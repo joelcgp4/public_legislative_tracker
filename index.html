@@ -2455,13 +2455,13 @@
         // Load data
         async function loadData() {
             try {
-                const response = await fetch('data/bills.json');
+                const response = await fetch('/api/bills');
                 const allBillsData = await response.json();
                 
                 // Separate active bills from filtered bills
                 allBills = allBillsData.filter(b => b.relevance_score > 0 && b.relevance !== 'none');
                 
-                const statsResponse = await fetch('data/stats.json');
+                const statsResponse = await fetch('/api/stats');
                 const stats = await statsResponse.json();
                 
                 updateDashboard(stats);
@@ -3569,18 +3569,78 @@
                 notes = 'Marked as irrelevant';
             }
             
-            alert('This is a read-only view. Run the tracker locally to submit feedback.');
+            try {
+                const response = await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bill_id: billId,
+                        feedback_type: feedbackType,
+                        user_score: userScore,
+                        user_tier: userTier,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    bill.user_score = userScore;
+                    bill.user_tier = userTier;
+                    bill.feedback_notes = notes;
+                    
+                    // Refresh the detail view
+                    showBillDetail(billId);
+                    
+                    // Show success message
+                    alert('Feedback saved successfully!');
+                } else {
+                    alert('Error saving feedback: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Error saving feedback. Check console for details.');
+            }
         }
         
         async function clearFeedback(billId) {
-            alert('This is a read-only view. Run the tracker locally to clear feedback.');
+            if (!confirm('Clear your feedback for this bill?')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/delete/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    if (bill) {
+                        bill.user_score = null;
+                        bill.user_tier = null;
+                        bill.feedback_notes = null;
+                    }
+                    
+                    // Refresh the detail view
+                    showBillDetail(billId);
+                    
+                    alert('Feedback cleared!');
+                } else {
+                    alert('Error clearing feedback');
+                }
+            } catch (error) {
+                console.error('Clear feedback error:', error);
+                alert('Error clearing feedback. Check console for details.');
+            }
         }
 
         // Filtered Bills Review functions
         async function loadFilteredBills() {
             // Need to fetch all bills including filtered ones
             try {
-                const response = await fetch('data/bills.json');
+                const response = await fetch('/api/bills');
                 const allBillsData = await response.json();
                 
                 // Get only filtered bills for this view
@@ -3758,7 +3818,37 @@
         }
         
         async function confirmDeleteBill(billId, billName) {
-            alert('This is a read-only view. Run the tracker locally to delete bills.');
+            const confirmed = confirm(`Permanently delete "${billName}" from the database?\n\nThis action cannot be undone. The bill will be completely removed.`);
+            
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch(`/api/bills/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove from filtered bills cache
+                    if (window.filteredBillsCache) {
+                        const index = window.filteredBillsCache.findIndex(b => b.bill_id === billId);
+                        if (index !== -1) {
+                            window.filteredBillsCache.splice(index, 1);
+                        }
+                    }
+                    
+                    // Refresh the filtered bills view
+                    applyFilteredFilters();
+                    
+                    alert('Bill permanently deleted from database!');
+                } else {
+                    alert('Error deleting bill: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Delete bill error:', error);
+                alert('Error deleting bill. Check console for details.');
+            }
         }
 
         // Feedback Review functions
@@ -3918,7 +4008,35 @@
         }
         
         async function revertFeedback(billId) {
-            alert('This is a read-only view. Run the tracker locally to revert feedback.');
+            if (!confirm('Revert to automated score and tier? This will delete your feedback.')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/delete/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    if (bill) {
+                        bill.user_score = null;
+                        bill.user_tier = null;
+                        bill.feedback_notes = null;
+                    }
+                    
+                    // Refresh the feedback review view
+                    applyFeedbackFilters();
+                    
+                    alert('Feedback reverted to automated assessment!');
+                } else {
+                    alert('Error reverting feedback');
+                }
+            } catch (error) {
+                console.error('Revert feedback error:', error);
+                alert('Error reverting feedback. Check console for details.');
+            }
         }
 
         function toggleReviewMenu(event) {
@@ -3957,7 +4075,7 @@
         }
 
         function exportData() {
-            window.location.href = 'data/bills.json';
+            window.location.href = '/api/export/json';
         }
 
         function timeAgo(date) {
