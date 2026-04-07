@@ -4419,6 +4419,8 @@
         
         // Feedback functions
         async function submitFeedback(billId, feedbackType) {
+            alert('Read-only view. Run the tracker locally to submit feedback.');
+            return;
             const bill = allBills.find(b => b.bill_id === billId);
             if (!bill) return;
             
@@ -4496,6 +4498,8 @@
         }
         
         async function clearFeedback(billId) {
+            alert('Read-only view. Run the tracker locally to clear feedback.');
+            return;
             if (!confirm('Clear your feedback for this bill?')) return;
             
             try {
@@ -4709,6 +4713,8 @@
         }
         
         async function confirmDeleteBill(billId, billName) {
+            alert('Read-only view. Run the tracker locally to delete bills.');
+            return;
             const confirmed = confirm(`Permanently delete "${billName}" from the database?\n\nThis action cannot be undone. The bill will be completely removed.`);
             
             if (!confirmed) return;
@@ -4899,6 +4905,8 @@
         }
         
         async function revertFeedback(billId) {
+            alert('Read-only view. Run the tracker locally to revert feedback.');
+            return;
             if (!confirm('Revert to automated score and tier? This will delete your feedback.')) return;
             
             try {
