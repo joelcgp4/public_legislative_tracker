@@ -2280,7 +2280,7 @@
                 </div>
                 <div class="chart-card">
                     <h3 class="chart-title">Content Control Type</h3>
-                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;"><span style="color:var(--accent);">&#9646;</span> Feed-direct &nbsp; <span style="color:var(--blue);">&#9646;</span> Feed-adjacent</p>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">Frequency across AI-reviewed bills</p>
                     <div id="chartCCT"></div>
                 </div>
             </div>
@@ -2798,12 +2798,10 @@
                     : (b.llm_content_control_type ? JSON.parse(b.llm_content_control_type) : []);
                 ccts.forEach(t => { if (counts[t] !== undefined) counts[t]++; });
             });
-            const feedRelevant = new Set(['Ranking/Recommendation control', 'User controls', 'Default settings', 'Opt-out', 'Opt-in']);
             const data = types.map(t => ({ label: t, value: counts[t] }))
                 .filter(d => d.value > 0)
                 .sort((a, b) => b.value - a.value);
-            analyticsBarChart('chartCCT', data, d =>
-                feedRelevant.has(d.label) ? 'var(--accent)' : 'var(--blue)');
+            analyticsBarChart('chartCCT', data, () => 'var(--accent)');
         }
 
         function renderScopeChart(bills) {
