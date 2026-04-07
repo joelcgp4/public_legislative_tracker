@@ -1095,6 +1095,12 @@
             border-color: var(--warning);
             background: rgba(245, 158, 11, 0.1);
         }
+
+        .relevance-score.llm-modified {
+            border-color: var(--blue);
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
         
         .feedback-badge {
             font-size: 0.65rem;
@@ -1510,6 +1516,9 @@
             <div class="menu-item" onclick="alert('Settings coming soon!')">
                 Settings
             </div>
+            <div class="menu-item" onclick="switchView('about')">
+                About
+            </div>
         </div>
     </div>
 
@@ -1734,6 +1743,18 @@
                         </div>
                     </div>
                     
+                    <!-- AI Review -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">AI Review</div>
+                        <div class="filter-group">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
+                                <label for="filter-ai-reviewed">AI Reviewed only</label>
+                                <span class="filter-count" id="count-ai-reviewed">0</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tags -->
                     <div class="filter-section">
                         <div class="filter-section-title">
@@ -2086,16 +2107,143 @@
             </div>
         </div>
 
+        <!-- ABOUT VIEW -->
+        <div class="view" id="aboutView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
+                <h2 class="section-title">About This Tracker</h2>
+            </div>
+
+            <div style="max-width: 800px; line-height: 1.8; color: var(--text-secondary);">
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">Research Question</h3>
+                    <p>This tracker monitors legislation across all 50 U.S. states and the U.S. federal government to answer a specific question: <strong style="color:var(--text-primary);">does a given bill materially affect what a user sees in their algorithmic feed?</strong></p>
+                    <p style="margin-top: 0.75rem;">That means we are not simply tracking any bill that mentions social media or artificial intelligence. We are specifically looking for legislation that would change the mechanics of how content is selected, ranked, or presented to users — through user controls, platform design requirements, transparency mandates, or restrictions on algorithmic personalization.</p>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Collected</h3>
+                    <p>Bills are pulled from LegiScan, a national legislative data service that aggregates bill information from all 50 state legislatures and Congress. We search using 23 keyword combinations — including terms like "algorithmic transparency," "social media recommendation," "user control algorithm," and "automated decision" — across every active legislative session.</p>
+                    <p style="margin-top: 0.75rem;">Every bill returned by those searches is run through our relevance scoring system. Bills that score above a minimum threshold are stored; the rest are discarded. We err on the side of collecting more rather than less, since the cost of missing a relevant bill is higher than the cost of reviewing an irrelevant one.</p>
+                    <p style="margin-top: 0.75rem;">The tracker re-runs these searches periodically. When a bill has not changed since the last run, we skip re-fetching its full details to avoid redundant work.</p>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Scored</h3>
+                    <p>Every bill goes through an automated relevance scoring system that produces a score from 0 to 10, which maps to one of five tiers:</p>
+
+                    <div style="margin: 1rem 0; display: grid; gap: 0.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag direct" style="min-width:80px; text-align:center;">DIRECT</span>
+                            <span>Bill directly addresses algorithmic feed control — for example, requiring platforms to offer a chronological feed option, mandating user opt-out of personalized recommendations, or restricting ranking signals for minors.</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag high" style="min-width:80px; text-align:center;">HIGH</span>
+                            <span>Bill substantially regulates algorithmic curation, including strong default settings for minors or significant platform design requirements tied to feed behavior.</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag medium" style="min-width:80px; text-align:center;">MEDIUM</span>
+                            <span>Bill meaningfully affects feed content through parental controls, age-gating, or platform design requirements that would change what users see, even if not the primary focus.</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag low" style="min-width:80px; text-align:center;">LOW</span>
+                            <span>Bill has indirect or marginal feed impact — for example, data privacy requirements that may limit personalization, or generic transparency mandates without user-facing controls.</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag minimal" style="min-width:80px; text-align:center;">MINIMAL</span>
+                            <span>Bill mentions relevant terms but does not materially affect what users see in their feed.</span>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 0.75rem;">The scoring system works in two passes. First, it checks whether the bill mentions at least one of: a platform keyword (social media, online platform), an algorithm keyword (algorithm, AI, automated decision), or a privacy keyword (personal data, data broker). Bills that mention none of these are discarded immediately.</p>
+                    <p style="margin-top: 0.75rem;">Bills that pass the first filter are then scored by accumulating points for positive signals: matching specific phrase patterns like "user control," "opt-out," or "algorithmic transparency" in the title or description; mentioning platforms alongside governance language; combining algorithm terms with transparency or disclosure; referencing youth and social media together; and including enforcement language like civil penalties or attorney general authority. Scores are capped at 10.</p>
+                    <p style="margin-top: 0.75rem;">This automated scoring is intentionally broad. It catches relevant bills but also picks up noise. The deeper review layer below is designed to correct for that.</p>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">Deeper Review</h3>
+                    <p>For bills scoring DIRECT, HIGH, or MEDIUM, we fetch the full text of the bill from the legislative source. This text — not just the title and description — is then run through a two-part review process.</p>
+                    <p style="margin-top: 0.75rem;">The first part is a <strong style="color:var(--text-primary);">static analysis</strong>: a set of deterministic rules that scan the bill text for specific language patterns and classify the bill against our research taxonomy — what type of content control it creates, what mechanism it uses, and what platforms it covers.</p>
+                    <p style="margin-top: 0.75rem;">The second part is an <strong style="color:var(--text-primary);">AI-assisted review</strong>: the bill text is sent to a language model with a structured prompt asking it to answer the research question directly. The model assigns a tier, classifies the bill against the same taxonomy, and provides a short rationale citing specific statutory language. Results are validated against the taxonomy before being stored.</p>
+                    <p style="margin-top: 0.75rem;">Where LLM review data is available, it is shown alongside the automated score in the bill detail view. The Analytics tab shows how the two scoring systems compare.</p>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">Classification Taxonomy</h3>
+                    <p>Each reviewed bill is classified along three dimensions:</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Content Control Type</strong> — what kind of control or restriction the bill creates: User controls, Parental controls, Age-gating, Default settings, Ranking/Recommendation control, Sensitive category suppression, Data Privacy, Opt-out, Opt-in, or Content removal. A bill can have multiple types.</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Mechanism</strong> — how the bill achieves its effect: Design/defaults (changing how platforms are built or configured), Verification (requiring age or identity checks), Notice &amp; choice (informing users and giving them options), Reporting (transparency reports to government or public), Labeling (warning labels or disclosures in the feed), Notifications in feed (in-app alerts), or Data access (rights to see or download personal data).</p>
+
+                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Scope</strong> — what the bill covers: Social media platforms specifically, General online platforms broadly, or Devices (e.g., parental control requirements on phones rather than apps).</p>
+                </div>
+
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">What This Tracker Does Not Do</h3>
+                    <p>This tracker does not take a position on any legislation. It does not assess whether bills are good policy, likely to pass, or constitutionally sound. It is a research tool for mapping the legislative landscape around algorithmic feed controls.</p>
+                    <p style="margin-top: 0.75rem;">The automated scoring system is imperfect. Broad omnibus bills sometimes score highly because they contain relevant language in one small section among dozens of unrelated provisions. The deeper review layer is designed to catch these cases, but human judgment remains essential. Tiers and classifications should be read as research signals, not authoritative legal assessments.</p>
+                    <p style="margin-top: 0.75rem;">Coverage is limited to legislation that appears in LegiScan's database and is returned by our keyword searches. Bills using unusual terminology or framed outside our keyword set may be missed.</p>
+                </div>
+
+            </div>
+        </div>
+
         <!-- ANALYTICS VIEW -->
         <div class="view" id="analyticsView">
             <div class="bills-header">
                 <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
                 <h2 class="section-title">Analytics</h2>
             </div>
-            <div class="charts-grid">
+            <!-- Tier 1: Research-critical -->
+            <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">Feed Impact</div>
+            <div class="charts-grid" style="margin-bottom: 2rem;">
                 <div class="chart-card">
-                    <h3 class="chart-title">Coming Soon: Interactive Charts</h3>
-                    <p style="color: var(--text-dim);">Advanced analytics and visualizations will be added here.</p>
+                    <h3 class="chart-title">Mechanism Distribution</h3>
+                    <div id="chartMechanism"></div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Content Control Type</h3>
+                    <div id="chartCCT"></div>
+                </div>
+            </div>
+            <div class="charts-grid" style="margin-bottom: 2rem;">
+                <div class="chart-card">
+                    <h3 class="chart-title">Scope Breakdown</h3>
+                    <div id="chartScope" style="display:flex; justify-content:center;"></div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Tier Distribution</h3>
+                    <div id="chartTier"></div>
+                </div>
+            </div>
+            <!-- Tier 2: Geographic/contextual -->
+            <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">Geographic</div>
+            <div class="charts-grid" style="margin-bottom: 2rem;">
+                <div class="chart-card" style="grid-column: 1 / -1;">
+                    <h3 class="chart-title">Bills by State (Direct + High + Medium)</h3>
+                    <div id="chartByState"></div>
+                </div>
+            </div>
+            <div class="charts-grid" style="margin-bottom: 2rem;">
+                <div class="chart-card" style="grid-column: 1 / -1;">
+                    <h3 class="chart-title">Legislative Activity Over Time</h3>
+                    <div id="chartOverTime"></div>
+                </div>
+            </div>
+            <!-- Tier 3: LLM diagnostic (conditional) -->
+            <div id="llmAnalyticsSection" style="display:none;">
+                <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">LLM Review</div>
+                <div class="charts-grid" style="margin-bottom: 2rem;">
+                    <div class="chart-card">
+                        <h3 class="chart-title">LLM vs Automated Tier</h3>
+                        <div id="chartTierComparison"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">LLM Mechanism Distribution</h3>
+                        <div id="chartLLMMechanism"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2158,24 +2306,23 @@
                 dateLabel = statusDateLabels[bill.status] || 'Status Date';
             }
             
-            // Get display score (user score if exists, otherwise automated)
-            const displayScore = bill.user_score !== null && bill.user_score !== undefined ? bill.user_score : (bill.relevance_score || 0);
-            const displayTier = bill.user_tier || bill.relevance;
+            // LLM tier supersedes automated; user score supersedes both
+            const hasLLM = !!bill.llm_tier;
             const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
-            const scoreClass = hasUserFeedback ? 'modified' : '';
-            
-            // Determine feedback badge
+            const displayScore = hasUserFeedback ? bill.user_score : (bill.relevance_score || 0);
+            const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
+            const scoreClass = hasUserFeedback ? 'modified' : (hasLLM && bill.llm_tier !== bill.relevance ? 'llm-modified' : '');
+
+            // Badge
             let feedbackBadge = '';
             if (hasUserFeedback) {
-                if (bill.user_score > bill.relevance_score) {
-                    feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
-                } else if (bill.user_score < bill.relevance_score) {
-                    feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
-                } else {
-                    feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
-                }
+                if (bill.user_score > bill.relevance_score) feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
+                else if (bill.user_score < bill.relevance_score) feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
+                else feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
+            } else if (hasLLM) {
+                feedbackBadge = '<span class="feedback-badge" style="background:var(--blue);color:white;">AI</span>';
             }
-            
+
             return `
                 <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})">
                     <div class="bill-header">
@@ -2191,8 +2338,9 @@
                     ` : ''}
                     <div class="bill-meta">
                         <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                        ${hasLLM && !hasUserFeedback ? `<span style="font-size:0.75rem; color:var(--blue);">AI reviewed</span>` : ''}
                         <span>Status: ${status}</span>
-                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` : 
+                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` :
                           bill.status_date ? `<span>${dateLabel}: ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
                     </div>
                 </div>
@@ -2269,11 +2417,11 @@
             }).join('');
             
             // Update tier counts
-            const directCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'direct').length;
-            const highCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'high').length;
-            const mediumCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'medium').length;
-            const lowCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'low').length;
-            const minimalCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'minimal').length;
+            const directCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'direct').length;
+            const highCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'high').length;
+            const mediumCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'medium').length;
+            const lowCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'low').length;
+            const minimalCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'minimal').length;
             
             document.getElementById('state-count-relevance-direct').textContent = directCount;
             document.getElementById('state-count-relevance-high').textContent = highCount;
@@ -2318,7 +2466,7 @@
             });
             
             if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
-                filtered = filtered.filter(b => selectedRelevance.includes(b.user_tier || b.relevance));
+                filtered = filtered.filter(b => selectedRelevance.includes(b.user_tier || b.llm_tier || b.relevance));
                 selectedRelevance.forEach(tier => {
                     activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
                         document.getElementById(`state-relevance-${tier}`).checked = false;
@@ -2370,8 +2518,8 @@
             } else if (sort === 'relevance') {
                 const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
                 filtered.sort((a, b) => {
-                    const tierA = a.user_tier || a.relevance || 'none';
-                    const tierB = b.user_tier || b.relevance || 'none';
+                    const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
                     const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
                     
@@ -2450,6 +2598,387 @@
             renderBills(filtered);
             document.getElementById('billCount').textContent = filtered.length;
             switchView('allBills');
+        }
+
+
+        // ==============================================================================
+        // ANALYTICS
+        // ==============================================================================
+
+        function renderAnalytics() {
+            const activeBills = allBills.filter(b => b.relevance_score > 0 && b.relevance !== 'none');
+            const reviewedBills = activeBills.filter(b => b.llm_tier);
+
+            renderMechanismChart(activeBills);
+            renderCCTChart(activeBills);
+            renderScopeChart(activeBills);
+            renderTierChart(activeBills);
+            renderByStateChart(activeBills);
+            renderOverTimeChart(activeBills);
+
+            if (reviewedBills.length > 0) {
+                document.getElementById('llmAnalyticsSection').style.display = 'block';
+                renderTierComparisonChart(reviewedBills);
+                renderLLMMechanismChart(reviewedBills);
+            } else {
+                document.getElementById('llmAnalyticsSection').style.display = 'none';
+            }
+        }
+
+        function analyticsBarChart(containerId, data, colorFn, maxWidth) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!data.length) {
+                container.innerHTML = '<p style="color:var(--text-dim);font-size:0.875rem;">No data available</p>';
+                return;
+            }
+            const max = d3.max(data, d => d.value);
+            const width = maxWidth || container.clientWidth || 400;
+            const barHeight = 28;
+            const labelWidth = 180;
+            const countWidth = 40;
+            const barMax = width - labelWidth - countWidth - 16;
+            const height = data.length * (barHeight + 6);
+
+            container.innerHTML = '';
+            const svg = d3.select(container).append('svg')
+                .attr('width', '100%')
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            const g = svg.selectAll('.bar-row')
+                .data(data)
+                .enter().append('g')
+                .attr('class', 'bar-row')
+                .attr('transform', (d, i) => `translate(0,${i * (barHeight + 6)})`);
+
+            g.append('text')
+                .attr('x', 0)
+                .attr('y', barHeight / 2 + 5)
+                .attr('fill', 'var(--text-secondary)')
+                .attr('font-size', '12px')
+                .attr('font-family', 'IBM Plex Sans, sans-serif')
+                .text(d => d.label.length > 24 ? d.label.slice(0, 22) + '…' : d.label);
+
+            g.append('rect')
+                .attr('x', labelWidth)
+                .attr('y', 2)
+                .attr('height', barHeight - 4)
+                .attr('rx', 4)
+                .attr('width', d => Math.max(4, (d.value / max) * barMax))
+                .attr('fill', d => colorFn ? colorFn(d) : 'var(--accent)');
+
+            g.append('text')
+                .attr('x', d => labelWidth + Math.max(4, (d.value / max) * barMax) + 6)
+                .attr('y', barHeight / 2 + 5)
+                .attr('fill', 'var(--text-dim)')
+                .attr('font-size', '11px')
+                .attr('font-family', 'IBM Plex Mono, monospace')
+                .text(d => d.value);
+        }
+
+        function renderMechanismChart(bills) {
+            const mechanisms = [
+                'Design/defaults', 'Verification', 'Notice & choice',
+                'Reporting', 'Labeling', 'Notifications in feed', 'Data access'
+            ];
+            const counts = {};
+            mechanisms.forEach(m => counts[m] = 0);
+            bills.forEach(b => {
+                const mechs = Array.isArray(b.mechanism) ? b.mechanism
+                    : (b.mechanism ? b.mechanism.split(',').map(s => s.trim()) : []);
+                mechs.forEach(m => { if (counts[m] !== undefined) counts[m]++; });
+            });
+            const data = mechanisms.map(m => ({ label: m, value: counts[m] }))
+                .filter(d => d.value > 0)
+                .sort((a, b) => b.value - a.value);
+            analyticsBarChart('chartMechanism', data, () => 'var(--accent)');
+        }
+
+        function renderCCTChart(bills) {
+            const types = [
+                'User controls', 'Parental controls', 'Age-gating', 'Default settings',
+                'Ranking/Recommendation control', 'Sensitive category suppression',
+                'Data Privacy', 'Opt-out', 'Opt-in', 'Content removal'
+            ];
+            const counts = {};
+            types.forEach(t => counts[t] = 0);
+            bills.forEach(b => {
+                const ccts = Array.isArray(b.content_control_type) ? b.content_control_type
+                    : (b.content_control_type ? b.content_control_type.split(',').map(s => s.trim()) : []);
+                ccts.forEach(t => { if (counts[t] !== undefined) counts[t]++; });
+            });
+            const feedRelevant = new Set(['Ranking/Recommendation control', 'User controls', 'Default settings', 'Opt-out', 'Opt-in']);
+            const data = types.map(t => ({ label: t, value: counts[t] }))
+                .filter(d => d.value > 0)
+                .sort((a, b) => b.value - a.value);
+            analyticsBarChart('chartCCT', data, d =>
+                feedRelevant.has(d.label) ? 'var(--accent)' : 'var(--blue)');
+        }
+
+        function renderScopeChart(bills) {
+            const container = document.getElementById('chartScope');
+            if (!container) return;
+            const scopes = ['Social media', 'General online platforms', 'Devices'];
+            const counts = {};
+            scopes.forEach(s => counts[s] = 0);
+            bills.forEach(b => {
+                const sc = b.scope;
+                if (sc && counts[sc] !== undefined) counts[sc]++;
+            });
+            const data = scopes.map(s => ({ label: s, value: counts[s] })).filter(d => d.value > 0);
+            if (!data.length) {
+                container.innerHTML = '<p style="color:var(--text-dim);font-size:0.875rem;">No scope data yet — run LLM review first</p>';
+                return;
+            }
+            const colors = ['var(--accent)', 'var(--blue)', 'var(--warning)'];
+            const total = d3.sum(data, d => d.value);
+            const size = 180;
+            const radius = size / 2;
+            container.innerHTML = '';
+            const svg = d3.select(container).append('svg')
+                .attr('width', size + 180)
+                .attr('height', size);
+            const arc = d3.arc().innerRadius(radius * 0.55).outerRadius(radius);
+            const pie = d3.pie().value(d => d.value).sort(null);
+            const g = svg.append('g').attr('transform', `translate(${radius},${radius})`);
+            g.selectAll('path')
+                .data(pie(data))
+                .enter().append('path')
+                .attr('d', arc)
+                .attr('fill', (d, i) => colors[i])
+                .attr('stroke', 'var(--bg-dark)')
+                .attr('stroke-width', 2);
+            // Legend
+            const legend = svg.append('g').attr('transform', `translate(${size + 10}, 20)`);
+            data.forEach((d, i) => {
+                const lg = legend.append('g').attr('transform', `translate(0,${i * 28})`);
+                lg.append('rect').attr('width', 12).attr('height', 12).attr('rx', 2)
+                    .attr('fill', colors[i]);
+                lg.append('text').attr('x', 18).attr('y', 11)
+                    .attr('fill', 'var(--text-secondary)').attr('font-size', '12px')
+                    .attr('font-family', 'IBM Plex Sans, sans-serif')
+                    .text(`${d.label} (${Math.round(d.value / total * 100)}%)`);
+            });
+        }
+
+        function renderTierChart(bills) {
+            const tiers = ['direct', 'high', 'medium', 'low', 'minimal'];
+            const colors = {
+                direct: 'var(--tier-direct)', high: 'var(--tier-high)',
+                medium: 'var(--tier-medium)', low: 'var(--tier-low)', minimal: 'var(--tier-minimal)'
+            };
+            const counts = {};
+            tiers.forEach(t => counts[t] = 0);
+            bills.forEach(b => {
+                const t = b.user_tier || b.llm_tier || b.relevance;
+                if (counts[t] !== undefined) counts[t]++;
+            });
+            const data = tiers.map(t => ({ label: t.toUpperCase(), value: counts[t] }))
+                .filter(d => d.value > 0);
+            analyticsBarChart('chartTier', data, d => colors[d.label.toLowerCase()]);
+        }
+
+        function renderByStateChart(bills) {
+            const focused = bills.filter(b => ['direct', 'high', 'medium'].includes(b.user_tier || b.llm_tier || b.relevance));
+            const counts = {};
+            focused.forEach(b => counts[b.state] = (counts[b.state] || 0) + 1);
+            const data = Object.entries(counts)
+                .map(([state, value]) => ({ label: state, value }))
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 20);
+            analyticsBarChart('chartByState', data, () => 'var(--blue)');
+        }
+
+        function renderOverTimeChart(bills) {
+            const container = document.getElementById('chartOverTime');
+            if (!container) return;
+
+            const focused = bills.filter(b =>
+                ['direct', 'high', 'medium'].includes(b.user_tier || b.llm_tier || b.relevance) &&
+                b.last_action_date && b.last_action_date !== '0000-00-00'
+            );
+
+            if (!focused.length) {
+                container.innerHTML = '<p style="color:var(--text-dim);font-size:0.875rem;">No date data available</p>';
+                return;
+            }
+
+            // Bin by quarter
+            const byQuarter = {};
+            focused.forEach(b => {
+                const d = new Date(b.last_action_date);
+                if (isNaN(d)) return;
+                const q = `${d.getFullYear()} Q${Math.floor(d.getMonth() / 3) + 1}`;
+                byQuarter[q] = (byQuarter[q] || 0) + 1;
+            });
+
+            const data = Object.entries(byQuarter)
+                .map(([label, value]) => ({ label, value }))
+                .sort((a, b) => a.label.localeCompare(b.label));
+
+            if (!data.length) {
+                container.innerHTML = '<p style="color:var(--text-dim);font-size:0.875rem;">No date data available</p>';
+                return;
+            }
+
+            const width = container.clientWidth || 700;
+            const height = 200;
+            const margin = { top: 10, right: 20, bottom: 50, left: 40 };
+            const innerW = width - margin.left - margin.right;
+            const innerH = height - margin.top - margin.bottom;
+
+            container.innerHTML = '';
+            const svg = d3.select(container).append('svg')
+                .attr('width', '100%')
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+            const x = d3.scaleBand().domain(data.map(d => d.label)).range([0, innerW]).padding(0.3);
+            const y = d3.scaleLinear().domain([0, d3.max(data, d => d.value)]).nice().range([innerH, 0]);
+
+            g.append('g').attr('transform', `translate(0,${innerH})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .attr('text-anchor', 'end')
+                .attr('fill', 'var(--text-dim)')
+                .attr('font-size', '10px');
+
+            g.append('g')
+                .call(d3.axisLeft(y).ticks(4).tickFormat(d3.format('d')))
+                .selectAll('text')
+                .attr('fill', 'var(--text-dim)')
+                .attr('font-size', '10px');
+
+            g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d.label))
+                .attr('y', d => y(d.value))
+                .attr('width', x.bandwidth())
+                .attr('height', d => innerH - y(d.value))
+                .attr('fill', 'var(--accent)')
+                .attr('rx', 3);
+
+            g.selectAll('.bar-label')
+                .data(data)
+                .enter().append('text')
+                .attr('x', d => x(d.label) + x.bandwidth() / 2)
+                .attr('y', d => y(d.value) - 4)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'var(--text-dim)')
+                .attr('font-size', '10px')
+                .text(d => d.value > 0 ? d.value : '');
+
+            // Style axes
+            g.selectAll('.domain, .tick line').attr('stroke', 'rgba(255,255,255,0.1)');
+        }
+
+        function renderTierComparisonChart(bills) {
+            const tiers = ['direct', 'high', 'medium', 'low', 'minimal'];
+            const matrix = {};
+            tiers.forEach(a => {
+                matrix[a] = {};
+                tiers.forEach(b => matrix[a][b] = 0);
+            });
+            bills.forEach(b => {
+                const auto = b.relevance;
+                const llm = b.llm_tier;
+                if (matrix[auto] && matrix[auto][llm] !== undefined) {
+                    matrix[auto][llm]++;
+                }
+            });
+            const data = [];
+            tiers.forEach(auto => {
+                tiers.forEach(llm => {
+                    if (matrix[auto][llm] > 0) {
+                        data.push({ auto, llm, value: matrix[auto][llm] });
+                    }
+                });
+            });
+            analyticsBarChart('chartTierComparison', data.map(d => ({
+                label: `Auto ${d.auto.toUpperCase()} → LLM ${d.llm.toUpperCase()}`,
+                value: d.value
+            })), () => 'var(--warning)');
+        }
+
+        function renderLLMMechanismChart(bills) {
+            const mechanisms = [
+                'Design/defaults', 'Verification', 'Notice & choice',
+                'Reporting', 'Labeling', 'Notifications in feed', 'Data access'
+            ];
+            const counts = {};
+            mechanisms.forEach(m => counts[m] = 0);
+            bills.forEach(b => {
+                const mechs = Array.isArray(b.llm_mechanism) ? b.llm_mechanism
+                    : (b.llm_mechanism ? JSON.parse(b.llm_mechanism) : []);
+                mechs.forEach(m => { if (counts[m] !== undefined) counts[m]++; });
+            });
+            const data = mechanisms.map(m => ({ label: m, value: counts[m] }))
+                .filter(d => d.value > 0)
+                .sort((a, b) => b.value - a.value);
+            analyticsBarChart('chartLLMMechanism', data, () => 'var(--accent)');
+        }
+
+        async function loadBillText(billId) {
+            const btn = document.getElementById(`readTextBtn_${billId}`);
+            const container = document.getElementById(`billTextContainer_${billId}`);
+            const textEl = document.getElementById(`billTextContent_${billId}`);
+
+            // Toggle if already loaded
+            if (container.style.display === 'block') {
+                container.style.display = 'none';
+                btn.textContent = '📄 Read Full Bill Text';
+                return;
+            }
+
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+
+            // Use API on local server, static file on public site
+            const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+            const url = isLocal
+                ? `/api/bills/${billId}/text`
+                : `data/text/${billId}.txt`;
+
+            try {
+                const resp = await fetch(url);
+
+                if (!resp.ok) {
+                    textEl.textContent = 'Full text not available for this bill.';
+                    container.style.display = 'block';
+                    btn.textContent = '📄 Hide';
+                    btn.disabled = false;
+                    return;
+                }
+
+                let text;
+                if (isLocal) {
+                    const data = await resp.json();
+                    text = data.text;
+                } else {
+                    text = await resp.text();
+                }
+
+                if (text && text.trim()) {
+                    textEl.textContent = text;
+                    container.style.display = 'block';
+                    btn.textContent = '📄 Hide Full Text';
+                } else {
+                    textEl.textContent = 'Full text not available for this bill.';
+                    container.style.display = 'block';
+                    btn.textContent = '📄 Hide';
+                }
+            } catch (e) {
+                textEl.textContent = 'Error loading bill text.';
+                container.style.display = 'block';
+                btn.textContent = '📄 Hide';
+            }
+
+            btn.disabled = false;
         }
 
         // Load data
@@ -2890,6 +3419,11 @@
                 if (el) el.textContent = count;
             });
             
+            // Count AI reviewed
+            const aiReviewedCount = allBills.filter(b => !!b.llm_tier).length;
+            const aiEl = document.getElementById('count-ai-reviewed');
+            if (aiEl) aiEl.textContent = aiReviewedCount;
+
             // Count parties
             const partyD = allBills.filter(b => b.sponsor_party === 'D').length;
             const partyR = allBills.filter(b => b.sponsor_party === 'R').length;
@@ -2953,20 +3487,37 @@
             let filtered = [...allBills];
             const activeFilters = [];
             
-            // Text search
+            // Text search — fuzzy: all tokens must match somewhere
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (search) {
-                filtered = filtered.filter(b =>
-                    b.title?.toLowerCase().includes(search) ||
-                    b.description?.toLowerCase().includes(search) ||
-                    b.bill_number?.toLowerCase().includes(search)
-                );
+                const tokens = search.split(/\s+/).filter(Boolean);
+                filtered = filtered.filter(b => {
+                    const haystack = [
+                        b.title || '',
+                        b.description || '',
+                        b.bill_number || '',
+                        b.state || '',
+                        b.sponsor_name || '',
+                        (b.tags || []).join(' '),
+                        (b.subjects || []).join(' ')
+                    ].join(' ').toLowerCase();
+                    return tokens.every(token => haystack.includes(token));
+                });
                 activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
                     document.getElementById('searchInput').value = '';
                     applyFilters();
                 }});
             }
             
+            // AI review filter
+            if (document.getElementById('filter-ai-reviewed')?.checked) {
+                filtered = filtered.filter(b => !!b.llm_tier);
+                activeFilters.push({ type: 'ai', label: 'AI Reviewed', clear: () => {
+                    document.getElementById('filter-ai-reviewed').checked = false;
+                    applyFilters();
+                }});
+            }
+
             // State filters
             const selectedStates = Array.from(document.querySelectorAll('[id^="state-"]:checked')).map(cb => cb.value);
             if (selectedStates.length > 0) {
@@ -3120,8 +3671,8 @@
                 const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
                 filtered.sort((a, b) => {
                     // Get effective tier (user override or automated)
-                    const tierA = a.user_tier || a.relevance || 'none';
-                    const tierB = b.user_tier || b.relevance || 'none';
+                    const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
                     const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
                     
@@ -3222,21 +3773,19 @@
                 }
                 
                 // Get display score (user score if exists, otherwise automated)
-                const displayScore = bill.user_score !== null && bill.user_score !== undefined ? bill.user_score : (bill.relevance_score || 0);
-                const displayTier = bill.user_tier || bill.relevance;
+                const hasLLM2 = !!bill.llm_tier;
                 const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
-                const scoreClass = hasUserFeedback ? 'modified' : '';
-                
-                // Determine feedback badge
+                const displayScore = hasUserFeedback ? bill.user_score : (bill.relevance_score || 0);
+                const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
+                const scoreClass = hasUserFeedback ? 'modified' : (hasLLM2 && bill.llm_tier !== bill.relevance ? 'llm-modified' : '');
+
                 let feedbackBadge = '';
                 if (hasUserFeedback) {
-                    if (bill.user_score > bill.relevance_score) {
-                        feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
-                    } else if (bill.user_score < bill.relevance_score) {
-                        feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
-                    } else {
-                        feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
-                    }
+                    if (bill.user_score > bill.relevance_score) feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
+                    else if (bill.user_score < bill.relevance_score) feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
+                    else feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
+                } else if (hasLLM2) {
+                    feedbackBadge = '<span class="feedback-badge" style="background:var(--blue);color:white;">AI</span>';
                 }
                 
                 return `
@@ -3297,6 +3846,9 @@
             } else if (view === 'analytics') {
                 document.getElementById('analyticsView').classList.add('active');
                 document.querySelectorAll('.menu-item')[5].classList.add('active');
+                renderAnalytics();
+            } else if (view === 'about') {
+                document.getElementById('aboutView').classList.add('active');
             } else if (view === 'billDetail') {
                 document.getElementById('billDetailView').classList.add('active');
             }
@@ -3360,10 +3912,64 @@
                             <span><strong>Type:</strong> ${billTypeName}</span>
                             <span><strong>Status:</strong> ${status}</span>
                             ${bill.status_date ? `<span><strong>Status Date:</strong> ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
-                            <span><strong>Relevance:</strong> <span class="tag ${bill.relevance}">${bill.relevance.toUpperCase()}</span></span>
+                            <span><strong>Tier:</strong>
+                                <span class="tag ${bill.user_tier || bill.llm_tier || bill.relevance}">${(bill.user_tier || bill.llm_tier || bill.relevance).toUpperCase()}</span>
+                                ${(bill.llm_tier && !bill.user_tier && bill.llm_tier !== bill.relevance) ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.25rem;">(auto: ${bill.relevance.toUpperCase()})</span>` : ''}
+                                ${bill.user_tier ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.25rem;">(manual override)</span>` : ''}
+                            </span>
                         </div>
                     </div>
                 </div>
+
+                ${bill.llm_tier ? `
+                <div class="feedback-panel" style="border-color: var(--blue); margin-top:1rem;">
+                    <div class="feedback-section-title" style="color: var(--blue);">
+                        AI Review
+                        <span style="font-size:0.75rem; font-weight:400; color:var(--text-dim); margin-left:0.5rem;">confidence: ${(bill.llm_confidence * 100).toFixed(0)}%</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">AI TIER</div>
+                            <span class="tag ${bill.llm_tier}">${bill.llm_tier.toUpperCase()}</span>
+                            ${bill.llm_tier !== bill.relevance ? `
+                                <span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;">
+                                    (auto: ${bill.relevance.toUpperCase()})
+                                </span>
+                            ` : '<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;">agrees with auto</span>'}
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">SCOPE</div>
+                            <span style="font-size:0.875rem; font-weight:600;">${bill.llm_scope || '—'}</span>
+                        </div>
+                    </div>
+
+                    ${bill.llm_content_control_type && bill.llm_content_control_type.length > 0 ? `
+                    <div style="margin-bottom:0.75rem;">
+                        <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.375rem;">CONTENT CONTROL TYPE</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.375rem;">
+                            ${bill.llm_content_control_type.map(t => `<span class="tag" style="background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3);">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${bill.llm_mechanism && bill.llm_mechanism.length > 0 ? `
+                    <div style="margin-bottom:0.75rem;">
+                        <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.375rem;">MECHANISM</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.375rem;">
+                            ${bill.llm_mechanism.map(m => `<span class="tag" style="background:rgba(59,130,246,0.1); color:var(--blue);">${m}</span>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${bill.llm_rationale ? `
+                    <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.375rem;">RATIONALE</div>
+                        <div style="font-size:0.875rem; line-height:1.6; color:var(--text-secondary);">${bill.llm_rationale}</div>
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
                 
                 ${bill.sponsor_name ? `
                     <div class="bill-detail-section">
@@ -3382,6 +3988,23 @@
                         <p class="bill-detail-description">${bill.description}</p>
                     </div>
                 ` : ''}
+
+                <div class="bill-detail-section">
+                    <button class="action-btn action-btn-secondary" id="readTextBtn_${bill.bill_id}"
+                        onclick="loadBillText(${bill.bill_id})"
+                        style="font-size:0.875rem; padding:0.5rem 1rem;">
+                        📄 Read Full Bill Text
+                    </button>
+                    <div id="billTextContainer_${bill.bill_id}" style="display:none; margin-top:1rem;">
+                        <div id="billTextContent_${bill.bill_id}"
+                            style="background:var(--bg-dark); padding:1.5rem; border-radius:8px;
+                                   font-family:'IBM Plex Mono',monospace; font-size:0.8rem;
+                                   line-height:1.7; color:var(--text-secondary);
+                                   max-height:500px; overflow-y:auto; white-space:pre-wrap; word-break:break-word;">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
                 
                 ${bill.last_action ? `
                     <div class="bill-detail-section">
@@ -3909,8 +4532,8 @@
             } else if (sort === 'tier') {
                 const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
                 filtered.sort((a, b) => {
-                    const tierA = a.user_tier || a.relevance || 'none';
-                    const tierB = b.user_tier || b.relevance || 'none';
+                    const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     return (tierOrder[tierA] || 999) - (tierOrder[tierB] || 999);
                 });
             }
@@ -3935,7 +4558,7 @@
             
             container.innerHTML = bills.map(bill => {
                 const displayScore = bill.user_score;
-                const displayTier = bill.user_tier || bill.relevance;
+                const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
                 const scoreDiff = bill.user_score - bill.relevance_score;
                 
                 let feedbackType = '';
