@@ -1,0 +1,3974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legislative Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #1f2937;
+            --bg-card: #374151;
+            --bg-card-hover: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-dim: #9ca3af;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --blue: #3b82f6;
+            
+            /* Tier colors */
+            --tier-direct: #dc2626;
+            --tier-high: #f97316;
+            --tier-medium: #eab308;
+            --tier-low: #10b981;
+            --tier-minimal: #6b7280;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* MENU OVERLAY */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 320px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease;
+            z-index: 200;
+            overflow-y: auto;
+        }
+
+        .menu-overlay.open {
+            right: 0;
+        }
+
+        .menu-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-header h2 {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .menu-items {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--accent);
+        }
+
+        .menu-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--accent);
+        }
+        
+        .menu-parent {
+            justify-content: space-between;
+        }
+        
+        .menu-arrow {
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+        
+        .menu-arrow.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .menu-submenu {
+            background: rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .menu-sub {
+            padding-left: 3rem;
+            font-size: 0.9rem;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1rem 0;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* VIEWS */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* DASHBOARD */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, #2d3748 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .stat-card:not(.no-click):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .stat-card.no-click {
+            cursor: default;
+        }
+        
+        .stat-card.no-click:hover {
+            transform: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        /* MAP */
+        .map-container {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .map-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        #usMap {
+            width: 100%;
+            height: 400px;
+        }
+
+        .state-path {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .state-path:hover {
+            filter: brightness(1.3);
+        }
+
+        /* RECENT ACTIVITY */
+        .recent-section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .recent-item {
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .recent-item:hover {
+            background: var(--bg-card-hover);
+            transform: translateX(8px);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot.signed { background: var(--accent); }
+        .status-dot.passed { background: var(--blue); }
+        .status-dot.committee { background: var(--warning); }
+        .status-dot.introduced { background: var(--text-dim); }
+
+        .recent-content {
+            flex: 1;
+        }
+
+        .recent-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .recent-meta {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        /* STATE GRID */
+        .state-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .state-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, #2d3748 100%);
+            padding: 1.5rem 1rem;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .state-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+        }
+
+        .state-abbr {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .state-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.25rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .state-card.empty {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .state-card.empty:hover {
+            transform: none;
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        /* BILLS VIEW */
+        .bills-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn {
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .filter-bar {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .filter-toggle-btn, .clear-filters-btn {
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-toggle-btn:hover, .clear-filters-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+        }
+        
+        .clear-filters-btn {
+            color: var(--danger);
+        }
+        
+        .clear-filters-btn:hover {
+            border-color: var(--danger);
+        }
+        
+        .filter-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .filter-content.collapsed {
+            display: none;
+        }
+        
+        .filter-section {
+            background: var(--bg-dark);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .filter-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            position: relative;
+        }
+        
+        .filter-group.expanded {
+            max-height: 2000px;
+        }
+        
+        .filter-expand-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .filter-expand-btn:hover {
+            color: var(--accent-hover);
+        }
+        
+        /* QUICK REVIEW (GAME) STYLES */
+        .quick-review-container {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .quick-review-header {
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-review-progress {
+            margin-top: 1rem;
+        }
+        
+        .progress-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .progress-percent {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+        }
+        
+        .quick-review-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .review-card-container {
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 3rem;
+            perspective: 1000px;
+        }
+        
+        .review-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            min-height: 400px;
+            transition: transform 0.3s ease;
+        }
+        
+        .review-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .review-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .review-bill-number {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .review-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .review-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+        
+        .review-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+        }
+        
+        .review-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .meta-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .meta-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .review-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .flip-card-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .flip-card-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .flip-card-btn-small {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .review-title-small {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .review-full-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .review-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .review-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .review-actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .review-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem 2rem;
+            border: 2px solid;
+            border-radius: 12px;
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 140px;
+        }
+        
+        .review-btn-irrelevant {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        .review-btn-irrelevant:hover {
+            background: rgba(239, 68, 68, 0.1);
+            transform: translateY(-4px);
+        }
+        
+        .review-btn-maybe {
+            border-color: #F59E0B;
+            color: #F59E0B;
+        }
+        
+        .review-btn-maybe:hover {
+            background: rgba(245, 158, 11, 0.1);
+            transform: translateY(-4px);
+        }
+        
+        .review-btn-relevant {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .review-btn-relevant:hover {
+            background: rgba(16, 185, 129, 0.1);
+            transform: translateY(-4px);
+        }
+        
+        .btn-icon {
+            font-size: 2rem;
+        }
+        
+        .btn-label {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .btn-hint {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+        
+        .review-shortcuts {
+            text-align: center;
+            color: var(--text-dim);
+        }
+        
+        kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .review-complete {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .complete-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .complete-stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .complete-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.375rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .filter-checkbox:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .filter-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        
+        .filter-checkbox label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .filter-count {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .state-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        
+        .state-filter-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .state-action-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem;
+            text-decoration: underline;
+        }
+        
+        .state-action-btn:hover {
+            color: var(--accent-hover);
+        }
+        
+        .date-input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-chip {
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 0.375rem 0.75rem;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.2s;
+        }
+        
+        .filter-chip-remove {
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+        
+        .filter-chip-remove:hover {
+            transform: scale(1.2);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .bills-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bill-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--text-dim);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .bill-card:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .bill-card.high {
+            border-left-color: var(--accent);
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .bill-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .bill-state-badge {
+            background: var(--bg-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bill-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bill-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .bill-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        .bill-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag.high {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+        
+        /* Tier-specific styles */
+        .tier-direct { color: var(--tier-direct); }
+        .tier-high { color: var(--tier-high); }
+        .tier-medium { color: var(--tier-medium); }
+        .tier-low { color: var(--tier-low); }
+        .tier-minimal { color: var(--tier-minimal); }
+        
+        .tag.direct { background: var(--tier-direct); color: white; }
+        .tag.high { background: var(--tier-high); color: white; }
+        .tag.medium { background: var(--tier-medium); color: var(--bg-dark); }
+        .tag.low { background: var(--tier-low); color: var(--bg-dark); }
+        .tag.minimal { background: var(--tier-minimal); color: white; }
+        
+        .relevance-score {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--accent);
+        }
+        
+        .relevance-score.modified {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .feedback-badge {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .feedback-badge.modified { background: var(--warning); color: var(--bg-dark); }
+        .feedback-badge.boosted { background: var(--accent); color: var(--bg-dark); }
+        .feedback-badge.reduced { background: var(--danger); color: white; }
+        .feedback-badge.reviewed { background: var(--blue); color: white; }
+        
+        /* Feedback panel styles */
+        .feedback-panel {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 1.5rem;
+        }
+        
+        .feedback-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--bg-dark);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: help;
+            position: relative;
+        }
+        
+        .info-tooltip {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            width: 320px;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 30px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            font-weight: 400;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        
+        .info-icon:hover .info-tooltip {
+            visibility: visible;
+        }
+        
+        .score-input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .score-input {
+            width: 100px;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .score-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .tier-radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tier-radio {
+            display: none;
+        }
+        
+        .tier-radio-label {
+            display: block;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+        
+        .tier-radio:checked + .tier-radio-label {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .tier-radio-label:hover {
+            border-color: var(--accent);
+        }
+        
+        .feedback-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+        
+        .feedback-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .feedback-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .feedback-btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feedback-btn-primary {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+        
+        .feedback-btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .feedback-btn-secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .feedback-btn-secondary:hover {
+            background: var(--bg-dark);
+        }
+        
+        .feedback-btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .feedback-btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        /* BILL DETAIL VIEW */
+        .bill-detail-view {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s;
+        }
+        
+        .bill-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .bill-detail-title-section {
+            flex: 1;
+        }
+        
+        .bill-detail-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .bill-detail-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+        
+        .bill-detail-meta-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+        
+        .bill-detail-meta-row strong {
+            color: var(--text-secondary);
+        }
+        
+        .bill-detail-section {
+            margin-bottom: 2rem;
+        }
+        
+        .bill-detail-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .bill-detail-description {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+        
+        .bill-detail-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .action-btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-btn-primary {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+        
+        .action-btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+        }
+        
+        .bill-description-truncated {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .bill-description-truncated.hidden {
+            display: none;
+        }
+
+        /* ANALYTICS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo" onclick="location.reload()" style="cursor: pointer;">
+            Legislative Tracker
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div id="lastSearchInfo" style="font-size: 0.75rem; color: var(--text-dim); text-align: right;"></div>
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        </div>
+    </div>
+
+    <!-- MENU OVERLAY -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <button class="close-btn" onclick="toggleMenu()">✕</button>
+        </div>
+        <div class="menu-items">
+            <div class="menu-item active" onclick="switchView('dashboard')">
+                Dashboard
+            </div>
+            <div class="menu-item" onclick="switchView('states')">
+                Browse by State
+            </div>
+            <div class="menu-item" onclick="switchView('allBills')">
+                View All Bills
+            </div>
+            
+            <!-- Review Menu (Expandable) -->
+            <div class="menu-item menu-parent" onclick="toggleReviewMenu(event)">
+                <span>Review</span>
+                <span class="menu-arrow" id="reviewArrow">▶</span>
+            </div>
+            <div class="menu-submenu" id="reviewSubmenu" style="display: none;">
+                <div class="menu-item menu-sub" onclick="switchView('quickReview')">
+                    Quick Review (Game)
+                </div>
+                <div class="menu-item menu-sub" onclick="switchView('feedbackReview')">
+                    Your Feedback
+                </div>
+                <div class="menu-item menu-sub" onclick="switchView('filteredBills')">
+                    Filtered Bills
+                </div>
+            </div>
+            
+            <div class="menu-item" onclick="switchView('analytics')">
+                Analytics
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-item" onclick="refreshData()">
+                Refresh Data
+            </div>
+            <div class="menu-item" onclick="exportData()">
+                Export Data
+            </div>
+            <div class="menu-item" onclick="alert('Settings coming soon!')">
+                Settings
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER -->
+    <div class="container">
+        <!-- DASHBOARD VIEW -->
+        <div class="view active" id="dashboardView">
+            <!-- Hero Stats -->
+            <div class="hero-stats">
+                <div class="stat-card" onclick="switchView('allBills', true)">
+                    <div class="stat-label">Total Bills</div>
+                    <div class="stat-value" id="totalBills">0</div>
+                </div>
+                <div class="stat-card" onclick="switchToTopPriority()">
+                    <div class="stat-label">Top Priority</div>
+                    <div class="stat-value" id="topPriority">0</div>
+                </div>
+                <div class="stat-card no-click">
+                    <div class="stat-label">States Covered</div>
+                    <div class="stat-value" id="statesCovered">0</div>
+                </div>
+            </div>
+
+            <!-- US Map -->
+            <div class="map-container">
+                <h2 class="map-title">Bills by State</h2>
+                <svg id="usMap" viewBox="0 0 960 600"></svg>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-section">
+                <h2 class="section-title">Recent Activity</h2>
+                <div id="recentBills">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading recent bills...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATES VIEW -->
+        <div class="view" id="statesView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
+                <h2 class="section-title">Browse by State</h2>
+            </div>
+            <div class="state-grid" id="stateGrid"></div>
+            
+            <!-- State Detail Section -->
+            <div id="stateBillsList" style="display: none;">
+                <div class="bills-header">
+                    <button class="back-btn" onclick="backToStateGrid()">← Back to State Grid</button>
+                    <h2 class="section-title" id="stateDetailTitle"></h2>
+                </div>
+                
+                <!-- Active Filters Display -->
+                <div id="stateActiveFiltersContainer" style="display: none;">
+                    <div class="active-filters" id="stateActiveFilters"></div>
+                </div>
+                
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="filter-header">
+                        <div class="filter-title">🔍 Filters</div>
+                        <div class="filter-actions">
+                            <button class="filter-toggle-btn" onclick="toggleStateFilters()">
+                                <span id="stateFilterToggleText">Show Filters</span>
+                            </button>
+                            <button class="clear-filters-btn" onclick="clearStateFilters()">Clear All</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-content collapsed" id="stateFilterContent">
+                        <!-- Search -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">Search</div>
+                            <input type="text" class="search-input" id="stateSearchInput" placeholder="Search bills, titles, descriptions..." oninput="applyStateFilters()">
+                        </div>
+                        
+                        <!-- Relevance -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">Relevance Tier</div>
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-direct" value="direct" onchange="applyStateFilters()">
+                                    <label for="state-relevance-direct">DIRECT</label>
+                                    <span class="filter-count" id="state-count-relevance-direct">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-high" value="high" onchange="applyStateFilters()">
+                                    <label for="state-relevance-high">HIGH</label>
+                                    <span class="filter-count" id="state-count-relevance-high">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-medium" value="medium" onchange="applyStateFilters()">
+                                    <label for="state-relevance-medium">MEDIUM</label>
+                                    <span class="filter-count" id="state-count-relevance-medium">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-low" value="low" onchange="applyStateFilters()">
+                                    <label for="state-relevance-low">LOW</label>
+                                    <span class="filter-count" id="state-count-relevance-low">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-minimal" value="minimal" onchange="applyStateFilters()">
+                                    <label for="state-relevance-minimal">MINIMAL</label>
+                                    <span class="filter-count" id="state-count-relevance-minimal">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">
+                                <span>Tags</span>
+                                <button class="filter-expand-btn" onclick="toggleFilterExpand('stateTagFilters')">Expand</button>
+                            </div>
+                            <div class="filter-group" id="stateTagFilters"></div>
+                        </div>
+                        
+                        <!-- Subjects -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">
+                                <span>Subjects</span>
+                                <button class="filter-expand-btn" onclick="toggleFilterExpand('stateSubjectFilters')">Expand</button>
+                            </div>
+                            <div class="filter-group" id="stateSubjectFilters"></div>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">Sort By</div>
+                            <select class="filter-select" id="stateSortSelect" onchange="applyStateFilters()" style="width: 100%; padding: 0.75rem;">
+                                <option value="introduced">Last Introduced</option>
+                                <option value="recent">Most Recent</option>
+                                <option value="relevance">By Relevance</option>
+                                <option value="billnumber">By Bill Number</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
+                    Showing <span id="stateBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> bills
+                </div>
+                
+                <div class="bills-grid" id="stateBillsGrid"></div>
+            </div>
+        </div>
+
+        <!-- ALL BILLS VIEW -->
+        <div class="view" id="allBillsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
+                <h2 class="section-title">All Bills (<span id="billCount">0</span>)</h2>
+            </div>
+            
+            <!-- Active Filters Display -->
+            <div id="activeFiltersContainer" style="display: none;">
+                <div class="active-filters" id="activeFilters"></div>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-header">
+                    <div class="filter-title">🔍 Filters</div>
+                    <div class="filter-actions">
+                        <button class="filter-toggle-btn" onclick="toggleFilters()">
+                            <span id="filterToggleText">Show Filters</span>
+                        </button>
+                        <button class="clear-filters-btn" onclick="clearAllFilters()">Clear All</button>
+                    </div>
+                </div>
+                
+                <div class="filter-content collapsed" id="filterContent">
+                    <!-- Search -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Search</div>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search bills, titles, descriptions..." oninput="applyFilters()">
+                    </div>
+                    
+                    <!-- States -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">States (<span id="stateFilterCount">0</span> selected)</div>
+                        <div class="state-filter-actions">
+                            <button class="state-action-btn" onclick="selectAllStates()">Select All</button>
+                            <button class="state-action-btn" onclick="clearAllStates()">Clear All</button>
+                        </div>
+                        <div class="state-filter-grid" id="stateFilters"></div>
+                    </div>
+                    
+                    <!-- Relevance -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Relevance Tier</div>
+                        <div class="filter-group">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="relevance-direct" value="direct" onchange="applyFilters()">
+                                <label for="relevance-direct">DIRECT</label>
+                                <span class="filter-count" id="count-relevance-direct">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="relevance-high" value="high" onchange="applyFilters()">
+                                <label for="relevance-high">HIGH</label>
+                                <span class="filter-count" id="count-relevance-high">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="relevance-medium" value="medium" onchange="applyFilters()">
+                                <label for="relevance-medium">MEDIUM</label>
+                                <span class="filter-count" id="count-relevance-medium">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="relevance-low" value="low" onchange="applyFilters()">
+                                <label for="relevance-low">LOW</label>
+                                <span class="filter-count" id="count-relevance-low">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="relevance-minimal" value="minimal" onchange="applyFilters()">
+                                <label for="relevance-minimal">MINIMAL</label>
+                                <span class="filter-count" id="count-relevance-minimal">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <span>Tags</span>
+                            <button class="filter-expand-btn" onclick="toggleFilterExpand('tagFilters')">Expand</button>
+                        </div>
+                        <div class="filter-group" id="tagFilters"></div>
+                    </div>
+                    
+                    <!-- Subjects -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">
+                            <span>Subjects</span>
+                            <button class="filter-expand-btn" onclick="toggleFilterExpand('subjectFilters')">Expand</button>
+                        </div>
+                        <div class="filter-group" id="subjectFilters"></div>
+                    </div>
+                    
+                    <!-- Sponsor Party -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Sponsor Party</div>
+                        <div class="filter-group">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="party-D" value="D" onchange="applyFilters()">
+                                <label for="party-D">Democrat (D)</label>
+                                <span class="filter-count" id="count-party-D">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="party-R" value="R" onchange="applyFilters()">
+                                <label for="party-R">Republican (R)</label>
+                                <span class="filter-count" id="count-party-R">0</span>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
+                                <label for="party-I">Independent (I)</label>
+                                <span class="filter-count" id="count-party-I">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bill Type -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Bill Type</div>
+                        <div class="filter-group" id="billTypeFilters"></div>
+                    </div>
+                    
+                    <!-- Date Ranges -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Status Date Range</div>
+                        <div class="filter-group">
+                            <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
+                            <input type="date" class="date-input" id="statusDateFrom" onchange="applyFilters()">
+                            <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
+                            <input type="date" class="date-input" id="statusDateTo" onchange="applyFilters()">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="filter-section-title">Last Updated Range</div>
+                        <div class="filter-group">
+                            <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
+                            <input type="date" class="date-input" id="lastUpdatedFrom" onchange="applyFilters()">
+                            <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
+                            <input type="date" class="date-input" id="lastUpdatedTo" onchange="applyFilters()">
+                        </div>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Sort By</div>
+                        <select class="filter-select" id="sortSelect" onchange="applyFilters()" style="width: 100%; padding: 0.75rem;">
+                            <option value="introduced">Last Introduced</option>
+                            <option value="recent">Most Recent</option>
+                            <option value="relevance">By Relevance</option>
+                            <option value="state">By State</option>
+                            <option value="billnumber">By Bill Number</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bills-grid" id="billsGrid"></div>
+        </div>
+
+        <!-- QUICK REVIEW (GAME) VIEW -->
+        <div class="view" id="quickReviewView">
+            <div class="quick-review-container">
+                <div class="quick-review-header">
+                    <button class="back-btn" onclick="exitQuickReview()">← Exit Review Mode</button>
+                    <div class="quick-review-progress">
+                        <div class="progress-text">
+                            <span id="reviewedCount">0</span> / <span id="totalReviewCount">0</span> bills reviewed
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-percent" id="progressPercent">0%</div>
+                    </div>
+                </div>
+                
+                <div class="quick-review-main" id="quickReviewMain">
+                    <!-- Bill Card (Center) -->
+                    <div class="review-card-container">
+                        <div class="review-card" id="reviewCard">
+                            <div class="review-card-front">
+                                <div class="review-card-header">
+                                    <span class="review-bill-number" id="reviewBillNumber">CA AB 123</span>
+                                    <span class="review-score" id="reviewScore">7.5</span>
+                                </div>
+                                
+                                <h2 class="review-title" id="reviewTitle">Bill Title Goes Here</h2>
+                                
+                                <div class="review-meta">
+                                    <div class="review-meta-item">
+                                        <span class="meta-label">Tier:</span>
+                                        <span class="meta-value" id="reviewTier">MEDIUM</span>
+                                    </div>
+                                    <div class="review-meta-item">
+                                        <span class="meta-label">Subjects:</span>
+                                        <span class="meta-value" id="reviewSubjects">Technology, Privacy</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="review-description" id="reviewDescription">
+                                    Brief description will appear here...
+                                </div>
+                                
+                                <button class="flip-card-btn" onclick="flipReviewCard()">
+                                    📄 Show Full Details
+                                </button>
+                            </div>
+                            
+                            <div class="review-card-back" style="display: none;">
+                                <div class="review-card-header">
+                                    <span class="review-bill-number" id="reviewBillNumberBack">CA AB 123</span>
+                                    <button class="flip-card-btn-small" onclick="flipReviewCard()">← Back</button>
+                                </div>
+                                
+                                <h3 class="review-title-small" id="reviewTitleBack">Bill Title</h3>
+                                
+                                <div class="review-full-content">
+                                    <div class="review-section">
+                                        <div class="review-section-title">Full Description</div>
+                                        <div id="reviewFullDescription"></div>
+                                    </div>
+                                    
+                                    <div class="review-section">
+                                        <div class="review-section-title">Sponsor</div>
+                                        <div id="reviewSponsor">Loading...</div>
+                                    </div>
+                                    
+                                    <div class="review-section">
+                                        <div class="review-section-title">Last Action</div>
+                                        <div id="reviewLastAction">Loading...</div>
+                                    </div>
+                                    
+                                    <div class="review-section">
+                                        <div class="review-section-title">All Subjects</div>
+                                        <div id="reviewAllSubjects"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons (Bottom) -->
+                    <div class="review-actions">
+                        <button class="review-btn review-btn-irrelevant" onclick="reviewBill('irrelevant')" title="Score: 0-3">
+                            <div class="btn-icon">✗</div>
+                            <div class="btn-label">Irrelevant</div>
+                            <div class="btn-hint">← or A</div>
+                        </button>
+                        
+                        <button class="review-btn review-btn-maybe" onclick="reviewBill('maybe')" title="Score: 4-8">
+                            <div class="btn-icon">?</div>
+                            <div class="btn-label">Maybe</div>
+                            <div class="btn-hint">↓ or S</div>
+                        </button>
+                        
+                        <button class="review-btn review-btn-relevant" onclick="reviewBill('relevant')" title="Score: 9-10">
+                            <div class="btn-icon">✓</div>
+                            <div class="btn-label">Relevant</div>
+                            <div class="btn-hint">→ or D</div>
+                        </button>
+                    </div>
+                    
+                    <!-- Keyboard Shortcuts Help -->
+                    <div class="review-shortcuts">
+                        <div style="font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Keyboard Shortcuts:</div>
+                        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; font-size: 0.875rem;">
+                            <span><kbd>←</kbd> or <kbd>A</kbd> = Irrelevant</span>
+                            <span><kbd>↓</kbd> or <kbd>S</kbd> = Maybe</span>
+                            <span><kbd>→</kbd> or <kbd>D</kbd> = Relevant</span>
+                            <span><kbd>Space</kbd> = Flip Card</span>
+                            <span><kbd>Esc</kbd> = Exit</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Completion Screen -->
+                <div class="review-complete" id="reviewComplete" style="display: none;">
+                    <div class="complete-icon">🎉</div>
+                    <h2>Review Session Complete!</h2>
+                    <div class="complete-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="completeRelevant">0</div>
+                            <div class="stat-label">Relevant</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="completeMaybe">0</div>
+                            <div class="stat-label">Maybe</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="completeIrrelevant">0</div>
+                            <div class="stat-label">Irrelevant</div>
+                        </div>
+                    </div>
+                    <div class="complete-actions">
+                        <button class="action-btn action-btn-primary" onclick="exitQuickReview()">
+                            Return to Dashboard
+                        </button>
+                        <button class="action-btn action-btn-secondary" onclick="startQuickReview()">
+                            Review More Bills
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK REVIEW VIEW -->
+        <div class="view" id="feedbackReviewView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
+                <h2 class="section-title">Feedback Review (<span id="feedbackCount">0</span> bills)</h2>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-header">
+                    <div class="filter-title">🔍 Filter Feedback</div>
+                    <div class="filter-actions">
+                        <button class="filter-toggle-btn" onclick="toggleFeedbackFilters()">
+                            <span id="feedbackFilterToggleText">Show Filters</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-content collapsed" id="feedbackFilterContent">
+                    <!-- Feedback Type -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Feedback Type</div>
+                        <div class="filter-group">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="feedback-type-boosted" value="boosted" checked onchange="applyFeedbackFilters()">
+                                <label for="feedback-type-boosted">Boosted (Score Increased)</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="feedback-type-reduced" value="reduced" checked onchange="applyFeedbackFilters()">
+                                <label for="feedback-type-reduced">Reduced (Score Decreased)</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="feedback-type-reviewed" value="reviewed" checked onchange="applyFeedbackFilters()">
+                                <label for="feedback-type-reviewed">Reviewed (Score Confirmed)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Sort By</div>
+                        <select class="filter-select" id="feedbackSortSelect" onchange="applyFeedbackFilters()" style="width: 100%; padding: 0.75rem;">
+                            <option value="recent">Most Recent Feedback</option>
+                            <option value="largest-change">Largest Score Change</option>
+                            <option value="state">By State</option>
+                            <option value="tier">By Current Tier</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
+                Showing <span id="feedbackBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> bills with feedback
+            </div>
+            
+            <div class="bills-grid" id="feedbackBillsGrid"></div>
+        </div>
+
+        <!-- FILTERED BILLS REVIEW VIEW -->
+        <div class="view" id="filteredBillsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
+                <h2 class="section-title">Filtered Bills Review (<span id="filteredCount">0</span> bills)</h2>
+            </div>
+            
+            <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--danger);">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">⚠️ These bills were filtered out (score = 0)</div>
+                <div style="font-size: 0.875rem; color: var(--text-dim);">
+                    Review these bills to confirm they should be excluded. Bills you mark as "Irrelevant" will be permanently deleted from the database.
+                </div>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-header">
+                    <div class="filter-title">🔍 Filter</div>
+                    <div class="filter-actions">
+                        <button class="filter-toggle-btn" onclick="toggleFilteredFilters()">
+                            <span id="filteredFilterToggleText">Show Filters</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-content collapsed" id="filteredFilterContent">
+                    <!-- Search -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Search</div>
+                        <input type="text" class="search-input" id="filteredSearchInput" placeholder="Search titles, descriptions..." oninput="applyFilteredFilters()">
+                    </div>
+                    
+                    <!-- States -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">States</div>
+                        <div class="filter-group" id="filteredStateFilters"></div>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div class="filter-section">
+                        <div class="filter-section-title">Sort By</div>
+                        <select class="filter-select" id="filteredSortSelect" onchange="applyFilteredFilters()" style="width: 100%; padding: 0.75rem;">
+                            <option value="state">By State</option>
+                            <option value="recent">Most Recent</option>
+                            <option value="billnumber">By Bill Number</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
+                Showing <span id="filteredBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> filtered bills
+            </div>
+            
+            <div class="bills-grid" id="filteredBillsGrid"></div>
+        </div>
+
+        <!-- BILL DETAIL VIEW -->
+        <div class="view" id="billDetailView">
+            <div class="bill-detail-view">
+                <button class="back-btn" onclick="switchView('allBills', true)" style="margin-bottom: 1.5rem;">← Back to All Bills</button>
+                <div id="billDetailContent"></div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div class="view" id="analyticsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
+                <h2 class="section-title">Analytics</h2>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">Coming Soon: Interactive Charts</h3>
+                    <p style="color: var(--text-dim);">Advanced analytics and visualizations will be added here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Ensure page always loads at top
+        if (history.scrollRestoration) {
+            history.scrollRestoration = 'manual';
+        }
+        window.addEventListener('beforeunload', () => {
+            window.scrollTo(0, 0);
+        });
+        
+        let allBills = [];
+        let currentState = null;
+
+        // US State coordinates for simplified map
+        const statePositions = {
+            'AL': [516, 413], 'AK': [110, 520], 'AZ': [170, 365], 'AR': [445, 370],
+            'CA': [90, 280], 'CO': [270, 290], 'CT': [750, 215], 'DE': [735, 265],
+            'FL': [650, 500], 'GA': [615, 415], 'HI': [250, 520], 'ID': [190, 180],
+            'IL': [510, 270], 'IN': [560, 270], 'IA': [450, 245], 'KS': [380, 315],
+            'KY': [580, 310], 'LA': [465, 450], 'ME': [790, 125], 'MD': [710, 265],
+            'MA': [770, 195], 'MI': [600, 205], 'MN': [420, 165], 'MS': [490, 415],
+            'MO': [450, 310], 'MT': [245, 140], 'NE': [370, 255], 'NV': [130, 265],
+            'NH': [770, 170], 'NJ': [735, 245], 'NM': [245, 370], 'NY': [720, 190],
+            'NC': [670, 345], 'ND': [370, 145], 'OH': [605, 255], 'OK': [385, 360],
+            'OR': [105, 145], 'PA': [685, 245], 'RI': [770, 210], 'SC': [645, 385],
+            'SD': [370, 195], 'TN': [550, 350], 'TX': [345, 445], 'UT': [200, 270],
+            'VT': [755, 160], 'VA': [690, 300], 'WA': [125, 95], 'WV': [640, 285],
+            'WI': [500, 185], 'WY': [270, 215]
+        };
+
+        // Define navigation functions first (before they're used)
+        function renderBillCard(bill) {
+            const statusMap = {
+                '1': 'Introduced',
+                '2': 'Engrossed',
+                '3': 'Enrolled',
+                '4': 'Passed',
+                '5': 'Vetoed',
+                '6': 'Failed'
+            };
+            const status = statusMap[bill.status] || bill.status || 'Unknown';
+            
+            // Dynamic date label based on status
+            let dateLabel = 'Status Date';
+            if (bill.last_action_date) {
+                dateLabel = 'Last Action';
+            } else if (bill.status) {
+                const statusDateLabels = {
+                    '1': 'Introduction Date',
+                    '2': 'Engrossed Date',
+                    '3': 'Enrolled Date',
+                    '4': 'Passed Date',
+                    '5': 'Vetoed Date',
+                    '6': 'Failed Date'
+                };
+                dateLabel = statusDateLabels[bill.status] || 'Status Date';
+            }
+            
+            // Get display score (user score if exists, otherwise automated)
+            const displayScore = bill.user_score !== null && bill.user_score !== undefined ? bill.user_score : (bill.relevance_score || 0);
+            const displayTier = bill.user_tier || bill.relevance;
+            const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
+            const scoreClass = hasUserFeedback ? 'modified' : '';
+            
+            // Determine feedback badge
+            let feedbackBadge = '';
+            if (hasUserFeedback) {
+                if (bill.user_score > bill.relevance_score) {
+                    feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
+                } else if (bill.user_score < bill.relevance_score) {
+                    feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
+                } else {
+                    feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
+                }
+            }
+            
+            return `
+                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})">
+                    <div class="bill-header">
+                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="relevance-score ${scoreClass}">${displayScore.toFixed(1)}</span>
+                            ${feedbackBadge}
+                        </div>
+                    </div>
+                    <h3 class="bill-title">${bill.title || 'No title'}</h3>
+                    ${(displayTier === 'direct' || displayTier === 'high') && bill.description ? `
+                        <p class="bill-description">${(bill.description || '').substring(0, 200)}...</p>
+                    ` : ''}
+                    <div class="bill-meta">
+                        <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                        <span>Status: ${status}</span>
+                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` : 
+                          bill.status_date ? `<span>${dateLabel}: ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showStateDetail(state) {
+            currentState = state;
+            const stateBills = allBills.filter(b => b.state === state);
+            
+            // Show in states view with back button to state grid
+            document.getElementById('stateGrid').style.display = 'none';
+            document.getElementById('stateBillsList').style.display = 'block';
+            document.getElementById('stateDetailTitle').textContent = `${state}`;
+            
+            // Initialize state filters
+            initializeStateFilters(stateBills);
+            
+            // Clear any existing filters
+            clearStateFilters();
+            
+            // Apply filters (which will render the bills)
+            applyStateFilters();
+            
+            // Make sure we're in states view (don't close menu if called from map)
+            switchView('states', true);
+        }
+        
+        function initializeStateFilters(stateBills) {
+            // Initialize tag checkboxes with counts
+            const tagContainer = document.getElementById('stateTagFilters');
+            const allTags = [
+                'algorithmic-transparency',
+                'user-choice',
+                'content-moderation',
+                'bias-audit',
+                'impact-assessment',
+                'automated-decisions',
+                'platform-regulation',
+                'ai-policy'
+            ];
+            
+            tagContainer.innerHTML = allTags.map(tag => {
+                const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const count = stateBills.filter(b => b.tags && b.tags.includes(tag)).length;
+                return `
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="state-tag-${tag}" value="${tag}" onchange="applyStateFilters()">
+                        <label for="state-tag-${tag}">${displayName}</label>
+                        <span class="filter-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            // Initialize subjects dynamically
+            const subjectContainer = document.getElementById('stateSubjectFilters');
+            const allSubjects = new Set();
+            stateBills.forEach(bill => {
+                if (bill.subjects && Array.isArray(bill.subjects)) {
+                    bill.subjects.forEach(s => allSubjects.add(s));
+                }
+            });
+            
+            const sortedSubjects = Array.from(allSubjects).sort();
+            subjectContainer.innerHTML = sortedSubjects.map(subject => {
+                const count = stateBills.filter(b => b.subjects && b.subjects.includes(subject)).length;
+                return `
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="state-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}" value="${subject}" onchange="applyStateFilters()">
+                        <label for="state-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}">${subject}</label>
+                        <span class="filter-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update tier counts
+            const directCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'direct').length;
+            const highCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'high').length;
+            const mediumCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'medium').length;
+            const lowCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'low').length;
+            const minimalCount = stateBills.filter(b => (b.user_tier || b.relevance) === 'minimal').length;
+            
+            document.getElementById('state-count-relevance-direct').textContent = directCount;
+            document.getElementById('state-count-relevance-high').textContent = highCount;
+            document.getElementById('state-count-relevance-medium').textContent = mediumCount;
+            document.getElementById('state-count-relevance-low').textContent = lowCount;
+            document.getElementById('state-count-relevance-minimal').textContent = minimalCount;
+        }
+        
+        function toggleStateFilters() {
+            const content = document.getElementById('stateFilterContent');
+            const toggleText = document.getElementById('stateFilterToggleText');
+            content.classList.toggle('collapsed');
+            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+        }
+        
+        function applyStateFilters() {
+            if (!currentState) return;
+            
+            let filtered = allBills.filter(b => b.state === currentState);
+            const activeFilters = [];
+            
+            // Search filter
+            const search = document.getElementById('stateSearchInput').value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(b =>
+                    b.title?.toLowerCase().includes(search) ||
+                    b.description?.toLowerCase().includes(search) ||
+                    b.bill_number?.toLowerCase().includes(search)
+                );
+                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
+                    document.getElementById('stateSearchInput').value = '';
+                    applyStateFilters();
+                }});
+            }
+            
+            // Relevance filters
+            const selectedRelevance = [];
+            ['direct', 'high', 'medium', 'low', 'minimal'].forEach(tier => {
+                if (document.getElementById(`state-relevance-${tier}`)?.checked) {
+                    selectedRelevance.push(tier);
+                }
+            });
+            
+            if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
+                filtered = filtered.filter(b => selectedRelevance.includes(b.user_tier || b.relevance));
+                selectedRelevance.forEach(tier => {
+                    activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
+                        document.getElementById(`state-relevance-${tier}`).checked = false;
+                        applyStateFilters();
+                    }});
+                });
+            }
+            
+            // Tag filters
+            const selectedTags = Array.from(document.querySelectorAll('[id^="state-tag-"]:checked')).map(cb => cb.value);
+            if (selectedTags.length > 0) {
+                filtered = filtered.filter(b => 
+                    b.tags && selectedTags.some(tag => b.tags.includes(tag))
+                );
+                selectedTags.forEach(tag => {
+                    const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    activeFilters.push({ type: 'tag', label: displayName, clear: () => {
+                        document.getElementById(`state-tag-${tag}`).checked = false;
+                        applyStateFilters();
+                    }});
+                });
+            }
+            
+            // Subject filters
+            const selectedSubjects = Array.from(document.querySelectorAll('[id^="state-subject-"]:checked')).map(cb => cb.value);
+            if (selectedSubjects.length > 0) {
+                filtered = filtered.filter(b => 
+                    b.subjects && selectedSubjects.some(subject => b.subjects.includes(subject))
+                );
+                selectedSubjects.forEach(subject => {
+                    activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
+                        document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}`).checked = false;
+                        applyStateFilters();
+                    }});
+                });
+            }
+            
+            // Sort
+            const sort = document.getElementById('stateSortSelect').value;
+            if (sort === 'introduced') {
+                // Sort by introduction date (status_date)
+                filtered.sort((a, b) => {
+                    const dateA = a.status_date ? new Date(a.status_date) : new Date(0);
+                    const dateB = b.status_date ? new Date(b.status_date) : new Date(0);
+                    return dateB - dateA; // Most recent first
+                });
+            } else if (sort === 'recent') {
+                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+            } else if (sort === 'relevance') {
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                filtered.sort((a, b) => {
+                    const tierA = a.user_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.relevance || 'none';
+                    const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
+                    const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
+                    
+                    if (orderA !== orderB) return orderA - orderB;
+                    
+                    const scoreA = a.user_score !== null && a.user_score !== undefined ? a.user_score : (a.relevance_score || 0);
+                    const scoreB = b.user_score !== null && b.user_score !== undefined ? b.user_score : (b.relevance_score || 0);
+                    
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    
+                    return new Date(b.last_updated) - new Date(a.last_updated);
+                });
+            } else if (sort === 'billnumber') {
+                filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+            }
+            
+            // Render active filters
+            renderStateActiveFilters(activeFilters);
+            
+            // Update count and render
+            document.getElementById('stateBillCount').textContent = filtered.length;
+            document.getElementById('stateBillsGrid').innerHTML = filtered.map(renderBillCard).join('');
+        }
+        
+        function renderStateActiveFilters(filters) {
+            const container = document.getElementById('stateActiveFiltersContainer');
+            const filtersDiv = document.getElementById('stateActiveFilters');
+            
+            if (filters.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            filtersDiv.innerHTML = filters.map(f => `
+                <div class="filter-chip">
+                    <span>${f.label}</span>
+                    <button onclick="event.stopPropagation(); (${f.clear.toString()})()">×</button>
+                </div>
+            `).join('');
+        }
+        
+        function clearStateFilters() {
+            // Clear search
+            const searchInput = document.getElementById('stateSearchInput');
+            if (searchInput) searchInput.value = '';
+            
+            // Clear relevance
+            ['direct', 'high', 'medium', 'low', 'minimal'].forEach(tier => {
+                const checkbox = document.getElementById(`state-relevance-${tier}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            
+            // Clear all tags
+            document.querySelectorAll('[id^="state-tag-"]:checked').forEach(cb => cb.checked = false);
+            
+            // Clear all subjects
+            document.querySelectorAll('[id^="state-subject-"]:checked').forEach(cb => cb.checked = false);
+            
+            // Reset sort
+            const sortSelect = document.getElementById('stateSortSelect');
+            if (sortSelect) sortSelect.value = 'introduced';
+            
+            applyStateFilters();
+        }
+
+        function backToStateGrid() {
+            document.getElementById('stateGrid').style.display = 'grid';
+            document.getElementById('stateBillsList').style.display = 'none';
+            currentState = null;
+        }
+
+        function filterByState(state) {
+            currentState = state;
+            const filtered = allBills.filter(b => b.state === state);
+            renderBills(filtered);
+            document.getElementById('billCount').textContent = filtered.length;
+            switchView('allBills');
+        }
+
+        // Load data
+        async function loadData() {
+            try {
+                const response = await fetch('data/bills.json');
+                const allBillsData = await response.json();
+                
+                // Separate active bills from filtered bills
+                allBills = allBillsData.filter(b => b.relevance_score > 0 && b.relevance !== 'none');
+                
+                const statsResponse = await fetch('data/stats.json');
+                const stats = await statsResponse.json();
+                
+                updateDashboard(stats);
+                drawMap();
+                showRecentBills();
+                populateStateGrid();
+                initializeFilters();
+                
+                // Ensure we're at the top after loading
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function updateDashboard(stats) {
+            document.getElementById('totalBills').textContent = stats.total || 0;
+            
+            // Top Priority = DIRECT + HIGH tiers
+            const topPriority = (stats.by_relevance?.direct || 0) + (stats.by_relevance?.high || 0);
+            document.getElementById('topPriority').textContent = topPriority;
+            
+            document.getElementById('statesCovered').textContent = Object.keys(stats.by_state || {}).length;
+            
+            // Display last complete search info
+            const lastSearchEl = document.getElementById('lastSearchInfo');
+            if (stats.last_complete_search) {
+                const lastSearch = new Date(stats.last_complete_search);
+                const now = new Date();
+                const diffDays = Math.floor((now - lastSearch) / (1000 * 60 * 60 * 24));
+                
+                let timeAgoText;
+                if (diffDays === 0) {
+                    timeAgoText = 'today';
+                } else if (diffDays === 1) {
+                    timeAgoText = 'yesterday';
+                } else if (diffDays < 7) {
+                    timeAgoText = `${diffDays} days ago`;
+                } else if (diffDays < 30) {
+                    const weeks = Math.floor(diffDays / 7);
+                    timeAgoText = `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+                } else {
+                    const months = Math.floor(diffDays / 30);
+                    timeAgoText = `${months} month${months > 1 ? 's' : ''} ago`;
+                }
+                
+                lastSearchEl.innerHTML = `
+                    <div style="font-weight: 600; color: var(--text-secondary);">Last Complete Search</div>
+                    <div>${timeAgoText}</div>
+                `;
+            } else {
+                lastSearchEl.innerHTML = `
+                    <div style="font-weight: 600; color: var(--text-secondary);">Last Complete Search</div>
+                    <div>Never</div>
+                `;
+            }
+        }
+
+        async function drawMap() {
+            const svg = d3.select('#usMap');
+            svg.selectAll('*').remove(); // Clear existing
+            
+            const width = 960;
+            const height = 600;
+            
+            // Count bills by state
+            const stateCounts = {};
+            allBills.forEach(bill => {
+                stateCounts[bill.state] = (stateCounts[bill.state] || 0) + 1;
+            });
+            
+            const maxCount = Math.max(...Object.values(stateCounts), 1);
+            
+            // Load US map data from CDN
+            const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+            
+            // Create projection
+            const projection = d3.geoAlbersUsa()
+                .scale(1200)
+                .translate([width / 2, height / 2]);
+            
+            const path = d3.geoPath().projection(projection);
+            
+            // State name to abbreviation mapping
+            const stateAbbr = {
+                'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR',
+                'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE',
+                'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID',
+                'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS',
+                'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+                'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS',
+                'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
+                'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+                'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK',
+                'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+                'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT',
+                'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV',
+                'Wisconsin': 'WI', 'Wyoming': 'WY'
+            };
+            
+            // Create a group for zooming
+            const g = svg.append('g');
+            
+            // Add state labels that scale inversely with zoom
+            let labels, countLabels;
+            
+            // Add zoom behavior with translation extent to constrain panning
+            const zoom = d3.zoom()
+                .scaleExtent([1, 8])  // Min and max zoom levels
+                .translateExtent([[0, 0], [width, height]])  // Constrain panning to map bounds
+                .extent([[0, 0], [width, height]])  // Define the viewport
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                    // Scale text inversely so it stays the same size
+                    const scale = 1 / event.transform.k;
+                    if (labels) labels.attr('font-size', `${10 * scale}px`);
+                    if (countLabels) {
+                        countLabels.attr('font-size', `${9 * scale}px`)
+                                   .attr('y', d => path.centroid(d)[1] + (12 * scale));
+                    }
+                });
+            
+            svg.call(zoom);
+            
+            // Draw states
+            const states = topojson.feature(us, us.objects.states);
+            
+            g.selectAll('path')
+                .data(states.features)
+                .enter()
+                .append('path')
+                .attr('d', path)
+                .attr('class', 'state-path')
+                .attr('data-state', d => stateAbbr[d.properties.name])
+                .attr('fill', d => {
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    const intensity = count / maxCount;
+                    return count > 0 
+                        ? `rgba(16, 185, 129, ${0.3 + intensity * 0.7})` 
+                        : 'rgba(55, 65, 81, 0.5)';
+                })
+                .attr('stroke', '#1f2937')
+                .attr('stroke-width', '1.5')
+                .style('cursor', d => {
+                    const abbr = stateAbbr[d.properties.name];
+                    return stateCounts[abbr] > 0 ? 'pointer' : 'default';
+                })
+                .on('mouseenter', function(event, d) {
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    if (count > 0) {
+                        d3.select(this)
+                            .style('filter', 'brightness(1.3)')
+                            .attr('stroke-width', '2.5');
+                    }
+                })
+                .on('mouseleave', function() {
+                    d3.select(this)
+                        .style('filter', 'brightness(1)')
+                        .attr('stroke-width', '1.5');
+                })
+                .on('click', function(event, d) {
+                    event.stopPropagation(); // Prevent zoom reset
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    if (count > 0) {
+                        showStateDetail(abbr);
+                    }
+                })
+                .append('title')
+                .text(d => {
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    return `${abbr}: ${count} bills`;
+                });
+            
+            // Add state labels
+            labels = g.selectAll('.state-label')
+                .data(states.features)
+                .enter()
+                .append('text')
+                .attr('class', 'state-label')
+                .attr('x', d => path.centroid(d)[0])
+                .attr('y', d => path.centroid(d)[1])
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'bold')
+                .attr('fill', d => {
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    return count > 0 ? '#f9fafb' : '#6b7280';
+                })
+                .attr('pointer-events', 'none')
+                .text(d => stateAbbr[d.properties.name]);
+            
+            // Add count labels
+            countLabels = g.selectAll('.count-label')
+                .data(states.features)
+                .enter()
+                .append('text')
+                .attr('class', 'count-label')
+                .attr('x', d => path.centroid(d)[0])
+                .attr('y', d => path.centroid(d)[1] + 12)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '9px')
+                .attr('font-weight', '600')
+                .attr('fill', '#10b981')
+                .attr('pointer-events', 'none')
+                .text(d => {
+                    const abbr = stateAbbr[d.properties.name];
+                    const count = stateCounts[abbr] || 0;
+                    return count > 0 ? count : '';
+                });
+            
+            // Add reset button (outside the zoomable group)
+            const resetBtn = svg.append('g')
+                .attr('class', 'reset-zoom')
+                .attr('transform', 'translate(850, 10)')
+                .style('cursor', 'pointer')
+                .on('click', () => {
+                    svg.transition()
+                        .duration(750)
+                        .call(zoom.transform, d3.zoomIdentity);
+                });
+            
+            resetBtn.append('rect')
+                .attr('width', 90)
+                .attr('height', 32)
+                .attr('rx', 6)
+                .attr('fill', '#374151')
+                .attr('stroke', '#10b981')
+                .attr('stroke-width', '1.5');
+            
+            resetBtn.append('text')
+                .attr('x', 45)
+                .attr('y', 21)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#f9fafb')
+                .attr('font-size', '13px')
+                .attr('font-weight', '600')
+                .text('Reset Zoom');
+        }
+
+        function showRecentBills() {
+            const container = document.getElementById('recentBills');
+            const recent = allBills
+                .sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated))
+                .slice(0, 5);
+            
+            const statusMap = {
+                '1': 'Introduced',
+                '2': 'Engrossed',
+                '3': 'Enrolled',
+                '4': 'Passed',
+                '5': 'Vetoed',
+                '6': 'Failed'
+            };
+            
+            container.innerHTML = recent.map(bill => {
+                const status = statusMap[bill.status] || bill.status || 'Unknown';
+                return `
+                <div class="recent-item" onclick="showBillDetail(${bill.bill_id})">
+                    <div class="status-dot ${bill.status}"></div>
+                    <div class="recent-content">
+                        <div class="recent-title">${bill.state} ${bill.bill_number}</div>
+                        <div class="recent-meta">${status} • ${timeAgo(bill.last_updated)}</div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function populateStateGrid() {
+            const container = document.getElementById('stateGrid');
+            const stateCounts = {};
+            
+            allBills.forEach(bill => {
+                stateCounts[bill.state] = (stateCounts[bill.state] || 0) + 1;
+            });
+            
+            const allStates = Object.keys(statePositions).sort();
+            
+            container.innerHTML = allStates.map(state => {
+                const count = stateCounts[state] || 0;
+                return `
+                    <div class="state-card ${count === 0 ? 'empty' : ''}" 
+                         onclick="${count > 0 ? `showStateDetail('${state}')` : ''}">
+                        <div class="state-abbr">${state}</div>
+                        <div class="state-count">${count}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter system
+        function initializeFilters() {
+            // Initialize state checkboxes
+            const stateContainer = document.getElementById('stateFilters');
+            const allStates = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 
+                              'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 
+                              'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 
+                              'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 
+                              'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
+            
+            stateContainer.innerHTML = allStates.map(state => `
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="state-${state}" value="${state}" onchange="applyFilters()">
+                    <label for="state-${state}">${state}</label>
+                </div>
+            `).join('');
+            
+            // Initialize tag checkboxes with counts
+            const tagContainer = document.getElementById('tagFilters');
+            const allTags = [
+                'algorithmic-transparency',
+                'user-choice',
+                'content-moderation',
+                'bias-audit',
+                'impact-assessment',
+                'automated-decisions',
+                'platform-regulation',
+                'ai-policy'
+            ];
+            
+            tagContainer.innerHTML = allTags.map(tag => {
+                const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                return `
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="tag-${tag}" value="${tag}" onchange="applyFilters()">
+                        <label for="tag-${tag}">${displayName}</label>
+                        <span class="filter-count" id="count-tag-${tag}">0</span>
+                    </div>
+                `;
+            }).join('');
+            
+            // Initialize subjects dynamically
+            const subjectContainer = document.getElementById('subjectFilters');
+            const allSubjects = new Set();
+            allBills.forEach(bill => {
+                if (bill.subjects && Array.isArray(bill.subjects)) {
+                    bill.subjects.forEach(s => allSubjects.add(s));
+                }
+            });
+            
+            const sortedSubjects = Array.from(allSubjects).sort();
+            subjectContainer.innerHTML = sortedSubjects.map(subject => `
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}" value="${subject}" onchange="applyFilters()">
+                    <label for="subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}">${subject}</label>
+                    <span class="filter-count" id="count-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}">0</span>
+                </div>
+            `).join('');
+            
+            // Initialize bill types dynamically
+            const billTypeContainer = document.getElementById('billTypeFilters');
+            const allBillTypes = new Set();
+            allBills.forEach(bill => {
+                if (bill.bill_type) {
+                    allBillTypes.add(bill.bill_type);
+                }
+            });
+            
+            const billTypeNames = {
+                'B': 'Bill',
+                'R': 'Resolution',
+                'CR': 'Concurrent Resolution',
+                'JR': 'Joint Resolution',
+                'JRCA': 'Joint Resolution Constitutional Amendment'
+            };
+            
+            const sortedTypes = Array.from(allBillTypes).sort();
+            billTypeContainer.innerHTML = sortedTypes.map(type => {
+                const displayName = billTypeNames[type] || type;
+                return `
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="billtype-${type}" value="${type}" onchange="applyFilters()">
+                        <label for="billtype-${type}">${displayName}</label>
+                        <span class="filter-count" id="count-billtype-${type}">0</span>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update counts
+            updateFilterCounts();
+        }
+        
+        function updateFilterCounts() {
+            // Count relevance for all 5 tiers
+            const directCount = allBills.filter(b => b.relevance === 'direct').length;
+            const highCount = allBills.filter(b => b.relevance === 'high').length;
+            const mediumCount = allBills.filter(b => b.relevance === 'medium').length;
+            const lowCount = allBills.filter(b => b.relevance === 'low').length;
+            const minimalCount = allBills.filter(b => b.relevance === 'minimal').length;
+            
+            document.getElementById('count-relevance-direct').textContent = directCount;
+            document.getElementById('count-relevance-high').textContent = highCount;
+            document.getElementById('count-relevance-medium').textContent = mediumCount;
+            document.getElementById('count-relevance-low').textContent = lowCount;
+            document.getElementById('count-relevance-minimal').textContent = minimalCount;
+            
+            // Count tags
+            const allTags = [
+                'algorithmic-transparency', 'user-choice', 'content-moderation',
+                'bias-audit', 'impact-assessment', 'automated-decisions',
+                'platform-regulation', 'ai-policy'
+            ];
+            
+            allTags.forEach(tag => {
+                const count = allBills.filter(b => b.tags && b.tags.includes(tag)).length;
+                const el = document.getElementById(`count-tag-${tag}`);
+                if (el) el.textContent = count;
+            });
+            
+            // Count subjects
+            const allSubjects = new Set();
+            allBills.forEach(bill => {
+                if (bill.subjects && Array.isArray(bill.subjects)) {
+                    bill.subjects.forEach(s => allSubjects.add(s));
+                }
+            });
+            
+            allSubjects.forEach(subject => {
+                const count = allBills.filter(b => b.subjects && b.subjects.includes(subject)).length;
+                const el = document.getElementById(`count-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}`);
+                if (el) el.textContent = count;
+            });
+            
+            // Count parties
+            const partyD = allBills.filter(b => b.sponsor_party === 'D').length;
+            const partyR = allBills.filter(b => b.sponsor_party === 'R').length;
+            const partyI = allBills.filter(b => b.sponsor_party === 'I').length;
+            document.getElementById('count-party-D').textContent = partyD;
+            document.getElementById('count-party-R').textContent = partyR;
+            document.getElementById('count-party-I').textContent = partyI;
+            
+            // Count bill types
+            const allBillTypes = new Set();
+            allBills.forEach(bill => {
+                if (bill.bill_type) {
+                    allBillTypes.add(bill.bill_type);
+                }
+            });
+            
+            allBillTypes.forEach(type => {
+                const count = allBills.filter(b => b.bill_type === type).length;
+                const el = document.getElementById(`count-billtype-${type}`);
+                if (el) el.textContent = count;
+            });
+        }
+        
+        function toggleFilters() {
+            const content = document.getElementById('filterContent');
+            const toggleText = document.getElementById('filterToggleText');
+            content.classList.toggle('collapsed');
+            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+        }
+        
+        function selectAllStates() {
+            document.querySelectorAll('[id^="state-"]').forEach(cb => cb.checked = true);
+            applyFilters();
+        }
+        
+        function clearAllStates() {
+            document.querySelectorAll('[id^="state-"]').forEach(cb => cb.checked = false);
+            applyFilters();
+        }
+        
+        function clearAllFilters() {
+            // Clear search
+            document.getElementById('searchInput').value = '';
+            
+            // Clear all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            // Clear date inputs
+            document.getElementById('statusDateFrom').value = '';
+            document.getElementById('statusDateTo').value = '';
+            document.getElementById('lastUpdatedFrom').value = '';
+            document.getElementById('lastUpdatedTo').value = '';
+            
+            // Reset sort
+            document.getElementById('sortSelect').value = 'introduced';
+            
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            let filtered = [...allBills];
+            const activeFilters = [];
+            
+            // Text search
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(b =>
+                    b.title?.toLowerCase().includes(search) ||
+                    b.description?.toLowerCase().includes(search) ||
+                    b.bill_number?.toLowerCase().includes(search)
+                );
+                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
+                    document.getElementById('searchInput').value = '';
+                    applyFilters();
+                }});
+            }
+            
+            // State filters
+            const selectedStates = Array.from(document.querySelectorAll('[id^="state-"]:checked')).map(cb => cb.value);
+            if (selectedStates.length > 0) {
+                filtered = filtered.filter(b => selectedStates.includes(b.state));
+                const label = selectedStates.length === 1 
+                    ? `State: ${selectedStates[0]}` 
+                    : `States: ${selectedStates.length} selected`;
+                activeFilters.push({ type: 'states', label, clear: clearAllStates });
+            }
+            
+            // Relevance filters
+            const selectedRelevance = [];
+            if (document.getElementById('relevance-direct').checked) selectedRelevance.push('direct');
+            if (document.getElementById('relevance-high').checked) selectedRelevance.push('high');
+            if (document.getElementById('relevance-medium').checked) selectedRelevance.push('medium');
+            if (document.getElementById('relevance-low').checked) selectedRelevance.push('low');
+            if (document.getElementById('relevance-minimal').checked) selectedRelevance.push('minimal');
+            
+            if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
+                filtered = filtered.filter(b => selectedRelevance.includes(b.relevance));
+                selectedRelevance.forEach(tier => {
+                    activeFilters.push({ type: 'relevance', label: `${tier.toUpperCase()}`, clear: () => {
+                        document.getElementById(`relevance-${tier}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+            
+            // Tag filters
+            const selectedTags = Array.from(document.querySelectorAll('[id^="tag-"]:checked')).map(cb => cb.value);
+            if (selectedTags.length > 0) {
+                filtered = filtered.filter(b => 
+                    b.tags && selectedTags.some(tag => b.tags.includes(tag))
+                );
+                selectedTags.forEach(tag => {
+                    const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    activeFilters.push({ type: 'tag', label: displayName, clear: () => {
+                        document.getElementById(`tag-${tag}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+            
+            // Subject filters
+            const selectedSubjects = Array.from(document.querySelectorAll('[id^="subject-"]:checked')).map(cb => cb.value);
+            if (selectedSubjects.length > 0) {
+                filtered = filtered.filter(b => 
+                    b.subjects && selectedSubjects.some(subject => b.subjects.includes(subject))
+                );
+                selectedSubjects.forEach(subject => {
+                    activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
+                        document.getElementById(`subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+            
+            // Party filters
+            const selectedParties = [];
+            if (document.getElementById('party-D').checked) selectedParties.push('D');
+            if (document.getElementById('party-R').checked) selectedParties.push('R');
+            if (document.getElementById('party-I').checked) selectedParties.push('I');
+            if (selectedParties.length > 0) {
+                filtered = filtered.filter(b => selectedParties.includes(b.sponsor_party));
+                const partyNames = { 'D': 'Democrat', 'R': 'Republican', 'I': 'Independent' };
+                selectedParties.forEach(party => {
+                    activeFilters.push({ type: 'party', label: `Party: ${partyNames[party]}`, clear: () => {
+                        document.getElementById(`party-${party}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+            
+            // Bill type filters
+            const selectedBillTypes = Array.from(document.querySelectorAll('[id^="billtype-"]:checked')).map(cb => cb.value);
+            if (selectedBillTypes.length > 0) {
+                filtered = filtered.filter(b => selectedBillTypes.includes(b.bill_type));
+                const billTypeNames = {
+                    'B': 'Bill',
+                    'R': 'Resolution',
+                    'CR': 'Concurrent Resolution',
+                    'JR': 'Joint Resolution',
+                    'JRCA': 'Joint Resolution Constitutional Amendment'
+                };
+                selectedBillTypes.forEach(type => {
+                    const displayName = billTypeNames[type] || type;
+                    activeFilters.push({ type: 'billtype', label: `Type: ${displayName}`, clear: () => {
+                        document.getElementById(`billtype-${type}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+            
+            // Status date range
+            const statusFrom = document.getElementById('statusDateFrom').value;
+            const statusTo = document.getElementById('statusDateTo').value;
+            if (statusFrom || statusTo) {
+                filtered = filtered.filter(b => {
+                    if (!b.status_date) return false;
+                    const billDate = new Date(b.status_date);
+                    if (statusFrom && billDate < new Date(statusFrom)) return false;
+                    if (statusTo && billDate > new Date(statusTo)) return false;
+                    return true;
+                });
+                let label = 'Status Date: ';
+                if (statusFrom && statusTo) label += `${statusFrom} to ${statusTo}`;
+                else if (statusFrom) label += `after ${statusFrom}`;
+                else label += `before ${statusTo}`;
+                activeFilters.push({ type: 'statusDate', label, clear: () => {
+                    document.getElementById('statusDateFrom').value = '';
+                    document.getElementById('statusDateTo').value = '';
+                    applyFilters();
+                }});
+            }
+            
+            // Last updated range
+            const updatedFrom = document.getElementById('lastUpdatedFrom').value;
+            const updatedTo = document.getElementById('lastUpdatedTo').value;
+            if (updatedFrom || updatedTo) {
+                filtered = filtered.filter(b => {
+                    if (!b.last_updated) return false;
+                    const billDate = new Date(b.last_updated);
+                    if (updatedFrom && billDate < new Date(updatedFrom)) return false;
+                    if (updatedTo && billDate > new Date(updatedTo)) return false;
+                    return true;
+                });
+                let label = 'Updated: ';
+                if (updatedFrom && updatedTo) label += `${updatedFrom} to ${updatedTo}`;
+                else if (updatedFrom) label += `after ${updatedFrom}`;
+                else label += `before ${updatedTo}`;
+                activeFilters.push({ type: 'updatedDate', label, clear: () => {
+                    document.getElementById('lastUpdatedFrom').value = '';
+                    document.getElementById('lastUpdatedTo').value = '';
+                    applyFilters();
+                }});
+            }
+            
+            // Sort - default to most recent
+            const sort = document.getElementById('sortSelect').value;
+            if (sort === 'introduced') {
+                // Sort by introduction date (status_date for status 1)
+                filtered.sort((a, b) => {
+                    const dateA = a.status_date ? new Date(a.status_date) : new Date(0);
+                    const dateB = b.status_date ? new Date(b.status_date) : new Date(0);
+                    return dateB - dateA; // Most recent first
+                });
+            } else if (sort === 'recent') {
+                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+            } else if (sort === 'relevance') {
+                // Sort by tier: direct > high > medium > low > minimal
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                filtered.sort((a, b) => {
+                    // Get effective tier (user override or automated)
+                    const tierA = a.user_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.relevance || 'none';
+                    const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
+                    const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
+                    
+                    if (orderA !== orderB) {
+                        return orderA - orderB;
+                    }
+                    
+                    // Within same tier, sort by score (high to low)
+                    const scoreA = a.user_score !== null && a.user_score !== undefined ? a.user_score : (a.relevance_score || 0);
+                    const scoreB = b.user_score !== null && b.user_score !== undefined ? b.user_score : (b.relevance_score || 0);
+                    
+                    if (scoreA !== scoreB) {
+                        return scoreB - scoreA;
+                    }
+                    
+                    // Finally by date
+                    return new Date(b.last_updated) - new Date(a.last_updated);
+                });
+            } else if (sort === 'state') {
+                filtered.sort((a, b) => {
+                    const stateCompare = a.state.localeCompare(b.state);
+                    if (stateCompare !== 0) return stateCompare;
+                    return new Date(b.last_updated) - new Date(a.last_updated);
+                });
+            } else if (sort === 'billnumber') {
+                filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+            }
+            
+            // Update state filter count
+            document.getElementById('stateFilterCount').textContent = selectedStates.length;
+            
+            // Render active filters
+            renderActiveFilters(activeFilters);
+            
+            // Update count and render
+            document.getElementById('billCount').textContent = filtered.length;
+            renderBills(filtered);
+        }
+        
+        function renderActiveFilters(filters) {
+            const container = document.getElementById('activeFiltersContainer');
+            const filtersDiv = document.getElementById('activeFilters');
+            
+            if (filters.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            filtersDiv.innerHTML = filters.map(f => `
+                <div class="filter-chip">
+                    ${f.label}
+                    <span class="filter-chip-remove" onclick='${f.clear.toString().match(/\{([\s\S]*)\}/)[1]}'>×</span>
+                </div>
+            `).join('');
+        }
+
+        function renderBills(bills) {
+            const container = document.getElementById('billsGrid');
+            
+            if (bills.length === 0) {
+                container.innerHTML = '<div class="loading"><p>No bills found</p></div>';
+                return;
+            }
+            
+            // Status code to text mapping (from LegiScan API)
+            const statusMap = {
+                '1': 'Introduced',
+                '2': 'Engrossed',
+                '3': 'Enrolled',
+                '4': 'Passed',
+                '5': 'Vetoed',
+                '6': 'Failed'
+            };
+            
+            container.innerHTML = bills.map(bill => {
+                const description = bill.description || '';
+                const truncatedDesc = description.length > 150 
+                    ? description.substring(0, 150) + '...' 
+                    : description;
+                
+                const status = statusMap[bill.status] || bill.status || 'Unknown';
+                
+                // Dynamic date label based on status
+                let dateLabel = 'Status Date';
+                if (bill.last_action_date) {
+                    dateLabel = 'Last Action';
+                } else if (bill.status) {
+                    const statusDateLabels = {
+                        '1': 'Introduction Date',
+                        '2': 'Engrossed Date',
+                        '3': 'Enrolled Date',
+                        '4': 'Passed Date',
+                        '5': 'Vetoed Date',
+                        '6': 'Failed Date'
+                    };
+                    dateLabel = statusDateLabels[bill.status] || 'Status Date';
+                }
+                
+                // Get display score (user score if exists, otherwise automated)
+                const displayScore = bill.user_score !== null && bill.user_score !== undefined ? bill.user_score : (bill.relevance_score || 0);
+                const displayTier = bill.user_tier || bill.relevance;
+                const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
+                const scoreClass = hasUserFeedback ? 'modified' : '';
+                
+                // Determine feedback badge
+                let feedbackBadge = '';
+                if (hasUserFeedback) {
+                    if (bill.user_score > bill.relevance_score) {
+                        feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
+                    } else if (bill.user_score < bill.relevance_score) {
+                        feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
+                    } else {
+                        feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
+                    }
+                }
+                
+                return `
+                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})">
+                    <div class="bill-header">
+                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="relevance-score ${scoreClass}">${displayScore.toFixed(1)}</span>
+                            ${feedbackBadge}
+                        </div>
+                    </div>
+                    <h3 class="bill-title">${bill.title || 'No title'}</h3>
+                    ${(displayTier === 'direct' || displayTier === 'high') && description ? `
+                        <p class="bill-description-truncated">${truncatedDesc}</p>
+                    ` : ''}
+                    <div class="bill-meta">
+                        <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                        <span>Status: ${status}</span>
+                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` : 
+                          bill.status_date ? `<span>${dateLabel}: ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+
+        function switchView(view, skipMenuClose) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            if (view === 'dashboard') {
+                document.getElementById('dashboardView').classList.add('active');
+                document.querySelectorAll('.menu-item')[0].classList.add('active');
+                currentState = null;
+            } else if (view === 'states') {
+                document.getElementById('statesView').classList.add('active');
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
+                // Only reset to grid view when switching from menu, not from state click
+                if (!skipMenuClose && document.getElementById('stateBillsList').style.display === 'block') {
+                    // Keep the current view
+                }
+            } else if (view === 'allBills') {
+                document.getElementById('allBillsView').classList.add('active');
+                document.querySelectorAll('.menu-item')[2].classList.add('active');
+                applyFilters();
+            } else if (view === 'quickReview') {
+                document.getElementById('quickReviewView').classList.add('active');
+                startQuickReview();
+            } else if (view === 'feedbackReview') {
+                document.getElementById('feedbackReviewView').classList.add('active');
+                document.querySelectorAll('.menu-item')[3].classList.add('active');
+                applyFeedbackFilters();
+            } else if (view === 'filteredBills') {
+                document.getElementById('filteredBillsView').classList.add('active');
+                document.querySelectorAll('.menu-item')[4].classList.add('active');
+                loadFilteredBills();
+            } else if (view === 'analytics') {
+                document.getElementById('analyticsView').classList.add('active');
+                document.querySelectorAll('.menu-item')[5].classList.add('active');
+            } else if (view === 'billDetail') {
+                document.getElementById('billDetailView').classList.add('active');
+            }
+            
+            // Scroll to top when switching views
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (!skipMenuClose) {
+                toggleMenu();
+            }
+        }
+        
+        function switchToTopPriority() {
+            // Clear all filters first
+            clearAllFilters();
+            
+            // Switch to all bills view
+            document.getElementById('allBillsView').classList.add('active');
+            document.querySelectorAll('.view').forEach(v => {
+                if (v.id !== 'allBillsView') v.classList.remove('active');
+            });
+            
+            // Set filters to DIRECT and HIGH tiers
+            document.getElementById('relevance-direct').checked = true;
+            document.getElementById('relevance-high').checked = true;
+            applyFilters();
+        }
+        
+        function showBillDetail(billId) {
+            const bill = allBills.find(b => b.bill_id === billId);
+            if (!bill) return;
+            
+            // Status code to text mapping
+            const statusMap = {
+                '1': 'Introduced',
+                '2': 'Engrossed',
+                '3': 'Enrolled',
+                '4': 'Passed',
+                '5': 'Vetoed',
+                '6': 'Failed'
+            };
+            const status = statusMap[bill.status] || bill.status || 'Unknown';
+            
+            const billTypeNames = {
+                'B': 'Bill',
+                'R': 'Resolution',
+                'CR': 'Concurrent Resolution',
+                'JR': 'Joint Resolution',
+                'JRCA': 'Joint Resolution Constitutional Amendment'
+            };
+            const billTypeName = bill.bill_type ? (billTypeNames[bill.bill_type] || bill.bill_type) : 'Unknown';
+            
+            const container = document.getElementById('billDetailContent');
+            
+            container.innerHTML = `
+                <div class="bill-detail-header">
+                    <div class="bill-detail-title-section">
+                        <div class="bill-detail-number">${bill.state} ${bill.bill_number}</div>
+                        <h1 class="bill-detail-title">${bill.title || 'No title available'}</h1>
+                        <div class="bill-detail-meta-row">
+                            <span><strong>Type:</strong> ${billTypeName}</span>
+                            <span><strong>Status:</strong> ${status}</span>
+                            ${bill.status_date ? `<span><strong>Status Date:</strong> ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
+                            <span><strong>Relevance:</strong> <span class="tag ${bill.relevance}">${bill.relevance.toUpperCase()}</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                ${bill.sponsor_name ? `
+                    <div class="bill-detail-section">
+                        <h2 class="bill-detail-section-title">Primary Sponsor</h2>
+                        <div class="bill-detail-meta-row">
+                            <span><strong>Name:</strong> ${bill.sponsor_name}</span>
+                            ${bill.sponsor_party ? `<span><strong>Party:</strong> ${bill.sponsor_party}</span>` : ''}
+                            ${bill.sponsor_district ? `<span><strong>District:</strong> ${bill.sponsor_district}</span>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${bill.description ? `
+                    <div class="bill-detail-section">
+                        <h2 class="bill-detail-section-title">Description</h2>
+                        <p class="bill-detail-description">${bill.description}</p>
+                    </div>
+                ` : ''}
+                
+                ${bill.last_action ? `
+                    <div class="bill-detail-section">
+                        <h2 class="bill-detail-section-title">Last Action</h2>
+                        <div class="bill-detail-meta-row">
+                            <span><strong>Action:</strong> ${bill.last_action}</span>
+                            ${bill.last_action_date ? `<span><strong>Date:</strong> ${new Date(bill.last_action_date).toLocaleDateString()}</span>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${bill.subjects && bill.subjects.length > 0 ? `
+                    <div class="bill-detail-section">
+                        <h2 class="bill-detail-section-title">Subjects</h2>
+                        <div class="bill-tags">
+                            ${bill.subjects.map(s => `<span class="tag">${s}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${bill.tags && bill.tags.length > 0 ? `
+                    <div class="bill-detail-section">
+                        <h2 class="bill-detail-section-title">Tags</h2>
+                        <div class="bill-tags">
+                            ${bill.tags.map(t => {
+                                const displayName = t.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                return `<span class="tag">${displayName}</span>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="bill-detail-section">
+                    <h2 class="bill-detail-section-title">Bill Information</h2>
+                    <div class="bill-detail-meta-row">
+                        <span><strong>Bill ID:</strong> ${bill.bill_id}</span>
+                        <span><strong>State:</strong> ${bill.state}</span>
+                        <span><strong>Bill Number:</strong> ${bill.bill_number}</span>
+                    </div>
+                </div>
+                
+                <!-- Feedback Panel -->
+                <div class="feedback-panel">
+                    <div class="feedback-section-title">
+                        Relevance Assessment
+                        <span class="info-icon">i
+                            <div class="info-tooltip">
+                                <strong>Scoring Breakdown (0-10):</strong><br>
+                                • Platform terms: +3.0<br>
+                                • Algorithm terms: +3.0<br>
+                                • Governance terms: +3.0<br>
+                                • Title matches: +0.1 each<br>
+                                • Multiple terms: +0.05 each<br>
+                                • Enforcement language: +0.05<br>
+                                • Penalty language: +0.05<br><br>
+                                <strong>Tiers:</strong><br>
+                                DIRECT (9.0-10.0) • HIGH (7.0-8.9)<br>
+                                MEDIUM (4.0-6.9) • LOW (2.0-3.9)<br>
+                                MINIMAL (0.1-1.9)
+                            </div>
+                        </span>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Automated Score</label>
+                            <div class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Your Score Override</label>
+                            <div class="score-input-group">
+                                <input type="number" 
+                                       id="userScore_${bill.bill_id}" 
+                                       class="score-input" 
+                                       min="0" 
+                                       max="10" 
+                                       step="0.1" 
+                                       value="${bill.user_score !== null && bill.user_score !== undefined ? bill.user_score.toFixed(1) : ''}"
+                                       placeholder="0.0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.75rem;">
+                            Automated Tier: <span class="tag ${bill.relevance}">${bill.relevance.toUpperCase()}</span>
+                        </label>
+                        <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.75rem;">Override Tier:</label>
+                        <div class="tier-radio-group">
+                            <input type="radio" id="tier_direct_${bill.bill_id}" name="tier_${bill.bill_id}" value="direct" class="tier-radio" ${bill.user_tier === 'direct' ? 'checked' : ''}>
+                            <label for="tier_direct_${bill.bill_id}" class="tier-radio-label tier-direct">DIRECT</label>
+                            
+                            <input type="radio" id="tier_high_${bill.bill_id}" name="tier_${bill.bill_id}" value="high" class="tier-radio" ${bill.user_tier === 'high' ? 'checked' : ''}>
+                            <label for="tier_high_${bill.bill_id}" class="tier-radio-label tier-high">HIGH</label>
+                            
+                            <input type="radio" id="tier_medium_${bill.bill_id}" name="tier_${bill.bill_id}" value="medium" class="tier-radio" ${bill.user_tier === 'medium' ? 'checked' : ''}>
+                            <label for="tier_medium_${bill.bill_id}" class="tier-radio-label tier-medium">MEDIUM</label>
+                            
+                            <input type="radio" id="tier_low_${bill.bill_id}" name="tier_${bill.bill_id}" value="low" class="tier-radio" ${bill.user_tier === 'low' ? 'checked' : ''}>
+                            <label for="tier_low_${bill.bill_id}" class="tier-radio-label tier-low">LOW</label>
+                            
+                            <input type="radio" id="tier_minimal_${bill.bill_id}" name="tier_${bill.bill_id}" value="minimal" class="tier-radio" ${bill.user_tier === 'minimal' ? 'checked' : ''}>
+                            <label for="tier_minimal_${bill.bill_id}" class="tier-radio-label tier-minimal">MINIMAL</label>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Feedback Notes (optional)</label>
+                        <textarea id="feedbackNotes_${bill.bill_id}" 
+                                  class="feedback-textarea" 
+                                  placeholder="Add notes about why you adjusted the score or tier...">${bill.feedback_notes || ''}</textarea>
+                    </div>
+                    
+                    <div class="feedback-actions">
+                        <button class="feedback-btn feedback-btn-primary" onclick="submitFeedback(${bill.bill_id}, 'custom')">
+                            Save Custom Assessment
+                        </button>
+                        <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'confirm')">
+                            Confirm Automated Score
+                        </button>
+                        <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'reject')">
+                            Mark as Irrelevant
+                        </button>
+                        ${bill.user_score !== null && bill.user_score !== undefined ? `
+                            <button class="feedback-btn feedback-btn-danger" onclick="clearFeedback(${bill.bill_id})">
+                                Clear Override
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="bill-detail-actions">
+                    <button class="action-btn action-btn-primary" onclick="window.open('${bill.url}', '_blank')">
+                        View Complete Details on LegiScan →
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="switchView('allBills', true)">
+                        ← Back to All Bills
+                    </button>
+                </div>
+            `;
+            
+            switchView('billDetail', true);
+        }
+        
+        // Feedback functions
+        async function submitFeedback(billId, feedbackType) {
+            const bill = allBills.find(b => b.bill_id === billId);
+            if (!bill) return;
+            
+            let userScore = null;
+            let userTier = null;
+            let notes = '';
+            
+            if (feedbackType === 'custom') {
+                // Get custom values
+                const scoreInput = document.getElementById(`userScore_${billId}`);
+                const notesInput = document.getElementById(`feedbackNotes_${billId}`);
+                const selectedTier = document.querySelector(`input[name="tier_${billId}"]:checked`);
+                
+                userScore = scoreInput.value ? parseFloat(scoreInput.value) : null;
+                userTier = selectedTier ? selectedTier.value : null;
+                notes = notesInput.value;
+                
+                if (userScore === null && userTier === null) {
+                    alert('Please enter a score override or select a tier');
+                    return;
+                }
+                
+                // Validate score
+                if (userScore !== null && (userScore < 0 || userScore > 10)) {
+                    alert('Score must be between 0 and 10');
+                    return;
+                }
+                
+            } else if (feedbackType === 'confirm') {
+                // Confirm automated score
+                userScore = bill.relevance_score;
+                userTier = bill.relevance;
+                notes = 'Confirmed automated assessment';
+                
+            } else if (feedbackType === 'reject') {
+                // Mark as irrelevant
+                userScore = 0;
+                userTier = 'minimal';
+                notes = 'Marked as irrelevant';
+            }
+            
+            alert('This is a read-only view. Run the tracker locally to submit feedback.');
+        }
+        
+        async function clearFeedback(billId) {
+            alert('This is a read-only view. Run the tracker locally to clear feedback.');
+        }
+
+        // Filtered Bills Review functions
+        async function loadFilteredBills() {
+            // Need to fetch all bills including filtered ones
+            try {
+                const response = await fetch('data/bills.json');
+                const allBillsData = await response.json();
+                
+                // Get only filtered bills for this view
+                const filteredBillsData = allBillsData.filter(b => b.relevance_score === 0 || b.relevance === 'none');
+                
+                // Store in a separate variable for filtered view
+                window.filteredBillsCache = filteredBillsData;
+                
+                applyFilteredFilters();
+            } catch (error) {
+                console.error('Error loading filtered bills:', error);
+            }
+        }
+        
+        function toggleFilteredFilters() {
+            const content = document.getElementById('filteredFilterContent');
+            const toggleText = document.getElementById('filteredFilterToggleText');
+            content.classList.toggle('collapsed');
+            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+        }
+        
+        function initializeFilteredStateFilters() {
+            // Get unique states from filtered bills
+            const filteredBills = window.filteredBillsCache || [];
+            const states = [...new Set(filteredBills.map(b => b.state))].sort();
+            
+            const container = document.getElementById('filteredStateFilters');
+            container.innerHTML = states.map(state => `
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filtered-state-${state}" value="${state}" checked onchange="applyFilteredFilters()">
+                    <label for="filtered-state-${state}">${state}</label>
+                    <span class="filter-count">${filteredBills.filter(b => b.state === state).length}</span>
+                </div>
+            `).join('');
+        }
+        
+        function applyFilteredFilters() {
+            // Use cached filtered bills
+            if (!window.filteredBillsCache) {
+                document.getElementById('filteredBillsGrid').innerHTML = '<div class="loading"><p>Loading filtered bills...</p></div>';
+                return;
+            }
+            
+            let filtered = [...window.filteredBillsCache];
+            
+            // Initialize state filters if needed
+            if (document.getElementById('filteredStateFilters').innerHTML === '') {
+                initializeFilteredStateFilters();
+            }
+            
+            // Search filter
+            const search = document.getElementById('filteredSearchInput')?.value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(b =>
+                    b.title?.toLowerCase().includes(search) ||
+                    b.description?.toLowerCase().includes(search) ||
+                    b.bill_number?.toLowerCase().includes(search)
+                );
+            }
+            
+            // State filter
+            const selectedStates = Array.from(document.querySelectorAll('[id^="filtered-state-"]:checked')).map(cb => cb.value);
+            if (selectedStates.length > 0) {
+                filtered = filtered.filter(b => selectedStates.includes(b.state));
+            }
+            
+            // Sort
+            const sort = document.getElementById('filteredSortSelect')?.value || 'state';
+            if (sort === 'state') {
+                filtered.sort((a, b) => a.state.localeCompare(b.state));
+            } else if (sort === 'recent') {
+                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+            } else if (sort === 'billnumber') {
+                filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+            }
+            
+            // Update counts
+            const totalFiltered = window.filteredBillsCache ? window.filteredBillsCache.length : 0;
+            document.getElementById('filteredCount').textContent = totalFiltered;
+            document.getElementById('filteredBillCount').textContent = filtered.length;
+            
+            // Render bills
+            renderFilteredBills(filtered);
+        }
+        
+        function renderFilteredBills(bills) {
+            const container = document.getElementById('filteredBillsGrid');
+            
+            if (bills.length === 0) {
+                container.innerHTML = '<div class="loading"><p>No filtered bills found</p></div>';
+                return;
+            }
+            
+            container.innerHTML = bills.map(bill => {
+                return `
+                <div class="bill-card" style="border: 2px solid var(--danger); opacity: 0.8;">
+                    <div class="bill-header">
+                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="relevance-score" style="background: var(--danger);">0.0</span>
+                            <span class="feedback-badge" style="background: var(--danger);">Filtered</span>
+                        </div>
+                    </div>
+                    <h3 class="bill-title">${bill.title || 'No title'}</h3>
+                    
+                    ${bill.description ? `
+                        <p class="bill-description">${(bill.description || '').substring(0, 200)}...</p>
+                    ` : ''}
+                    
+                    <div style="background: var(--bg-dark); padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; font-size: 0.875rem;">
+                        <div style="color: var(--text-dim); margin-bottom: 0.5rem;">Why filtered:</div>
+                        <div style="font-style: italic;">
+                            ${getFilterReason(bill)}
+                        </div>
+                    </div>
+                    
+                    <div class="bill-meta">
+                        ${bill.subjects && bill.subjects.length > 0 ? `
+                            <span>Subjects: ${bill.subjects.slice(0, 2).join(', ')}</span>
+                        ` : ''}
+                        <span>Bill ID: ${bill.bill_id}</span>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem;">
+                        <button class="action-btn action-btn-primary" onclick="event.stopPropagation(); restoreBill(${bill.bill_id})" style="padding: 0.5rem;">
+                            ✓ Actually Relevant
+                        </button>
+                        <button class="action-btn action-btn-danger" onclick="event.stopPropagation(); confirmDeleteBill(${bill.bill_id}, '${bill.state} ${bill.bill_number}')" style="padding: 0.5rem;">
+                            ✗ Permanently Delete
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem;">
+                        <button class="action-btn action-btn-secondary" onclick="event.stopPropagation(); showBillDetail(${bill.bill_id})" style="width: 100%; padding: 0.5rem; font-size: 0.875rem;">
+                            View Full Details
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        
+        function getFilterReason(bill) {
+            const title = (bill.title || '').toLowerCase();
+            const desc = (bill.description || '').toLowerCase();
+            const text = `${title} ${desc}`;
+            
+            // Check for exclusion patterns
+            if (/appropriation|budget bill/i.test(title) && !(/platform|transparency/i.test(text))) {
+                return "Appropriations-only bill (no platform regulation)";
+            }
+            if (/literacy|citizenship|education/i.test(title) && !(/platform must|platform shall/i.test(text))) {
+                return "Education/literacy bill (no platform requirements)";
+            }
+            if (/workforce|job training|career/i.test(title)) {
+                return "Workforce development bill (not platform regulation)";
+            }
+            if (/task force to study|commission to study/i.test(title) && !(/shall|penalty|enforcement/i.test(text))) {
+                return "Study-only bill (no enforcement mechanism)";
+            }
+            if (/assistive|medical|agricultural|vehicle|clean/i.test(text)) {
+                return "Wrong type of technology (not digital platforms)";
+            }
+            if (!(/social media|platform|algorithm|privacy|personal data|data broker/i.test(text))) {
+                return "Does not mention platforms, algorithms, or privacy";
+            }
+            return "Does not meet core relevance criteria";
+        }
+        
+        async function restoreBill(billId) {
+            if (!confirm('Mark this bill as relevant? You can set a custom score.')) return;
+            
+            // Open bill detail for manual scoring
+            showBillDetail(billId);
+        }
+        
+        async function confirmDeleteBill(billId, billName) {
+            alert('This is a read-only view. Run the tracker locally to delete bills.');
+        }
+
+        // Feedback Review functions
+        function loadFeedbackReview() {
+            switchView('feedbackReview', true);
+            applyFeedbackFilters();
+        }
+        
+        function toggleFeedbackFilters() {
+            const content = document.getElementById('feedbackFilterContent');
+            const toggleText = document.getElementById('feedbackFilterToggleText');
+            content.classList.toggle('collapsed');
+            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+        }
+        
+        function applyFeedbackFilters() {
+            console.log('applyFeedbackFilters called');
+            console.log('Total bills:', allBills.length);
+            
+            // Get all bills with feedback
+            let filtered = allBills.filter(b => 
+                b.user_score !== null && b.user_score !== undefined
+            );
+            
+            console.log('Bills with feedback:', filtered.length);
+            
+            // Filter by feedback type
+            const selectedTypes = [];
+            if (document.getElementById('feedback-type-boosted')?.checked) selectedTypes.push('boosted');
+            if (document.getElementById('feedback-type-reduced')?.checked) selectedTypes.push('reduced');
+            if (document.getElementById('feedback-type-reviewed')?.checked) selectedTypes.push('reviewed');
+            
+            console.log('Selected types:', selectedTypes);
+            
+            if (selectedTypes.length > 0 && selectedTypes.length < 3) {
+                filtered = filtered.filter(b => {
+                    if (b.user_score > b.relevance_score) return selectedTypes.includes('boosted');
+                    if (b.user_score < b.relevance_score) return selectedTypes.includes('reduced');
+                    return selectedTypes.includes('reviewed');
+                });
+            }
+            
+            console.log('After type filter:', filtered.length);
+            
+            // Sort
+            const sort = document.getElementById('feedbackSortSelect')?.value || 'recent';
+            if (sort === 'recent') {
+                // Would need updated_at from feedback table - use last_updated for now
+                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+            } else if (sort === 'largest-change') {
+                filtered.sort((a, b) => {
+                    const changeA = Math.abs(a.user_score - a.relevance_score);
+                    const changeB = Math.abs(b.user_score - b.relevance_score);
+                    return changeB - changeA;
+                });
+            } else if (sort === 'state') {
+                filtered.sort((a, b) => a.state.localeCompare(b.state));
+            } else if (sort === 'tier') {
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                filtered.sort((a, b) => {
+                    const tierA = a.user_tier || a.relevance || 'none';
+                    const tierB = b.user_tier || b.relevance || 'none';
+                    return (tierOrder[tierA] || 999) - (tierOrder[tierB] || 999);
+                });
+            }
+            
+            // Update counts
+            document.getElementById('feedbackCount').textContent = allBills.filter(b => 
+                b.user_score !== null && b.user_score !== undefined
+            ).length;
+            document.getElementById('feedbackBillCount').textContent = filtered.length;
+            
+            // Render bills with enhanced feedback cards
+            renderFeedbackBills(filtered);
+        }
+        
+        function renderFeedbackBills(bills) {
+            const container = document.getElementById('feedbackBillsGrid');
+            
+            if (bills.length === 0) {
+                container.innerHTML = '<div class="loading"><p>No bills with feedback found</p></div>';
+                return;
+            }
+            
+            container.innerHTML = bills.map(bill => {
+                const displayScore = bill.user_score;
+                const displayTier = bill.user_tier || bill.relevance;
+                const scoreDiff = bill.user_score - bill.relevance_score;
+                
+                let feedbackType = '';
+                let feedbackBadge = '';
+                if (scoreDiff > 0) {
+                    feedbackType = 'boosted';
+                    feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
+                } else if (scoreDiff < 0) {
+                    feedbackType = 'reduced';
+                    feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
+                } else {
+                    feedbackType = 'reviewed';
+                    feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
+                }
+                
+                return `
+                <div class="bill-card ${displayTier}" style="border: 2px solid var(--accent);">
+                    <div class="bill-header">
+                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="relevance-score modified">${displayScore.toFixed(1)}</span>
+                            ${feedbackBadge}
+                        </div>
+                    </div>
+                    <h3 class="bill-title">${bill.title || 'No title'}</h3>
+                    
+                    <div style="background: var(--bg-dark); padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; font-size: 0.875rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <div>
+                                <span style="color: var(--text-dim);">Automated:</span>
+                                <strong>${bill.relevance_score.toFixed(1)}</strong>
+                                <span style="color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem;">${bill.relevance}</span>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-dim);">Your Score:</span>
+                                <strong style="color: var(--accent);">${bill.user_score.toFixed(1)}</strong>
+                                <span style="color: var(--accent); text-transform: uppercase; font-size: 0.75rem;">${displayTier}</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <span style="color: var(--text-dim);">Change:</span>
+                            <strong style="color: ${scoreDiff > 0 ? 'var(--accent)' : 'var(--danger)'};">
+                                ${scoreDiff > 0 ? '+' : ''}${scoreDiff.toFixed(1)}
+                            </strong>
+                        </div>
+                        ${bill.feedback_notes ? `
+                            <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-dim);">Notes:</span>
+                                <div style="margin-top: 0.25rem; font-style: italic;">${bill.feedback_notes}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="bill-meta">
+                        <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                        <span>Bill ID: ${bill.bill_id}</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                        <button class="action-btn action-btn-secondary" onclick="event.stopPropagation(); showBillDetail(${bill.bill_id})" style="flex: 1; padding: 0.5rem;">
+                            Modify Again
+                        </button>
+                        <button class="action-btn action-btn-danger" onclick="event.stopPropagation(); revertFeedback(${bill.bill_id})" style="flex: 1; padding: 0.5rem;">
+                            Revert to Automated
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        
+        async function revertFeedback(billId) {
+            alert('This is a read-only view. Run the tracker locally to revert feedback.');
+        }
+
+        function toggleReviewMenu(event) {
+            event.stopPropagation();
+            const submenu = document.getElementById('reviewSubmenu');
+            const arrow = document.getElementById('reviewArrow');
+            
+            if (submenu.style.display === 'none') {
+                submenu.style.display = 'block';
+                arrow.classList.add('expanded');
+            } else {
+                submenu.style.display = 'none';
+                arrow.classList.remove('expanded');
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('menuOverlay').classList.toggle('open');
+        }
+        
+        function toggleFilterExpand(filterId) {
+            const filterGroup = document.getElementById(filterId);
+            const button = event.target;
+            
+            if (filterGroup.classList.contains('expanded')) {
+                filterGroup.classList.remove('expanded');
+                button.textContent = 'Expand';
+            } else {
+                filterGroup.classList.add('expanded');
+                button.textContent = 'Collapse';
+            }
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        function exportData() {
+            window.location.href = 'data/bills.json';
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+            return Math.floor(seconds / 604800) + 'w ago';
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
