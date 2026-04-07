@@ -408,53 +408,58 @@
         }
 
         .filter-bar {
-            background: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 1rem;
         }
-        
-        .filter-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
+
+        .filter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
         }
-        
+
+        .filter-title {
+            display: none; /* title replaced by toggle button */
+        }
+
         .filter-actions {
             display: flex;
             gap: 0.5rem;
+            align-items: center;
         }
-        
-        .filter-toggle-btn, .clear-filters-btn {
-            background: var(--bg-dark);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            padding: 0.5rem 1rem;
+
+        .filter-toggle-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-secondary);
+            padding: 0.375rem 0.75rem;
             border-radius: 6px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            letter-spacing: 0.02em;
         }
-        
-        .filter-toggle-btn:hover, .clear-filters-btn:hover {
-            background: var(--bg-card-hover);
+
+        .filter-toggle-btn:hover, .filter-toggle-btn.active {
             border-color: var(--accent);
+            color: var(--accent);
         }
-        
+
         .clear-filters-btn {
+            background: none;
+            border: none;
             color: var(--danger);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.375rem 0.5rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
         }
-        
+
         .clear-filters-btn:hover {
-            border-color: var(--danger);
+            opacity: 1;
         }
         
         .filter-content {
@@ -1713,22 +1718,24 @@
                 <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
                 <h2 class="section-title">All Bills (<span id="billCount">0</span>)</h2>
             </div>
-            
+
+            <!-- Filter Controls Row -->
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+                <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()" style="padding:0.5rem 1rem; font-size:0.875rem;">Filters ▾</button>
+                <button class="clear-filters-btn" onclick="clearAllFilters()" style="display:none;" id="clearFiltersBtn">Clear all</button>
+                <span style="font-size:0.875rem; color:var(--text-dim); margin-left:auto;">Showing <strong id="billCountInline" style="color:var(--text-primary);">0</strong> bills</span>
+            </div>
+
             <!-- Active Filters Display -->
-            <div id="activeFiltersContainer" style="display: none;">
+            <div id="activeFiltersContainer" style="display: none; margin-bottom:0.5rem;">
                 <div class="active-filters" id="activeFilters"></div>
             </div>
-            
-            <!-- Filter Bar -->
+
+            <!-- Filter Panel -->
             <div class="filter-bar">
-                <div class="filter-header">
+                <div class="filter-header" style="display:none;">
                     <div class="filter-title">Filters</div>
-                    <div class="filter-actions">
-                        <button class="filter-toggle-btn" onclick="toggleFilters()">
-                            <span id="filterToggleText">Show Filters</span>
-                        </button>
-                        <button class="clear-filters-btn" onclick="clearAllFilters()">Clear All</button>
-                    </div>
+                    <div class="filter-actions"></div>
                 </div>
                 
                 <div class="filter-content collapsed" id="filterContent">
@@ -1861,6 +1868,38 @@
                                     <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
                                     <label for="party-I">Independent (I)</label>
                                     <span class="filter-count" id="count-party-I">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bill Status -->
+                    <div class="filter-section">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Bill Status</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-active" value="active" onchange="applyFilters()">
+                                    <label for="status-active">Active (Introduced / In Progress)</label>
+                                    <span class="filter-count" id="count-status-active">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-passed" value="passed" onchange="applyFilters()">
+                                    <label for="status-passed">Passed / Enacted</label>
+                                    <span class="filter-count" id="count-status-passed">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-failed" value="failed" onchange="applyFilters()">
+                                    <label for="status-failed" style="color:var(--danger);">Failed / Vetoed</label>
+                                    <span class="filter-count" id="count-status-failed">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-unknown" value="unknown" onchange="applyFilters()">
+                                    <label for="status-unknown">Status Unknown</label>
+                                    <span class="filter-count" id="count-status-unknown">0</span>
                                 </div>
                             </div>
                         </div>
@@ -2405,10 +2444,14 @@
                 feedbackBadge = '<span class="feedback-badge" style="background:var(--blue);color:white;">AI</span>';
             }
 
+            const isFailed = getBillStatusGroup(bill) === 'failed';
             return `
-                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})">
+                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})"
+                    style="${isFailed ? 'opacity:0.6; border-left-color: var(--danger);' : ''}">
                     <div class="bill-header">
-                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}
+                            ${isFailed ? '<span style="font-size:0.65rem; font-weight:700; color:var(--danger); margin-left:0.4rem; letter-spacing:0.05em;">FAILED</span>' : ''}
+                        </span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             ${hasUserFeedback
                                 ? `<span class="relevance-score modified">${bill.user_score.toFixed(1)}</span>`
@@ -3583,6 +3626,17 @@
             document.getElementById('count-party-R').textContent = partyR;
             document.getElementById('count-party-I').textContent = partyI;
             
+            // Count bill statuses
+            const statusGroups = { active: 0, passed: 0, failed: 0, unknown: 0 };
+            allBills.forEach(b => {
+                const g = getBillStatusGroup(b);
+                statusGroups[g] = (statusGroups[g] || 0) + 1;
+            });
+            Object.entries(statusGroups).forEach(([k, v]) => {
+                const el = document.getElementById(`count-status-${k}`);
+                if (el) el.textContent = v;
+            });
+
             // Count bill types
             const allBillTypes = new Set();
             allBills.forEach(bill => {
@@ -3607,9 +3661,19 @@
 
         function toggleFilters() {
             const content = document.getElementById('filterContent');
-            const toggleText = document.getElementById('filterToggleText');
+            const btn = document.getElementById('filterToggleBtn');
+            const isCollapsed = content.classList.contains('collapsed');
             content.classList.toggle('collapsed');
-            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+            if (btn) btn.classList.toggle('active', isCollapsed);
+        }
+
+        function updateClearBtn() {
+            const btn = document.getElementById('clearFiltersBtn');
+            if (!btn) return;
+            const hasSearch = document.getElementById('searchInput')?.value;
+            const hasChecked = document.querySelector('#filterContent input:checked');
+            const hasDate = document.getElementById('statusDateFrom')?.value || document.getElementById('statusDateTo')?.value;
+            btn.style.display = (hasSearch || hasChecked || hasDate) ? 'inline-block' : 'none';
         }
         
         function selectAllStates() {
@@ -3623,6 +3687,7 @@
         }
         
         function clearAllFilters() {
+            document.getElementById('clearFiltersBtn') && (document.getElementById('clearFiltersBtn').style.display = 'none');
             // Clear search
             document.getElementById('searchInput').value = '';
             
@@ -3641,6 +3706,15 @@
             applyFilters();
         }
         
+
+        function getBillStatusGroup(bill) {
+            const s = bill.status ? String(bill.status) : null;
+            if (!s) return 'unknown';
+            if (s === '4' || s === '3') return 'passed';   // Passed or Enrolled
+            if (s === '5' || s === '6') return 'failed';   // Vetoed or Failed
+            if (s === '1' || s === '2') return 'active';   // Introduced or Engrossed
+            return 'unknown';
+        }
         function applyFilters() {
             let filtered = [...allBills];
             const activeFilters = [];
@@ -3753,6 +3827,23 @@
                 });
             }
             
+            // Bill status filters
+            const selectedStatuses = [];
+            if (document.getElementById('status-active')?.checked) selectedStatuses.push('active');
+            if (document.getElementById('status-passed')?.checked) selectedStatuses.push('passed');
+            if (document.getElementById('status-failed')?.checked) selectedStatuses.push('failed');
+            if (document.getElementById('status-unknown')?.checked) selectedStatuses.push('unknown');
+            if (selectedStatuses.length > 0 && selectedStatuses.length < 4) {
+                filtered = filtered.filter(b => selectedStatuses.includes(getBillStatusGroup(b)));
+                selectedStatuses.forEach(s => {
+                    const labels = { active: 'Active', passed: 'Passed', failed: 'Failed', unknown: 'Unknown' };
+                    activeFilters.push({ type: 'status', label: `Status: ${labels[s]}`, clear: () => {
+                        document.getElementById(`status-${s}`).checked = false;
+                        applyFilters();
+                    }});
+                });
+            }
+
             // Bill type filters
             const selectedBillTypes = Array.from(document.querySelectorAll('[id^="billtype-"]:checked')).map(cb => cb.value);
             if (selectedBillTypes.length > 0) {
@@ -3871,7 +3962,10 @@
             
             // Update count and render
             document.getElementById('billCount').textContent = filtered.length;
+            const inlineCount = document.getElementById('billCountInline');
+            if (inlineCount) inlineCount.textContent = filtered.length;
             renderBills(filtered);
+            updateClearBtn();
         }
         
         window._filterClearFns = {};
@@ -4366,13 +4460,71 @@
                 notes = 'Marked as irrelevant';
             }
             
-            alert('This is a read-only view. Run the tracker locally to submit feedback.');
-            return;
-            alert('This is a read-only view. Run the tracker locally to submit feedback.');
+            try {
+                const response = await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bill_id: billId,
+                        feedback_type: feedbackType,
+                        user_score: userScore,
+                        user_tier: userTier,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    bill.user_score = userScore;
+                    bill.user_tier = userTier;
+                    bill.feedback_notes = notes;
+                    
+                    // Refresh the detail view
+                    showBillDetail(billId);
+                    
+                    // Show success message
+                    alert('Feedback saved successfully!');
+                } else {
+                    alert('Error saving feedback: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Error saving feedback. Check console for details.');
+            }
         }
         
         async function clearFeedback(billId) {
-            alert('This is a read-only view. Run the tracker locally to clear feedback.');
+            if (!confirm('Clear your feedback for this bill?')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/delete/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    if (bill) {
+                        bill.user_score = null;
+                        bill.user_tier = null;
+                        bill.feedback_notes = null;
+                    }
+                    
+                    // Refresh the detail view
+                    showBillDetail(billId);
+                    
+                    alert('Feedback cleared!');
+                } else {
+                    alert('Error clearing feedback');
+                }
+            } catch (error) {
+                console.error('Clear feedback error:', error);
+                alert('Error clearing feedback. Check console for details.');
+            }
         }
 
         // Filtered Bills Review functions
@@ -4557,13 +4709,37 @@
         }
         
         async function confirmDeleteBill(billId, billName) {
-            alert('This is a read-only view. Run the tracker locally to delete bills.');
-            return;
             const confirmed = confirm(`Permanently delete "${billName}" from the database?\n\nThis action cannot be undone. The bill will be completely removed.`);
             
             if (!confirmed) return;
             
-            alert('This is a read-only view. Run the tracker locally to delete bills.');
+            try {
+                const response = await fetch(`/api/bills/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove from filtered bills cache
+                    if (window.filteredBillsCache) {
+                        const index = window.filteredBillsCache.findIndex(b => b.bill_id === billId);
+                        if (index !== -1) {
+                            window.filteredBillsCache.splice(index, 1);
+                        }
+                    }
+                    
+                    // Refresh the filtered bills view
+                    applyFilteredFilters();
+                    
+                    alert('Bill permanently deleted from database!');
+                } else {
+                    alert('Error deleting bill: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Delete bill error:', error);
+                alert('Error deleting bill. Check console for details.');
+            }
         }
 
         // Feedback Review functions
@@ -4723,7 +4899,35 @@
         }
         
         async function revertFeedback(billId) {
-            alert('This is a read-only view. Run the tracker locally to revert feedback.');
+            if (!confirm('Revert to automated score and tier? This will delete your feedback.')) return;
+            
+            try {
+                const response = await fetch(`/api/feedback/delete/${billId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update bill in allBills
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    if (bill) {
+                        bill.user_score = null;
+                        bill.user_tier = null;
+                        bill.feedback_notes = null;
+                    }
+                    
+                    // Refresh the feedback review view
+                    applyFeedbackFilters();
+                    
+                    alert('Feedback reverted to automated assessment!');
+                } else {
+                    alert('Error reverting feedback');
+                }
+            } catch (error) {
+                console.error('Revert feedback error:', error);
+                alert('Error reverting feedback. Check console for details.');
+            }
         }
 
         function toggleReviewMenu(event) {
@@ -4762,7 +4966,7 @@
         }
 
         function exportData() {
-            window.location.href = 'data/bills.json';
+            window.location.href = '/api/export/json';
         }
 
         function timeAgo(date) {
