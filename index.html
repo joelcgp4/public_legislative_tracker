@@ -458,9 +458,9 @@
         }
         
         .filter-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
             margin-top: 1rem;
         }
         
@@ -479,12 +479,38 @@
             font-size: 0.875rem;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+        
+        .filter-section-title:hover {
+            color: var(--text-primary);
+        }
+
+        .filter-section-title .section-arrow {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+
+        .filter-section-title.expanded .section-arrow {
+            transform: rotate(90deg);
+        }
+
+        .filter-section-body {
+            display: none;
+            padding-top: 0.75rem;
+        }
+
+        .filter-section-body.expanded {
+            display: block;
         }
         
         .filter-group {
@@ -1089,6 +1115,23 @@
             border-radius: 6px;
             background: rgba(16, 185, 129, 0.1);
             border: 2px solid var(--accent);
+            position: relative;
+        }
+
+        .relevance-score::after {
+            content: 'AUTO';
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.48rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            opacity: 0.75;
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-card);
+            padding: 0 2px;
         }
         
         .relevance-score.modified {
@@ -1096,10 +1139,19 @@
             background: rgba(245, 158, 11, 0.1);
         }
 
+        .relevance-score.modified::after {
+            content: 'USER';
+            color: var(--warning);
+        }
+
         .relevance-score.llm-modified {
             border-color: var(--blue);
             background: rgba(59, 130, 246, 0.1);
             box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .relevance-score.llm-modified::after {
+            content: none;
         }
         
         .feedback-badge {
@@ -1473,7 +1525,7 @@
     <div class="menu-overlay" id="menuOverlay">
         <div class="menu-header">
             <h2>Menu</h2>
-            <button class="close-btn" onclick="toggleMenu()">✕</button>
+            <button class="close-btn" onclick="toggleMenu()" style="font-size:0.875rem; font-weight:600; padding:0.25rem 0.75rem; border:1px solid rgba(255,255,255,0.2); border-radius:6px;">Close</button>
         </div>
         <div class="menu-items">
             <div class="menu-item active" onclick="switchView('dashboard')">
@@ -1507,14 +1559,8 @@
                 Analytics
             </div>
             <div class="menu-divider"></div>
-            <div class="menu-item" onclick="refreshData()">
-                Refresh Data
-            </div>
             <div class="menu-item" onclick="exportData()">
                 Export Data
-            </div>
-            <div class="menu-item" onclick="alert('Settings coming soon!')">
-                Settings
             </div>
             <div class="menu-item" onclick="switchView('about')">
                 About
@@ -1548,16 +1594,7 @@
                 <svg id="usMap" viewBox="0 0 960 600"></svg>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="recent-section">
-                <h2 class="section-title">Recent Activity</h2>
-                <div id="recentBills">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Loading recent bills...</p>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <!-- STATES VIEW -->
@@ -1583,7 +1620,7 @@
                 <!-- Filter Bar -->
                 <div class="filter-bar">
                     <div class="filter-header">
-                        <div class="filter-title">🔍 Filters</div>
+                        <div class="filter-title">Filters</div>
                         <div class="filter-actions">
                             <button class="filter-toggle-btn" onclick="toggleStateFilters()">
                                 <span id="stateFilterToggleText">Show Filters</span>
@@ -1685,7 +1722,7 @@
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-header">
-                    <div class="filter-title">🔍 Filters</div>
+                    <div class="filter-title">Filters</div>
                     <div class="filter-actions">
                         <button class="filter-toggle-btn" onclick="toggleFilters()">
                             <span id="filterToggleText">Show Filters</span>
@@ -1695,143 +1732,180 @@
                 </div>
                 
                 <div class="filter-content collapsed" id="filterContent">
-                    <!-- Search -->
+                    <!-- Search (always visible when open) -->
                     <div class="filter-section">
-                        <div class="filter-section-title">Search</div>
-                        <input type="text" class="search-input" id="searchInput" placeholder="Search bills, titles, descriptions..." oninput="applyFilters()">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search bills, titles, descriptions..." oninput="applyFilters()" style="width:100%;">
                     </div>
-                    
+
+                    <!-- Sort (always visible when open) -->
+                    <div class="filter-section">
+                        <select class="filter-select" id="sortSelect" onchange="applyFilters()" style="width: 100%; padding: 0.75rem;">
+                            <option value="introduced">Sort: Last Introduced</option>
+                            <option value="recent">Sort: Most Recent</option>
+                            <option value="relevance">Sort: By Relevance</option>
+                            <option value="state">Sort: By State</option>
+                            <option value="billnumber">Sort: By Bill Number</option>
+                        </select>
+                    </div>
+
+                    <!-- Relevance Tier -->
+                    <div class="filter-section">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Relevance Tier</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-direct" value="direct" onchange="applyFilters()">
+                                    <label for="relevance-direct">DIRECT</label>
+                                    <span class="filter-count" id="count-relevance-direct">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-high" value="high" onchange="applyFilters()">
+                                    <label for="relevance-high">HIGH</label>
+                                    <span class="filter-count" id="count-relevance-high">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-medium" value="medium" onchange="applyFilters()">
+                                    <label for="relevance-medium">MEDIUM</label>
+                                    <span class="filter-count" id="count-relevance-medium">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-low" value="low" onchange="applyFilters()">
+                                    <label for="relevance-low">LOW</label>
+                                    <span class="filter-count" id="count-relevance-low">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-minimal" value="minimal" onchange="applyFilters()">
+                                    <label for="relevance-minimal">MINIMAL</label>
+                                    <span class="filter-count" id="count-relevance-minimal">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- States -->
                     <div class="filter-section">
-                        <div class="filter-section-title">States (<span id="stateFilterCount">0</span> selected)</div>
-                        <div class="state-filter-actions">
-                            <button class="state-action-btn" onclick="selectAllStates()">Select All</button>
-                            <button class="state-action-btn" onclick="clearAllStates()">Clear All</button>
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>States (<span id="stateFilterCount">0</span> selected)</span>
+                            <span class="section-arrow">▶</span>
                         </div>
-                        <div class="state-filter-grid" id="stateFilters"></div>
-                    </div>
-                    
-                    <!-- Relevance -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Relevance Tier</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="relevance-direct" value="direct" onchange="applyFilters()">
-                                <label for="relevance-direct">DIRECT</label>
-                                <span class="filter-count" id="count-relevance-direct">0</span>
+                        <div class="filter-section-body">
+                            <div class="state-filter-actions">
+                                <button class="state-action-btn" onclick="selectAllStates()">Select All</button>
+                                <button class="state-action-btn" onclick="clearAllStates()">Clear All</button>
                             </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="relevance-high" value="high" onchange="applyFilters()">
-                                <label for="relevance-high">HIGH</label>
-                                <span class="filter-count" id="count-relevance-high">0</span>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="relevance-medium" value="medium" onchange="applyFilters()">
-                                <label for="relevance-medium">MEDIUM</label>
-                                <span class="filter-count" id="count-relevance-medium">0</span>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="relevance-low" value="low" onchange="applyFilters()">
-                                <label for="relevance-low">LOW</label>
-                                <span class="filter-count" id="count-relevance-low">0</span>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="relevance-minimal" value="minimal" onchange="applyFilters()">
-                                <label for="relevance-minimal">MINIMAL</label>
-                                <span class="filter-count" id="count-relevance-minimal">0</span>
-                            </div>
+                            <div class="state-filter-grid" id="stateFilters"></div>
                         </div>
                     </div>
-                    
+
                     <!-- AI Review -->
                     <div class="filter-section">
-                        <div class="filter-section-title">AI Review</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
-                                <label for="filter-ai-reviewed">AI Reviewed only</label>
-                                <span class="filter-count" id="count-ai-reviewed">0</span>
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>AI Review</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
+                                    <label for="filter-ai-reviewed">AI Reviewed only</label>
+                                    <span class="filter-count" id="count-ai-reviewed">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Tags -->
                     <div class="filter-section">
-                        <div class="filter-section-title">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
                             <span>Tags</span>
-                            <button class="filter-expand-btn" onclick="toggleFilterExpand('tagFilters')">Expand</button>
+                            <span class="section-arrow">▶</span>
                         </div>
-                        <div class="filter-group" id="tagFilters"></div>
+                        <div class="filter-section-body">
+                            <div class="filter-group expanded" id="tagFilters"></div>
+                        </div>
                     </div>
-                    
+
                     <!-- Subjects -->
                     <div class="filter-section">
-                        <div class="filter-section-title">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
                             <span>Subjects</span>
-                            <button class="filter-expand-btn" onclick="toggleFilterExpand('subjectFilters')">Expand</button>
+                            <span class="section-arrow">▶</span>
                         </div>
-                        <div class="filter-group" id="subjectFilters"></div>
+                        <div class="filter-section-body">
+                            <div class="filter-group expanded" id="subjectFilters"></div>
+                        </div>
                     </div>
-                    
+
                     <!-- Sponsor Party -->
                     <div class="filter-section">
-                        <div class="filter-section-title">Sponsor Party</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="party-D" value="D" onchange="applyFilters()">
-                                <label for="party-D">Democrat (D)</label>
-                                <span class="filter-count" id="count-party-D">0</span>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="party-R" value="R" onchange="applyFilters()">
-                                <label for="party-R">Republican (R)</label>
-                                <span class="filter-count" id="count-party-R">0</span>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
-                                <label for="party-I">Independent (I)</label>
-                                <span class="filter-count" id="count-party-I">0</span>
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Sponsor Party</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="party-D" value="D" onchange="applyFilters()">
+                                    <label for="party-D">Democrat (D)</label>
+                                    <span class="filter-count" id="count-party-D">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="party-R" value="R" onchange="applyFilters()">
+                                    <label for="party-R">Republican (R)</label>
+                                    <span class="filter-count" id="count-party-R">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
+                                    <label for="party-I">Independent (I)</label>
+                                    <span class="filter-count" id="count-party-I">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Bill Type -->
                     <div class="filter-section">
-                        <div class="filter-section-title">Bill Type</div>
-                        <div class="filter-group" id="billTypeFilters"></div>
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Bill Type</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group expanded" id="billTypeFilters"></div>
+                        </div>
                     </div>
-                    
+
                     <!-- Date Ranges -->
                     <div class="filter-section">
-                        <div class="filter-section-title">Status Date Range</div>
-                        <div class="filter-group">
-                            <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
-                            <input type="date" class="date-input" id="statusDateFrom" onchange="applyFilters()">
-                            <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
-                            <input type="date" class="date-input" id="statusDateTo" onchange="applyFilters()">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Status Date Range</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
+                                <input type="date" class="date-input" id="statusDateFrom" onchange="applyFilters()">
+                                <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
+                                <input type="date" class="date-input" id="statusDateTo" onchange="applyFilters()">
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="filter-section">
-                        <div class="filter-section-title">Last Updated Range</div>
-                        <div class="filter-group">
-                            <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
-                            <input type="date" class="date-input" id="lastUpdatedFrom" onchange="applyFilters()">
-                            <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
-                            <input type="date" class="date-input" id="lastUpdatedTo" onchange="applyFilters()">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Last Updated Range</span>
+                            <span class="section-arrow">▶</span>
                         </div>
-                    </div>
-                    
-                    <!-- Sort -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Sort By</div>
-                        <select class="filter-select" id="sortSelect" onchange="applyFilters()" style="width: 100%; padding: 0.75rem;">
-                            <option value="introduced">Last Introduced</option>
-                            <option value="recent">Most Recent</option>
-                            <option value="relevance">By Relevance</option>
-                            <option value="state">By State</option>
-                            <option value="billnumber">By Bill Number</option>
-                        </select>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
+                                <input type="date" class="date-input" id="lastUpdatedFrom" onchange="applyFilters()">
+                                <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
+                                <input type="date" class="date-input" id="lastUpdatedTo" onchange="applyFilters()">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1883,7 +1957,7 @@
                                 </div>
                                 
                                 <button class="flip-card-btn" onclick="flipReviewCard()">
-                                    📄 Show Full Details
+                                    Show Full Details
                                 </button>
                             </div>
                             
@@ -1923,19 +1997,19 @@
                     <!-- Action Buttons (Bottom) -->
                     <div class="review-actions">
                         <button class="review-btn review-btn-irrelevant" onclick="reviewBill('irrelevant')" title="Score: 0-3">
-                            <div class="btn-icon">✗</div>
+                            
                             <div class="btn-label">Irrelevant</div>
                             <div class="btn-hint">← or A</div>
                         </button>
                         
                         <button class="review-btn review-btn-maybe" onclick="reviewBill('maybe')" title="Score: 4-8">
-                            <div class="btn-icon">?</div>
+                            
                             <div class="btn-label">Maybe</div>
                             <div class="btn-hint">↓ or S</div>
                         </button>
                         
                         <button class="review-btn review-btn-relevant" onclick="reviewBill('relevant')" title="Score: 9-10">
-                            <div class="btn-icon">✓</div>
+                            
                             <div class="btn-label">Relevant</div>
                             <div class="btn-hint">→ or D</div>
                         </button>
@@ -1956,7 +2030,7 @@
                 
                 <!-- Completion Screen -->
                 <div class="review-complete" id="reviewComplete" style="display: none;">
-                    <div class="complete-icon">🎉</div>
+                    <div class="complete-icon"></div>
                     <h2>Review Session Complete!</h2>
                     <div class="complete-stats">
                         <div class="stat-item">
@@ -1994,7 +2068,7 @@
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-header">
-                    <div class="filter-title">🔍 Filter Feedback</div>
+                    <div class="filter-title">Filter Feedback</div>
                     <div class="filter-actions">
                         <button class="filter-toggle-btn" onclick="toggleFeedbackFilters()">
                             <span id="feedbackFilterToggleText">Show Filters</span>
@@ -2050,7 +2124,7 @@
             </div>
             
             <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--danger);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">⚠️ These bills were filtered out (score = 0)</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">These bills were filtered out (score = 0)</div>
                 <div style="font-size: 0.875rem; color: var(--text-dim);">
                     Review these bills to confirm they should be excluded. Bills you mark as "Irrelevant" will be permanently deleted from the database.
                 </div>
@@ -2059,7 +2133,7 @@
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-header">
-                    <div class="filter-title">🔍 Filter</div>
+                    <div class="filter-title">Filter</div>
                     <div class="filter-actions">
                         <button class="filter-toggle-btn" onclick="toggleFilteredFilters()">
                             <span id="filteredFilterToggleText">Show Filters</span>
@@ -2196,52 +2270,60 @@
                 <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
                 <h2 class="section-title">Analytics</h2>
             </div>
-            <!-- Tier 1: Research-critical -->
-            <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">Feed Impact</div>
+            <!-- Row 1: Mechanism + CCT -->
+            <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">Feed Impact (AI Reviewed Bills)</div>
             <div class="charts-grid" style="margin-bottom: 2rem;">
                 <div class="chart-card">
-                    <h3 class="chart-title">Mechanism Distribution</h3>
+                    <h3 class="chart-title">Mechanism</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">How the bill achieves its effect</p>
                     <div id="chartMechanism"></div>
                 </div>
                 <div class="chart-card">
                     <h3 class="chart-title">Content Control Type</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;"><span style="color:var(--accent);">&#9646;</span> Feed-direct &nbsp; <span style="color:var(--blue);">&#9646;</span> Feed-adjacent</p>
                     <div id="chartCCT"></div>
                 </div>
             </div>
+            <!-- Row 2: Scope (donut) + Tier (stacked) -->
             <div class="charts-grid" style="margin-bottom: 2rem;">
                 <div class="chart-card">
-                    <h3 class="chart-title">Scope Breakdown</h3>
-                    <div id="chartScope" style="display:flex; justify-content:center;"></div>
+                    <h3 class="chart-title">Scope</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">What type of platform the bill covers</p>
+                    <div id="chartScope"></div>
                 </div>
                 <div class="chart-card">
                     <h3 class="chart-title">Tier Distribution</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">All bills by effective tier</p>
                     <div id="chartTier"></div>
                 </div>
             </div>
-            <!-- Tier 2: Geographic/contextual -->
+            <!-- Row 3: Geographic -->
             <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">Geographic</div>
             <div class="charts-grid" style="margin-bottom: 2rem;">
                 <div class="chart-card" style="grid-column: 1 / -1;">
-                    <h3 class="chart-title">Bills by State (Direct + High + Medium)</h3>
+                    <h3 class="chart-title">Bills by State</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">Direct + High + Medium tier bills only</p>
                     <div id="chartByState"></div>
                 </div>
             </div>
             <div class="charts-grid" style="margin-bottom: 2rem;">
                 <div class="chart-card" style="grid-column: 1 / -1;">
                     <h3 class="chart-title">Legislative Activity Over Time</h3>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">Direct + High + Medium bills by quarter</p>
                     <div id="chartOverTime"></div>
                 </div>
             </div>
-            <!-- Tier 3: LLM diagnostic (conditional) -->
+            <!-- LLM diagnostic (conditional) -->
             <div id="llmAnalyticsSection" style="display:none;">
-                <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">LLM Review</div>
+                <div style="margin-bottom: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 600;">AI vs Automated Scoring</div>
                 <div class="charts-grid" style="margin-bottom: 2rem;">
                     <div class="chart-card">
-                        <h3 class="chart-title">LLM vs Automated Tier</h3>
+                        <h3 class="chart-title">Tier Reclassification</h3>
+                        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.75rem;">Where AI tier differs from automated tier</p>
                         <div id="chartTierComparison"></div>
                     </div>
                     <div class="chart-card">
-                        <h3 class="chart-title">LLM Mechanism Distribution</h3>
+                        <h3 class="chart-title">AI Mechanism Distribution</h3>
                         <div id="chartLLMMechanism"></div>
                     </div>
                 </div>
@@ -2328,7 +2410,12 @@
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="relevance-score ${scoreClass}">${displayScore.toFixed(1)}</span>
+                            ${hasUserFeedback
+                                ? `<span class="relevance-score modified">${bill.user_score.toFixed(1)}</span>`
+                                : hasLLM
+                                    ? ''
+                                    : `<span class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</span>`
+                            }
                             ${feedbackBadge}
                         </div>
                     </div>
@@ -2384,7 +2471,7 @@
             ];
             
             tagContainer.innerHTML = allTags.map(tag => {
-                const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
                 const count = stateBills.filter(b => b.tags && b.tags.includes(tag)).length;
                 return `
                     <div class="filter-checkbox">
@@ -2482,7 +2569,7 @@
                     b.tags && selectedTags.some(tag => b.tags.includes(tag))
                 );
                 selectedTags.forEach(tag => {
-                    const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
                     activeFilters.push({ type: 'tag', label: displayName, clear: () => {
                         document.getElementById(`state-tag-${tag}`).checked = false;
                         applyStateFilters();
@@ -2553,13 +2640,16 @@
                 return;
             }
             
+            window._stateFilterClearFns = {};
             container.style.display = 'block';
-            filtersDiv.innerHTML = filters.map(f => `
+            filtersDiv.innerHTML = filters.map((f, i) => {
+                window._stateFilterClearFns[i] = f.clear;
+                return `
                 <div class="filter-chip">
                     <span>${f.label}</span>
-                    <button onclick="event.stopPropagation(); (${f.clear.toString()})()">×</button>
-                </div>
-            `).join('');
+                    <span class="filter-chip-remove" onclick="event.stopPropagation(); window._stateFilterClearFns[${i}]()">×</span>
+                </div>`;
+            }).join('');
         }
         
         function clearStateFilters() {
@@ -2685,8 +2775,8 @@
             const counts = {};
             mechanisms.forEach(m => counts[m] = 0);
             bills.forEach(b => {
-                const mechs = Array.isArray(b.mechanism) ? b.mechanism
-                    : (b.mechanism ? b.mechanism.split(',').map(s => s.trim()) : []);
+                const mechs = Array.isArray(b.llm_mechanism) ? b.llm_mechanism
+                    : (b.llm_mechanism ? JSON.parse(b.llm_mechanism) : []);
                 mechs.forEach(m => { if (counts[m] !== undefined) counts[m]++; });
             });
             const data = mechanisms.map(m => ({ label: m, value: counts[m] }))
@@ -2704,8 +2794,8 @@
             const counts = {};
             types.forEach(t => counts[t] = 0);
             bills.forEach(b => {
-                const ccts = Array.isArray(b.content_control_type) ? b.content_control_type
-                    : (b.content_control_type ? b.content_control_type.split(',').map(s => s.trim()) : []);
+                const ccts = Array.isArray(b.llm_content_control_type) ? b.llm_content_control_type
+                    : (b.llm_content_control_type ? JSON.parse(b.llm_content_control_type) : []);
                 ccts.forEach(t => { if (counts[t] !== undefined) counts[t]++; });
             });
             const feedRelevant = new Set(['Ranking/Recommendation control', 'User controls', 'Default settings', 'Opt-out', 'Opt-in']);
@@ -2723,7 +2813,7 @@
             const counts = {};
             scopes.forEach(s => counts[s] = 0);
             bills.forEach(b => {
-                const sc = b.scope;
+                const sc = b.llm_scope;
                 if (sc && counts[sc] !== undefined) counts[sc]++;
             });
             const data = scopes.map(s => ({ label: s, value: counts[s] })).filter(d => d.value > 0);
@@ -2733,15 +2823,24 @@
             }
             const colors = ['var(--accent)', 'var(--blue)', 'var(--warning)'];
             const total = d3.sum(data, d => d.value);
-            const size = 180;
-            const radius = size / 2;
+            const donutSize = 160;
+            const radius = donutSize / 2;
+            const legendH = data.length * 26;
+            const totalH = donutSize + legendH + 20;
+            const width = Math.max(donutSize + 40, 300);
+
             container.innerHTML = '';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+
             const svg = d3.select(container).append('svg')
-                .attr('width', size + 180)
-                .attr('height', size);
+                .attr('width', width)
+                .attr('height', totalH);
+
             const arc = d3.arc().innerRadius(radius * 0.55).outerRadius(radius);
             const pie = d3.pie().value(d => d.value).sort(null);
-            const g = svg.append('g').attr('transform', `translate(${radius},${radius})`);
+            const g = svg.append('g').attr('transform', `translate(${width/2},${radius})`);
             g.selectAll('path')
                 .data(pie(data))
                 .enter().append('path')
@@ -2749,16 +2848,16 @@
                 .attr('fill', (d, i) => colors[i])
                 .attr('stroke', 'var(--bg-dark)')
                 .attr('stroke-width', 2);
-            // Legend
-            const legend = svg.append('g').attr('transform', `translate(${size + 10}, 20)`);
+
+            // Legend below donut
+            const legend = svg.append('g').attr('transform', `translate(${width/2 - 90},${donutSize + 16})`);
             data.forEach((d, i) => {
-                const lg = legend.append('g').attr('transform', `translate(0,${i * 28})`);
-                lg.append('rect').attr('width', 12).attr('height', 12).attr('rx', 2)
-                    .attr('fill', colors[i]);
+                const lg = legend.append('g').attr('transform', `translate(0,${i * 26})`);
+                lg.append('rect').attr('width', 12).attr('height', 12).attr('rx', 2).attr('fill', colors[i]);
                 lg.append('text').attr('x', 18).attr('y', 11)
                     .attr('fill', 'var(--text-secondary)').attr('font-size', '12px')
                     .attr('font-family', 'IBM Plex Sans, sans-serif')
-                    .text(`${d.label} (${Math.round(d.value / total * 100)}%)`);
+                    .text(`${d.label} — ${Math.round(d.value / total * 100)}% (${d.value})`);
             });
         }
 
@@ -2768,15 +2867,65 @@
                 direct: 'var(--tier-direct)', high: 'var(--tier-high)',
                 medium: 'var(--tier-medium)', low: 'var(--tier-low)', minimal: 'var(--tier-minimal)'
             };
-            const counts = {};
-            tiers.forEach(t => counts[t] = 0);
+            const reviewed = {}, autoOnly = {};
+            tiers.forEach(t => { reviewed[t] = 0; autoOnly[t] = 0; });
             bills.forEach(b => {
                 const t = b.user_tier || b.llm_tier || b.relevance;
-                if (counts[t] !== undefined) counts[t]++;
+                if (reviewed[t] === undefined) return;
+                if (b.llm_tier || b.user_tier) reviewed[t]++;
+                else autoOnly[t]++;
             });
-            const data = tiers.map(t => ({ label: t.toUpperCase(), value: counts[t] }))
-                .filter(d => d.value > 0);
-            analyticsBarChart('chartTier', data, d => colors[d.label.toLowerCase()]);
+
+            const container = document.getElementById('chartTier');
+            if (!container) return;
+            const data = tiers.filter(t => (reviewed[t] + autoOnly[t]) > 0);
+            if (!data.length) { container.innerHTML = '<p style="color:var(--text-dim)">No data</p>'; return; }
+
+            const barH = 28, gap = 6, labelW = 80, countW = 45;
+            const width = container.clientWidth || 380;
+            const barMax = width - labelW - countW - 8;
+            const maxVal = Math.max(...data.map(t => reviewed[t] + autoOnly[t]));
+            const height = data.length * (barH + gap);
+
+            container.innerHTML = '';
+            const svg = d3.select(container).append('svg')
+                .attr('width', '100%').attr('viewBox', `0 0 ${width} ${height + 30}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            // Legend
+            const leg = svg.append('g').attr('transform', `translate(${labelW}, ${height + 8})`);
+            leg.append('rect').attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', 'rgba(255,255,255,0.6)');
+            leg.append('text').attr('x', 14).attr('y', 9).attr('fill', 'var(--text-dim)').attr('font-size', '10px').text('AI/User reviewed');
+            leg.append('rect').attr('x', 130).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', 'rgba(255,255,255,0.2)');
+            leg.append('text').attr('x', 144).attr('y', 9).attr('fill', 'var(--text-dim)').attr('font-size', '10px').text('Auto only');
+
+            data.forEach((tier, i) => {
+                const total = reviewed[tier] + autoOnly[tier];
+                const reviewedW = Math.max(0, (reviewed[tier] / maxVal) * barMax);
+                const autoW = Math.max(0, (autoOnly[tier] / maxVal) * barMax);
+                const y = i * (barH + gap);
+                const color = colors[tier];
+
+                svg.append('text').attr('x', 0).attr('y', y + barH/2 + 5)
+                    .attr('fill', color).attr('font-size', '11px').attr('font-weight', '700')
+                    .attr('font-family', 'IBM Plex Sans, sans-serif').text(tier.toUpperCase());
+
+                // Auto-only bar (dim)
+                svg.append('rect').attr('x', labelW).attr('y', y + 2)
+                    .attr('width', autoW + reviewedW).attr('height', barH - 4).attr('rx', 4)
+                    .attr('fill', color).attr('opacity', 0.25);
+
+                // Reviewed bar (bright)
+                if (reviewedW > 0) {
+                    svg.append('rect').attr('x', labelW).attr('y', y + 2)
+                        .attr('width', reviewedW).attr('height', barH - 4).attr('rx', 4)
+                        .attr('fill', color).attr('opacity', 0.9);
+                }
+
+                svg.append('text').attr('x', labelW + autoW + reviewedW + 6).attr('y', y + barH/2 + 5)
+                    .attr('fill', 'var(--text-dim)').attr('font-size', '11px')
+                    .attr('font-family', 'IBM Plex Mono, monospace').text(total);
+            });
         }
 
         function renderByStateChart(bills) {
@@ -2931,7 +3080,7 @@
             // Toggle if already loaded
             if (container.style.display === 'block') {
                 container.style.display = 'none';
-                btn.textContent = '📄 Read Full Bill Text';
+                btn.textContent = 'Read Full Bill Text';
                 return;
             }
 
@@ -2950,7 +3099,7 @@
                 if (!resp.ok) {
                     textEl.textContent = 'Full text not available for this bill.';
                     container.style.display = 'block';
-                    btn.textContent = '📄 Hide';
+                    btn.textContent = 'Hide';
                     btn.disabled = false;
                     return;
                 }
@@ -2966,16 +3115,16 @@
                 if (text && text.trim()) {
                     textEl.textContent = text;
                     container.style.display = 'block';
-                    btn.textContent = '📄 Hide Full Text';
+                    btn.textContent = 'Hide Full Text';
                 } else {
                     textEl.textContent = 'Full text not available for this bill.';
                     container.style.display = 'block';
-                    btn.textContent = '📄 Hide';
+                    btn.textContent = 'Hide';
                 }
             } catch (e) {
                 textEl.textContent = 'Error loading bill text.';
                 container.style.display = 'block';
-                btn.textContent = '📄 Hide';
+                btn.textContent = 'Hide';
             }
 
             btn.disabled = false;
@@ -2995,7 +3144,6 @@
                 
                 updateDashboard(stats);
                 drawMap();
-                showRecentBills();
                 populateStateGrid();
                 initializeFilters();
                 
@@ -3010,11 +3158,16 @@
         function updateDashboard(stats) {
             document.getElementById('totalBills').textContent = stats.total || 0;
             
-            // Top Priority = DIRECT + HIGH tiers
-            const topPriority = (stats.by_relevance?.direct || 0) + (stats.by_relevance?.high || 0);
+            // Top Priority = DIRECT + HIGH using effective tier (user > llm > auto)
+            // LLM tier is authoritative when present — auto tier is ignored if LLM reviewed
+            const topPriority = allBills.filter(b => {
+                if (b.user_tier) return b.user_tier === 'direct' || b.user_tier === 'high';
+                if (b.llm_tier) return b.llm_tier === 'direct' || b.llm_tier === 'high';
+                return b.relevance === 'direct' || b.relevance === 'high';
+            }).length;
             document.getElementById('topPriority').textContent = topPriority;
             
-            document.getElementById('statesCovered').textContent = Object.keys(stats.by_state || {}).length;
+            document.getElementById('statesCovered').textContent = new Set(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) !== 'none').map(b => b.state)).size;
             
             // Display last complete search info
             const lastSearchEl = document.getElementById('lastSearchInfo');
@@ -3317,7 +3470,7 @@
             ];
             
             tagContainer.innerHTML = allTags.map(tag => {
-                const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
                 return `
                     <div class="filter-checkbox">
                         <input type="checkbox" id="tag-${tag}" value="${tag}" onchange="applyFilters()">
@@ -3447,6 +3600,13 @@
             });
         }
         
+        function toggleFilterSection(titleEl) {
+            const body = titleEl.nextElementSibling;
+            const isExpanded = body.classList.contains('expanded');
+            body.classList.toggle('expanded', !isExpanded);
+            titleEl.classList.toggle('expanded', !isExpanded);
+        }
+
         function toggleFilters() {
             const content = document.getElementById('filterContent');
             const toggleText = document.getElementById('filterToggleText');
@@ -3537,7 +3697,11 @@
             if (document.getElementById('relevance-minimal').checked) selectedRelevance.push('minimal');
             
             if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
-                filtered = filtered.filter(b => selectedRelevance.includes(b.relevance));
+                filtered = filtered.filter(b => {
+                    if (b.user_tier) return selectedRelevance.includes(b.user_tier);
+                    if (b.llm_tier) return selectedRelevance.includes(b.llm_tier);
+                    return selectedRelevance.includes(b.relevance);
+                });
                 selectedRelevance.forEach(tier => {
                     activeFilters.push({ type: 'relevance', label: `${tier.toUpperCase()}`, clear: () => {
                         document.getElementById(`relevance-${tier}`).checked = false;
@@ -3553,7 +3717,7 @@
                     b.tags && selectedTags.some(tag => b.tags.includes(tag))
                 );
                 selectedTags.forEach(tag => {
-                    const displayName = tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
                     activeFilters.push({ type: 'tag', label: displayName, clear: () => {
                         document.getElementById(`tag-${tag}`).checked = false;
                         applyFilters();
@@ -3712,6 +3876,7 @@
             renderBills(filtered);
         }
         
+        window._filterClearFns = {};
         function renderActiveFilters(filters) {
             const container = document.getElementById('activeFiltersContainer');
             const filtersDiv = document.getElementById('activeFilters');
@@ -3720,14 +3885,17 @@
                 container.style.display = 'none';
                 return;
             }
-            
+
+            window._filterClearFns = {};
             container.style.display = 'block';
-            filtersDiv.innerHTML = filters.map(f => `
+            filtersDiv.innerHTML = filters.map((f, i) => {
+                window._filterClearFns[i] = f.clear;
+                return `
                 <div class="filter-chip">
                     ${f.label}
-                    <span class="filter-chip-remove" onclick='${f.clear.toString().match(/\{([\s\S]*)\}/)[1]}'>×</span>
-                </div>
-            `).join('');
+                    <span class="filter-chip-remove" onclick="window._filterClearFns[${i}]()">×</span>
+                </div>`;
+            }).join('');
         }
 
         function renderBills(bills) {
@@ -3793,7 +3961,12 @@
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="relevance-score ${scoreClass}">${displayScore.toFixed(1)}</span>
+                            ${hasUserFeedback
+                                ? `<span class="relevance-score modified">${bill.user_score.toFixed(1)}</span>`
+                                : hasLLM2
+                                    ? ''
+                                    : `<span class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</span>`
+                            }
                             ${feedbackBadge}
                         </div>
                     </div>
@@ -3831,6 +4004,7 @@
             } else if (view === 'allBills') {
                 document.getElementById('allBillsView').classList.add('active');
                 document.querySelectorAll('.menu-item')[2].classList.add('active');
+                if (!skipMenuClose) clearAllFilters(); // clear filters when navigating from menu
                 applyFilters();
             } else if (view === 'quickReview') {
                 document.getElementById('quickReviewView').classList.add('active');
@@ -3862,18 +4036,16 @@
         }
         
         function switchToTopPriority() {
-            // Clear all filters first
             clearAllFilters();
-            
-            // Switch to all bills view
+
             document.getElementById('allBillsView').classList.add('active');
             document.querySelectorAll('.view').forEach(v => {
                 if (v.id !== 'allBillsView') v.classList.remove('active');
             });
-            
-            // Set filters to DIRECT and HIGH tiers
+
             document.getElementById('relevance-direct').checked = true;
             document.getElementById('relevance-high').checked = true;
+            document.getElementById('sortSelect').value = 'relevance';
             applyFilters();
         }
         
@@ -3989,11 +4161,12 @@
                     </div>
                 ` : ''}
 
+                ${bill.has_bill_text ? `
                 <div class="bill-detail-section">
                     <button class="action-btn action-btn-secondary" id="readTextBtn_${bill.bill_id}"
                         onclick="loadBillText(${bill.bill_id})"
                         style="font-size:0.875rem; padding:0.5rem 1rem;">
-                        📄 Read Full Bill Text
+                        Read Full Bill Text
                     </button>
                     <div id="billTextContainer_${bill.bill_id}" style="display:none; margin-top:1rem;">
                         <div id="billTextContent_${bill.bill_id}"
@@ -4005,6 +4178,7 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
                 
                 ${bill.last_action ? `
                     <div class="bill-detail-section">
@@ -4030,7 +4204,7 @@
                         <h2 class="bill-detail-section-title">Tags</h2>
                         <div class="bill-tags">
                             ${bill.tags.map(t => {
-                                const displayName = t.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                const displayName = (({'ai-policy': 'AI Policy'})[t] || t.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
                                 return `<span class="tag">${displayName}</span>`;
                             }).join('')}
                         </div>
@@ -4070,8 +4244,10 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                         <div>
-                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Automated Score</label>
-                            <div class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</div>
+                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Automated Score
+                                ${bill.llm_tier && !bill.user_tier ? '<span style="font-size:0.7rem; color:var(--blue); margin-left:0.25rem;">(overridden by AI)</span>' : ''}
+                            </label>
+                            <div class="relevance-score" style="${bill.llm_tier && !bill.user_tier ? 'opacity:0.5;' : ''}">${(bill.relevance_score || 0).toFixed(1)}</div>
                         </div>
                         <div>
                             <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Your Score Override</label>
@@ -4389,10 +4565,10 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem;">
                         <button class="action-btn action-btn-primary" onclick="event.stopPropagation(); restoreBill(${bill.bill_id})" style="padding: 0.5rem;">
-                            ✓ Actually Relevant
+                            Mark as Relevant
                         </button>
                         <button class="action-btn action-btn-danger" onclick="event.stopPropagation(); confirmDeleteBill(${bill.bill_id}, '${bill.state} ${bill.bill_number}')" style="padding: 0.5rem;">
-                            ✗ Permanently Delete
+                            Permanently Delete
                         </button>
                     </div>
                     
