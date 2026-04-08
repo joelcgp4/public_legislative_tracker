@@ -751,45 +751,45 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 1.5rem 2rem;
+            gap: 0.4rem;
+            padding: 0.9rem 1rem;
             border: 2px solid;
-            border-radius: 12px;
+            border-radius: 10px;
             background: var(--bg-card);
             cursor: pointer;
             transition: all 0.2s;
-            min-width: 140px;
+            min-width: 90px;
+            flex: 1;
         }
-        
-        .review-btn-irrelevant {
-            border-color: var(--danger);
-            color: var(--danger);
+        .review-btn-minimal {
+            border-color: var(--tier-minimal);
+            color: var(--tier-minimal);
         }
-        
-        .review-btn-irrelevant:hover {
-            background: rgba(239, 68, 68, 0.1);
-            transform: translateY(-4px);
+        .review-btn-minimal:hover { background: rgba(156,163,175,0.12); transform: translateY(-3px); }
+        .review-btn-low {
+            border-color: var(--tier-low);
+            color: var(--tier-low);
         }
-        
-        .review-btn-maybe {
-            border-color: #F59E0B;
-            color: #F59E0B;
+        .review-btn-low:hover { background: rgba(16,185,129,0.1); transform: translateY(-3px); }
+        .review-btn-medium {
+            border-color: var(--tier-medium);
+            color: var(--tier-medium);
         }
-        
-        .review-btn-maybe:hover {
-            background: rgba(245, 158, 11, 0.1);
-            transform: translateY(-4px);
+        .review-btn-medium:hover { background: rgba(245,158,11,0.1); transform: translateY(-3px); }
+        .review-btn-high {
+            border-color: var(--tier-high);
+            color: var(--tier-high);
         }
-        
-        .review-btn-relevant {
-            border-color: var(--accent);
-            color: var(--accent);
+        .review-btn-high:hover { background: rgba(249,115,22,0.1); transform: translateY(-3px); }
+        .review-btn-direct {
+            border-color: var(--tier-direct);
+            color: var(--tier-direct);
         }
-        
-        .review-btn-relevant:hover {
-            background: rgba(16, 185, 129, 0.1);
-            transform: translateY(-4px);
-        }
+        .review-btn-direct:hover { background: rgba(239,68,68,0.1); transform: translateY(-3px); }
+        /* Keep old names as aliases for any remaining references */
+        .review-btn-irrelevant { border-color: var(--tier-minimal); color: var(--tier-minimal); }
+        .review-btn-maybe { border-color: var(--tier-medium); color: var(--tier-medium); }
+        .review-btn-relevant { border-color: var(--tier-high); color: var(--tier-high); }
         
         .btn-icon {
             font-size: 2rem;
@@ -1550,7 +1550,13 @@
             </div>
             <div class="menu-submenu" id="reviewSubmenu" style="display: none;">
                 <div class="menu-item menu-sub" onclick="switchView('quickReview')">
-                    Quick Review (Game)
+                    Quick Review <span id="quickReviewCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
+                </div>
+                <div class="menu-item menu-sub" onclick="startFlaggedReview()">
+                    Review Flagged <span id="flaggedCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
+                </div>
+                <div class="menu-item menu-sub" onclick="switchView('starredBills')">
+                    Starred Bills <span id="starredCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
                 </div>
                 <div class="menu-item menu-sub" onclick="switchView('feedbackReview')">
                     Your Feedback
@@ -2028,42 +2034,52 @@
                                         <div class="review-section-title">All Subjects</div>
                                         <div id="reviewAllSubjects"></div>
                                     </div>
+                                    <div class="review-section" style="margin-top:1rem;">
+                                        <a id="reviewLegiScanLink" href="#" target="_blank"
+                                            style="color:var(--blue); font-size:0.875rem; font-weight:600;">
+                                            View on LegiScan →
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Secondary controls -->
+                    <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:0.75rem;">
+                        <button onclick="reviewBack()" style="background:none; border:1px solid rgba(255,255,255,0.15); color:var(--text-dim); padding:0.4rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.8rem;">← Back</button>
+                        <button onclick="reviewSkip()" style="background:none; border:1px solid rgba(255,255,255,0.15); color:var(--text-dim); padding:0.4rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.8rem;">Skip</button>
+                        <button id="reviewStarBtn" onclick="reviewToggleStar()" style="background:none; border:1px solid rgba(255,255,255,0.15); color:var(--text-dim); padding:0.4rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.8rem;">Star</button>
+                        <button id="reviewFlagBtn" onclick="reviewToggleFlag()" style="background:none; border:1px solid rgba(255,255,255,0.15); color:var(--text-dim); padding:0.4rem 0.9rem; border-radius:6px; cursor:pointer; font-size:0.8rem;">Flag</button>
+                    </div>
+
                     <!-- Action Buttons (Bottom) -->
-                    <div class="review-actions">
-                        <button class="review-btn review-btn-irrelevant" onclick="reviewBill('irrelevant')" title="Score: 0-3">
-                            
-                            <div class="btn-label">Irrelevant</div>
-                            <div class="btn-hint">← or A</div>
+                    <div class="review-actions" style="gap:0.5rem;">
+                        <button class="review-btn review-btn-minimal" onclick="reviewBill('minimal')" title="Minimal — mentions relevant terms but no feed mechanism">
+                            <div class="btn-label">MINIMAL</div>
+                            <div class="btn-hint">1</div>
                         </button>
-                        
-                        <button class="review-btn review-btn-maybe" onclick="reviewBill('maybe')" title="Score: 4-8">
-                            
-                            <div class="btn-label">Maybe</div>
-                            <div class="btn-hint">↓ or S</div>
+                        <button class="review-btn review-btn-low" onclick="reviewBill('low')" title="Low — indirect or marginal feed impact">
+                            <div class="btn-label">LOW</div>
+                            <div class="btn-hint">2</div>
                         </button>
-                        
-                        <button class="review-btn review-btn-relevant" onclick="reviewBill('relevant')" title="Score: 9-10">
-                            
-                            <div class="btn-label">Relevant</div>
-                            <div class="btn-hint">→ or D</div>
+                        <button class="review-btn review-btn-medium" onclick="reviewBill('medium')" title="Medium — real feed impact through indirect mechanisms">
+                            <div class="btn-label">MEDIUM</div>
+                            <div class="btn-hint">3</div>
+                        </button>
+                        <button class="review-btn review-btn-high" onclick="reviewBill('high')" title="High — substantially constrains feed curation">
+                            <div class="btn-label">HIGH</div>
+                            <div class="btn-hint">4</div>
+                        </button>
+                        <button class="review-btn review-btn-direct" onclick="reviewBill('direct')" title="Direct — primary purpose is user feed control">
+                            <div class="btn-label">DIRECT</div>
+                            <div class="btn-hint">5</div>
                         </button>
                     </div>
-                    
+
                     <!-- Keyboard Shortcuts Help -->
                     <div class="review-shortcuts">
-                        <div style="font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Keyboard Shortcuts:</div>
-                        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; font-size: 0.875rem;">
-                            <span><kbd>←</kbd> or <kbd>A</kbd> = Irrelevant</span>
-                            <span><kbd>↓</kbd> or <kbd>S</kbd> = Maybe</span>
-                            <span><kbd>→</kbd> or <kbd>D</kbd> = Relevant</span>
-                            <span><kbd>Space</kbd> = Flip Card</span>
-                            <span><kbd>Esc</kbd> = Exit</span>
-                        </div>
+                        <div style="font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Keyboard Shortcuts: &nbsp; <kbd>1</kbd>–<kbd>5</kbd> to assign tier &nbsp; <kbd>Space</kbd> flip card &nbsp; <kbd>Esc</kbd> exit</div>
                     </div>
                 </div>
                 
@@ -2074,15 +2090,15 @@
                     <div class="complete-stats">
                         <div class="stat-item">
                             <div class="stat-value" id="completeRelevant">0</div>
-                            <div class="stat-label">Relevant</div>
+                            <div class="stat-label">Direct / High</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="completeMaybe">0</div>
-                            <div class="stat-label">Maybe</div>
+                            <div class="stat-label">Medium</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="completeIrrelevant">0</div>
-                            <div class="stat-label">Irrelevant</div>
+                            <div class="stat-label">Low / Minimal</div>
                         </div>
                     </div>
                     <div class="complete-actions">
@@ -2095,6 +2111,15 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- STARRED BILLS VIEW -->
+        <div class="view" id="starredBillsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
+                <h2 class="section-title">Starred Bills (<span id="starredBillCount">0</span>)</h2>
+            </div>
+            <div id="starredBillsGrid" class="bills-grid"></div>
         </div>
 
         <!-- FEEDBACK REVIEW VIEW -->
@@ -3184,6 +3209,7 @@
                 const stats = await statsResponse.json();
                 
                 updateDashboard(stats);
+                updateReviewMenuCounts();
                 drawMap();
                 populateStateGrid();
                 initializeFilters();
@@ -3667,6 +3693,269 @@
             if (btn) btn.classList.toggle('active', isCollapsed);
         }
 
+
+        // ==============================================================
+        // QUICK REVIEW (GAME MODE)
+        // ==============================================================
+
+        let reviewQueue = [];
+        let reviewIndex = 0;
+        let reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
+        let reviewCurrentBill = null;
+
+        function startQuickReview() {
+            // Queue: auto-only bills (no llm_tier, no user_tier), sorted by score desc
+            reviewQueue = allBills
+                .filter(b => !b.llm_tier && !b.user_tier)
+                .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0));
+
+            reviewIndex = 0;
+            reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
+
+            if (reviewQueue.length === 0) {
+                document.getElementById('quickReviewMain').style.display = 'none';
+                document.getElementById('reviewComplete').style.display = 'flex';
+                document.getElementById('completeRelevant').textContent = 0;
+                document.getElementById('completeMaybe').textContent = 0;
+                document.getElementById('completeIrrelevant').textContent = 0;
+                document.getElementById('reviewedCount').textContent = 0;
+                document.getElementById('totalReviewCount').textContent = 0;
+                return;
+            }
+
+            document.getElementById('reviewComplete').style.display = 'none';
+            document.getElementById('quickReviewMain').style.display = 'flex';
+            document.getElementById('totalReviewCount').textContent = reviewQueue.length;
+            document.getElementById('reviewedCount').textContent = 0;
+
+            loadReviewCard(reviewQueue[0]);
+            document.addEventListener('keydown', handleReviewKey);
+        }
+
+        function loadReviewCard(bill) {
+            reviewCurrentBill = bill;
+
+            // Reset to front
+            document.querySelector('.review-card-front').style.display = 'block';
+            document.querySelector('.review-card-back').style.display = 'none';
+
+            const tier = bill.user_tier || bill.llm_tier || bill.relevance;
+            const score = (bill.relevance_score || 0).toFixed(1);
+
+            document.getElementById('reviewBillNumber').textContent = `${bill.state} ${bill.bill_number}`;
+            document.getElementById('reviewBillNumberBack').textContent = `${bill.state} ${bill.bill_number}`;
+            document.getElementById('reviewScore').textContent = score;
+            document.getElementById('reviewTitle').textContent = bill.title || 'No title';
+            document.getElementById('reviewTitleBack').textContent = bill.title || 'No title';
+            document.getElementById('reviewTier').textContent = tier.toUpperCase();
+            document.getElementById('reviewTier').className = `meta-value tag ${tier}`;
+            document.getElementById('reviewSubjects').textContent =
+                bill.subjects && bill.subjects.length > 0 ? bill.subjects.slice(0, 3).join(', ') : 'None';
+            document.getElementById('reviewDescription').textContent =
+                bill.description ? bill.description.substring(0, 300) + (bill.description.length > 300 ? '...' : '') : 'No description available.';
+
+            // Back side
+            document.getElementById('reviewFullDescription').textContent = bill.description || 'No description available.';
+            document.getElementById('reviewSponsor').textContent =
+                bill.sponsor_name ? `${bill.sponsor_name}${bill.sponsor_party ? ` (${bill.sponsor_party})` : ''}` : 'Unknown';
+            document.getElementById('reviewLastAction').textContent =
+                bill.last_action ? `${bill.last_action}${bill.last_action_date ? ` — ${new Date(bill.last_action_date).toLocaleDateString()}` : ''}` : 'Unknown';
+            document.getElementById('reviewAllSubjects').textContent =
+                bill.subjects && bill.subjects.length > 0 ? bill.subjects.join(', ') : 'None';
+            const legLink = document.getElementById('reviewLegiScanLink');
+            if (legLink) legLink.href = bill.url || '#';
+            updateReviewActionButtons();
+
+            updateReviewProgress();
+        }
+
+        function updateReviewProgress() {
+            const reviewed = reviewStats.relevant + reviewStats.maybe + reviewStats.irrelevant;
+            const total = reviewQueue.length;
+            const pct = total > 0 ? Math.round((reviewed / total) * 100) : 0;
+            document.getElementById('reviewedCount').textContent = reviewed;
+            document.getElementById('progressFill').style.width = `${pct}%`;
+            document.getElementById('progressPercent').textContent = `${pct}%`;
+        }
+
+        function flipReviewCard() {
+            const front = document.querySelector('.review-card-front');
+            const back = document.querySelector('.review-card-back');
+            if (front.style.display === 'none') {
+                front.style.display = 'block';
+                back.style.display = 'none';
+            } else {
+                front.style.display = 'none';
+                back.style.display = 'block';
+            }
+        }
+
+        async function reviewBill(tier) {
+            if (!reviewCurrentBill) return;
+
+            const bill = reviewCurrentBill;
+            const validTiers = ['minimal', 'low', 'medium', 'high', 'direct'];
+            if (!validTiers.includes(tier)) return;
+
+            const scoreMap = { minimal: 1, low: 3, medium: 5, high: 8, direct: 10 };
+            const statKey = (tier === 'direct' || tier === 'high') ? 'relevant'
+                          : tier === 'medium' ? 'maybe' : 'irrelevant';
+            reviewStats[statKey]++;
+
+            // Save feedback
+            try {
+                await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bill_id: bill.bill_id,
+                        feedback_type: 'custom',
+                        user_score: scoreMap[tier],
+                        user_tier: tier,
+                        notes: `Quick review: ${tier}`
+                    })
+                });
+                bill.user_tier = tier;
+                bill.user_score = scoreMap[tier];
+            } catch(e) {
+                // Continue even if save fails
+            }
+
+            // Advance queue
+            reviewIndex++;
+            if (reviewIndex >= reviewQueue.length) {
+                finishReview();
+            } else {
+                loadReviewCard(reviewQueue[reviewIndex]);
+            }
+        }
+
+        function finishReview() {
+            document.removeEventListener('keydown', handleReviewKey);
+            document.getElementById('quickReviewMain').style.display = 'none';
+            document.getElementById('reviewComplete').style.display = 'flex';
+            document.getElementById('completeRelevant').textContent = reviewStats.relevant;
+            document.getElementById('completeMaybe').textContent = reviewStats.maybe;
+            document.getElementById('completeIrrelevant').textContent = reviewStats.irrelevant;
+        }
+
+        function exitQuickReview() {
+            document.removeEventListener('keydown', handleReviewKey);
+            reviewCurrentBill = null;
+            switchView('dashboard', true);
+        }
+
+        function handleReviewKey(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const tierKeys = { '1': 'minimal', '2': 'low', '3': 'medium', '4': 'high', '5': 'direct' };
+            if (tierKeys[e.key]) { e.preventDefault(); reviewBill(tierKeys[e.key]); return; }
+            switch(e.key) {
+                case ' ':      e.preventDefault(); flipReviewCard(); break;
+                case 'Escape': exitQuickReview(); break;
+            }
+        }
+
+        function reviewBack() {
+            if (reviewIndex <= 0) return;
+            reviewIndex--;
+            // Reverse the last stat
+            const prev = reviewQueue[reviewIndex];
+            if (prev.user_tier) {
+                const statKey = (prev.user_tier === 'direct' || prev.user_tier === 'high') ? 'relevant'
+                               : prev.user_tier === 'medium' ? 'maybe' : 'irrelevant';
+                if (reviewStats[statKey] > 0) reviewStats[statKey]--;
+            }
+            loadReviewCard(reviewQueue[reviewIndex]);
+        }
+
+        function reviewSkip() {
+            if (!reviewCurrentBill) return;
+            reviewIndex++;
+            if (reviewIndex >= reviewQueue.length) {
+                finishReview();
+            } else {
+                loadReviewCard(reviewQueue[reviewIndex]);
+            }
+        }
+
+        async function reviewToggleStar() {
+            if (!reviewCurrentBill) return;
+            const bill = reviewCurrentBill;
+            try {
+                const resp = await fetch(`/api/feedback/star/${bill.bill_id}`, { method: 'POST' });
+                const data = await resp.json();
+                bill.starred = data.starred ? 1 : 0;
+                updateReviewActionButtons();
+            } catch(e) {}
+        }
+
+        async function reviewToggleFlag() {
+            if (!reviewCurrentBill) return;
+            const bill = reviewCurrentBill;
+            try {
+                const resp = await fetch(`/api/feedback/flag/${bill.bill_id}`, { method: 'POST' });
+                const data = await resp.json();
+                bill.flagged = data.flagged ? 1 : 0;
+                updateReviewActionButtons();
+            } catch(e) {}
+        }
+
+        function updateReviewActionButtons() {
+            const bill = reviewCurrentBill;
+            if (!bill) return;
+            const starBtn = document.getElementById('reviewStarBtn');
+            const flagBtn = document.getElementById('reviewFlagBtn');
+            if (starBtn) {
+                starBtn.textContent = bill.starred ? 'Starred' : 'Star';
+                starBtn.style.color = bill.starred ? 'var(--warning)' : 'var(--text-dim)';
+                starBtn.style.borderColor = bill.starred ? 'var(--warning)' : 'rgba(255,255,255,0.15)';
+            }
+            if (flagBtn) {
+                flagBtn.textContent = bill.flagged ? 'Flagged' : 'Flag';
+                flagBtn.style.color = bill.flagged ? 'var(--danger)' : 'var(--text-dim)';
+                flagBtn.style.borderColor = bill.flagged ? 'var(--danger)' : 'rgba(255,255,255,0.15)';
+            }
+        }
+
+        function startFlaggedReview() {
+            reviewQueue = allBills.filter(b => b.flagged);
+            reviewIndex = 0;
+            reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
+            if (reviewQueue.length === 0) {
+                alert('No flagged bills to review.');
+                return;
+            }
+            document.getElementById('reviewComplete').style.display = 'none';
+            document.getElementById('quickReviewMain').style.display = 'flex';
+            document.getElementById('totalReviewCount').textContent = reviewQueue.length;
+            document.getElementById('reviewedCount').textContent = 0;
+            loadReviewCard(reviewQueue[0]);
+            document.addEventListener('keydown', handleReviewKey);
+            switchView('quickReview', true);
+        }
+
+        function loadStarredBills() {
+            const starred = allBills.filter(b => b.starred);
+            document.getElementById('starredBillCount').textContent = starred.length;
+            const grid = document.getElementById('starredBillsGrid');
+            if (!starred.length) {
+                grid.innerHTML = '<div class="loading"><p>No starred bills yet.</p></div>';
+                return;
+            }
+            grid.innerHTML = starred.map(b => renderBillCard(b)).join('');
+        }
+
+        function updateReviewMenuCounts() {
+            const queueCount = allBills.filter(b => !b.llm_tier && !b.user_tier).length;
+            const flaggedCount = allBills.filter(b => b.flagged).length;
+            const starredCount = allBills.filter(b => b.starred).length;
+            const qrEl = document.getElementById('quickReviewCount');
+            const flEl = document.getElementById('flaggedCount');
+            const stEl = document.getElementById('starredCount');
+            if (qrEl) qrEl.textContent = queueCount > 0 ? `(${queueCount})` : '';
+            if (flEl) flEl.textContent = flaggedCount > 0 ? `(${flaggedCount})` : '';
+            if (stEl) stEl.textContent = starredCount > 0 ? `(${starredCount})` : '';
+        }
         function updateClearBtn() {
             const btn = document.getElementById('clearFiltersBtn');
             if (!btn) return;
@@ -4113,6 +4402,9 @@
                 document.getElementById('analyticsView').classList.add('active');
                 document.querySelectorAll('.menu-item')[5].classList.add('active');
                 renderAnalytics();
+            } else if (view === 'starredBills') {
+                document.getElementById('starredBillsView').classList.add('active');
+                loadStarredBills();
             } else if (view === 'about') {
                 document.getElementById('aboutView').classList.add('active');
             } else if (view === 'billDetail') {
