@@ -33,6 +33,7 @@
             --tier-medium: #eab308;
             --tier-low: #10b981;
             --tier-minimal: #6b7280;
+            --tier-ambiguous: #8b5cf6;
         }
 
         body {
@@ -614,27 +615,37 @@
 
         .review-nav-btn {
             flex-shrink: 0;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.15);
+            width: 64px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.12);
             background: var(--bg-card);
             color: var(--text-dim);
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 0.25rem;
+            padding: 0.75rem 0.5rem;
         }
 
-        .review-nav-btn:hover {
+        .review-nav-btn span.nav-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .review-nav-btn:hover:not(:disabled) {
             border-color: var(--accent);
             color: var(--accent);
+            background: rgba(16,185,129,0.08);
         }
 
         .review-nav-btn:disabled {
-            opacity: 0.25;
+            opacity: 0.2;
             cursor: default;
         }
 
@@ -650,22 +661,52 @@
         }
 
         .review-icon-btn {
-            background: none;
-            border: none;
+            background: var(--bg-dark);
+            border: 2px solid rgba(255,255,255,0.12);
             font-size: 1.1rem;
             cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            opacity: 0.4;
+            padding: 0.45rem 0.6rem;
+            border-radius: 8px;
+            color: var(--text-dim);
             transition: all 0.15s;
             line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        .review-icon-btn:hover { opacity: 0.8; }
-        .review-icon-btn.active { opacity: 1; }
-        .review-icon-btn.star.active { color: var(--warning); }
-        .review-icon-btn.flag.active { color: var(--danger); }
-        
+        .review-icon-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text-secondary); }
+        .review-icon-btn.star.active { color: var(--warning); border-color: var(--warning); background: rgba(245,158,11,0.15); box-shadow: 0 0 8px rgba(245,158,11,0.3); }
+        .review-icon-btn.flag.active { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.15); box-shadow: 0 0 8px rgba(239,68,68,0.3); }
+
+        .card-flag-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0.2rem 0.35rem;
+            border-radius: 5px;
+            color: var(--text-dim);
+            transition: all 0.15s;
+            line-height: 1;
+            opacity: 0.45;
+        }
+        .card-flag-btn:hover { opacity: 1; border-color: rgba(239,68,68,0.4); color: var(--danger); background: rgba(239,68,68,0.08); }
+        .card-flag-btn.active { opacity: 1; color: var(--danger); border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.12); }
+
+        .card-star-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 0.2rem 0.35rem;
+            border-radius: 5px;
+            color: var(--text-dim);
+            transition: all 0.15s;
+            line-height: 1;
+            opacity: 0.45;
+        }
+        .card-star-btn:hover { opacity: 1; border-color: rgba(245,158,11,0.4); color: var(--warning); background: rgba(245,158,11,0.08); }
+        .card-star-btn.active { opacity: 1; color: var(--warning); border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.12); }
+
         .review-card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -677,6 +718,27 @@
         
         .review-card:hover {
             transform: translateY(-4px);
+        }
+
+        .review-card.slide-out-left {
+            animation: slideOutLeft 0.18s ease-in forwards;
+        }
+        .review-card.slide-out-right {
+            animation: slideOutRight 0.18s ease-in forwards;
+        }
+        .review-card.slide-in {
+            animation: slideIn 0.2s ease-out forwards;
+        }
+
+        @keyframes slideOutLeft {
+            to { transform: translateX(-60px); opacity: 0; }
+        }
+        @keyframes slideOutRight {
+            to { transform: translateX(60px); opacity: 0; }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
         .review-card-header {
@@ -695,12 +757,15 @@
         }
         
         .review-score {
-            font-size: 1.5rem;
+            font-size: 0.75rem;
             font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
             color: var(--accent);
             background: rgba(16, 185, 129, 0.1);
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
+            border: 1px solid var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
         }
         
         .review-title {
@@ -846,6 +911,13 @@
         .review-btn-irrelevant { border-color: var(--tier-minimal); color: var(--tier-minimal); }
         .review-btn-maybe { border-color: var(--tier-medium); color: var(--tier-medium); }
         .review-btn-relevant { border-color: var(--tier-high); color: var(--tier-high); }
+        /* Discard = permanently irrelevant, styled separately from tier buttons */
+        .review-btn-discard {
+            border-color: var(--danger);
+            color: var(--danger);
+            opacity: 0.75;
+        }
+        .review-btn-discard:hover { background: rgba(239,68,68,0.1); transform: translateY(-3px); opacity: 1; }
         
         .btn-icon {
             font-size: 2rem;
@@ -1082,8 +1154,213 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        .bill-card.high {
-            border-left-color: var(--accent);
+        .bill-card.llm-reviewed {
+            border-left-color: var(--blue);
+        }
+
+        .bill-card.user-reviewed {
+            border-left-color: var(--tier-ambiguous);
+        }
+
+        /* Companion card */
+        .companion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin: 0.75rem 0 0.5rem;
+        }
+
+        .companion-chamber {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .companion-chamber-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .companion-chamber-badge.house {
+            background: #E6F1FB;
+            color: #0C447C;
+        }
+
+        .companion-chamber-badge.senate {
+            background: #EEEDFE;
+            color: #3C3489;
+        }
+
+        .companion-bill-id {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .companion-meta {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .companion-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .companion-counted {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .companion-title-clickable {
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .companion-title-clickable:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .companion-chamber-clickable {
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .companion-chamber-clickable:hover {
+            background: rgba(16,185,129,0.06);
+            outline: 1px solid var(--accent);
+            border-radius: 8px;
+        }
+
+        /* Companion detail modal */
+        #ambiguousDetailModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #ambiguousDetailModal.open { display: flex; }
+        .ambiguous-modal-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border-left: 4px solid var(--tier-ambiguous);
+            padding: 2rem;
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .ambiguous-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.6rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .ambiguous-modal-close:hover { color: var(--text); }
+        #companionDetailModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #companionDetailModal.open { display: flex; }
+        .companion-modal-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .companion-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 1.6rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .companion-modal-close:hover { color: var(--text); }
+        .companion-modal-bills {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.25rem 0;
+        }
+        .companion-modal-bill {
+            background: var(--bg-dark);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .companion-modal-bill-num {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+        .companion-modal-bill-meta {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+        .companion-modal-open-btn {
+            display: inline-block;
+            margin-top: 0.65rem;
+            margin-right: 0.4rem;
+            padding: 0.35rem 0.8rem;
+            background: var(--bg-card);
+            border: 1px solid var(--text-dim);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.78rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .companion-modal-open-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .companion-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--bg-dark);
+            flex-wrap: wrap;
         }
 
         .bill-header {
@@ -1161,58 +1438,43 @@
         .tier-medium { color: var(--tier-medium); }
         .tier-low { color: var(--tier-low); }
         .tier-minimal { color: var(--tier-minimal); }
-        
+        .tier-ambiguous { color: var(--tier-ambiguous); }
+
         .tag.direct { background: var(--tier-direct); color: white; }
         .tag.high { background: var(--tier-high); color: white; }
         .tag.medium { background: var(--tier-medium); color: var(--bg-dark); }
         .tag.low { background: var(--tier-low); color: var(--bg-dark); }
         .tag.minimal { background: var(--tier-minimal); color: white; }
+        .tag.ambiguous { background: var(--tier-ambiguous); color: white; }
         
-        .relevance-score {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.1rem;
+        .tier-indicator {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.7rem;
             font-weight: 700;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 2px solid var(--accent);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            border: 2px solid;
             position: relative;
         }
 
-        .relevance-score::after {
-            content: 'AUTO';
-            position: absolute;
-            top: -7px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.48rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
+        .tier-indicator.auto {
+            border-color: var(--accent);
             color: var(--accent);
-            opacity: 0.75;
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: var(--bg-card);
-            padding: 0 2px;
+            background: rgba(16, 185, 129, 0.08);
         }
-        
-        .relevance-score.modified {
+
+        .tier-indicator.user-override {
             border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        .relevance-score.modified::after {
-            content: 'USER';
             color: var(--warning);
+            background: rgba(245, 158, 11, 0.08);
         }
 
-        .relevance-score.llm-modified {
+        .tier-indicator.llm-override {
             border-color: var(--blue);
-            background: rgba(59, 130, 246, 0.1);
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-        }
-
-        .relevance-score.llm-modified::after {
-            content: none;
+            color: var(--blue);
+            background: rgba(59, 130, 246, 0.08);
         }
         
         .feedback-badge {
@@ -1515,7 +1777,18 @@
             background: var(--bg-card-hover);
             border-color: var(--accent);
         }
-        
+
+        .action-btn-danger {
+            background: var(--danger);
+            color: white;
+            border: 1px solid transparent;
+        }
+
+        .action-btn-danger:hover {
+            background: #dc2626;
+            border-color: transparent;
+        }
+
         .bill-description-truncated {
             color: var(--text-secondary);
             margin-bottom: 0.75rem;
@@ -1608,8 +1881,8 @@
                 <div class="menu-item menu-sub" onclick="switchView('quickReview')">
                     Quick Review <span id="quickReviewCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
                 </div>
-                <div class="menu-item menu-sub" onclick="startFlaggedReview()">
-                    Review Flagged <span id="flaggedCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
+                <div class="menu-item menu-sub" onclick="switchView('flaggedBills')">
+                    Review Flagged <span id="flaggedCount" style="font-size:0.75rem; color:var(--danger); margin-left:0.5rem;"></span>
                 </div>
                 <div class="menu-item menu-sub" onclick="switchView('starredBills')">
                     Starred Bills <span id="starredCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
@@ -1617,8 +1890,8 @@
                 <div class="menu-item menu-sub" onclick="switchView('feedbackReview')">
                     Your Feedback
                 </div>
-                <div class="menu-item menu-sub" onclick="switchView('filteredBills')">
-                    Filtered Bills
+                <div class="menu-item menu-sub" onclick="switchView('ambiguousReview')">
+                    Ambiguous Bills <span id="ambiguousCount" style="font-size:0.75rem; color:var(--tier-ambiguous); margin-left:0.5rem;"></span>
                 </div>
             </div>
             
@@ -1731,6 +2004,11 @@
                                     <input type="checkbox" id="state-relevance-minimal" value="minimal" onchange="applyStateFilters()">
                                     <label for="state-relevance-minimal">MINIMAL</label>
                                     <span class="filter-count" id="state-count-relevance-minimal">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="state-relevance-ambiguous" value="ambiguous" onchange="applyStateFilters()">
+                                    <label for="state-relevance-ambiguous">AMBIGUOUS</label>
+                                    <span class="filter-count" id="state-count-relevance-ambiguous">0</span>
                                 </div>
                             </div>
                         </div>
@@ -1850,6 +2128,11 @@
                                     <label for="relevance-minimal">MINIMAL</label>
                                     <span class="filter-count" id="count-relevance-minimal">0</span>
                                 </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="relevance-ambiguous" value="ambiguous" onchange="applyFilters()">
+                                    <label for="relevance-ambiguous">AMBIGUOUS</label>
+                                    <span class="filter-count" id="count-relevance-ambiguous">0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1881,6 +2164,10 @@
                                     <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
                                     <label for="filter-ai-reviewed">AI Reviewed only</label>
                                     <span class="filter-count" id="count-ai-reviewed">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="filter-companion-only" onchange="applyFilters()">
+                                    <label for="filter-companion-only">Companion bills only</label>
                                 </div>
                             </div>
                         </div>
@@ -1967,6 +2254,26 @@
                         </div>
                     </div>
 
+                    <!-- Reviewed Date -->
+                    <div class="filter-section">
+                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                            <span>Manually Reviewed</span>
+                            <span class="section-arrow">▶</span>
+                        </div>
+                        <div class="filter-section-body">
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="filter-reviewed-only" onchange="applyFilters()">
+                                    <label for="filter-reviewed-only">Has manual review</label>
+                                </div>
+                                <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">Reviewed from:</label>
+                                <input type="date" class="date-input" id="reviewedFrom" onchange="applyFilters()">
+                                <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">To:</label>
+                                <input type="date" class="date-input" id="reviewedTo" onchange="applyFilters()">
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Bill Type -->
                     <div class="filter-section">
                         <div class="filter-section-title" onclick="toggleFilterSection(this)">
@@ -2031,21 +2338,31 @@
                 </div>
                 
                 <div class="quick-review-main" id="quickReviewMain">
+                    <!-- Star / Flag above card -->
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem; width:100%; max-width:820px; justify-content:flex-end;">
+                        <button id="reviewStarBtn" class="review-icon-btn star" onclick="reviewToggleStar()" title="Star this bill (S)">&#9733;</button>
+                        <button id="reviewFlagBtn" class="review-icon-btn flag" onclick="reviewToggleFlag()" title="Flag for re-review (F)">&#9873;</button>
+                    </div>
+
                     <!-- Bill Card Row: back arrow | card | skip arrow -->
                     <div class="review-card-row">
-                        <button class="review-nav-btn" id="reviewBackBtn" onclick="reviewBack()" title="Back" disabled>&#8592;</button>
+                        <button class="review-nav-btn" id="reviewBackBtn" onclick="reviewBack()" title="Back (←)" disabled>
+                            &#8592;<span class="nav-label">Back</span>
+                        </button>
                         <div class="review-card-container">
                         <div class="review-card" id="reviewCard">
                             <div class="review-card-front">
                                 <div class="review-card-header">
                                     <span class="review-bill-number" id="reviewBillNumber">CA AB 123</span>
-                                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                                        <div class="review-card-icons">
-                                            <button id="reviewStarBtn" class="review-icon-btn star" onclick="reviewToggleStar()" title="Star this bill">&#9733;</button>
-                                            <button id="reviewFlagBtn" class="review-icon-btn flag" onclick="reviewToggleFlag()" title="Flag for re-review">&#9873;</button>
-                                        </div>
-                                        <span class="review-score" id="reviewScore">7.5</span>
-                                    </div>
+                                    <span class="review-score" id="reviewScore">—</span>
+                                </div>
+                                <div id="reviewAssignedRow" style="display:none; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.75rem;">
+                                    <span style="font-size:0.7rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em;">Assigned:</span>
+                                    <span id="reviewCurrentTierBadge" class="tag" style="font-size:0.7rem;"></span>
+                                    <button onclick="reviewClearSelection()" id="reviewClearBtn"
+                                        style="background:none; border:1px solid rgba(255,255,255,0.15); color:var(--text-dim); font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:5px; cursor:pointer; margin-left:auto;">
+                                        Clear
+                                    </button>
                                 </div>
                                 
                                 <h2 class="review-title" id="reviewTitle">Bill Title Goes Here</h2>
@@ -2061,6 +2378,10 @@
                                     </div>
                                 </div>
                                 
+                                <div id="reviewLastReviewedRow" style="display:none; margin-bottom:0.75rem; font-size:0.75rem; color:var(--text-dim);">
+                                    Last reviewed: <span id="reviewLastReviewed" style="color:var(--text-secondary); font-weight:600;"></span>
+                                </div>
+
                                 <div class="review-description" id="reviewDescription">
                                     Brief description will appear here...
                                 </div>
@@ -2108,11 +2429,15 @@
                             </div>
                         </div>
                         </div><!-- end review-card-container -->
-                        <button class="review-nav-btn" onclick="reviewSkip()" title="Skip">&#8594;</button>
+                        <button class="review-nav-btn" onclick="reviewSkip()" title="Skip (→)">&#8594;<span class="nav-label">Skip</span></button>
                     </div><!-- end review-card-row -->
 
                     <!-- Action Buttons (Bottom) -->
                     <div class="review-actions" style="gap:0.5rem;">
+                        <button class="review-btn review-btn-discard" onclick="reviewIrrelevant()" title="Irrelevant — permanently remove from database and exclude from future runs (X)">
+                            <div class="btn-label">IRRELEVANT</div>
+                            <div class="btn-hint">X</div>
+                        </button>
                         <button class="review-btn review-btn-minimal" onclick="reviewBill('minimal')" title="Minimal — mentions relevant terms but no feed mechanism">
                             <div class="btn-label">MINIMAL</div>
                             <div class="btn-hint">1</div>
@@ -2138,7 +2463,7 @@
                     <!-- Keyboard Shortcuts Help -->
                     <div class="review-shortcuts">
                         <div style="font-size: 0.8rem; color: var(--text-dim);">
-                            <kbd>1</kbd>–<kbd>5</kbd> assign tier &nbsp;|&nbsp; <kbd>←</kbd> back &nbsp;|&nbsp; <kbd>→</kbd> skip &nbsp;|&nbsp; <kbd>S</kbd> star &nbsp;|&nbsp; <kbd>F</kbd> flag &nbsp;|&nbsp; <kbd>Space</kbd> flip &nbsp;|&nbsp; <kbd>Esc</kbd> exit
+                            <kbd>X</kbd> irrelevant &nbsp;|&nbsp; <kbd>1</kbd>–<kbd>5</kbd> assign tier &nbsp;|&nbsp; <kbd>←</kbd> back &nbsp;|&nbsp; <kbd>→</kbd> skip &nbsp;|&nbsp; <kbd>S</kbd> star &nbsp;|&nbsp; <kbd>F</kbd> flag &nbsp;|&nbsp; <kbd>Space</kbd> flip &nbsp;|&nbsp; <kbd>Esc</kbd> exit
                         </div>
                     </div>
                 </div>
@@ -2158,7 +2483,7 @@
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="completeIrrelevant">0</div>
-                            <div class="stat-label">Low / Minimal</div>
+                            <div class="stat-label">Low / Minimal / Removed</div>
                         </div>
                     </div>
                     <div class="complete-actions">
@@ -2182,6 +2507,46 @@
             <div id="starredBillsGrid" class="bills-grid"></div>
         </div>
 
+        <!-- ============================================================ -->
+        <!-- FLAGGED BILLS VIEW -->
+        <!-- ============================================================ -->
+        <div class="view" id="flaggedBillsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
+                <h2 class="section-title">Flagged for Review (<span id="flaggedBillCount">0</span>)</h2>
+            </div>
+            <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--danger);">
+                <div style="font-size: 0.875rem; color: var(--text-dim);">
+                    Bills flagged for additional review. Click the flag button on any bill card to add or remove it from this list.
+                </div>
+            </div>
+            <div id="flaggedBillsGrid" class="bills-grid"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- AMBIGUOUS REVIEW VIEW -->
+        <!-- ============================================================ -->
+        <div class="view" id="ambiguousReviewView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
+                <h2 class="section-title">Ambiguous Bills (<span id="ambiguousReviewCount">0</span>)</h2>
+            </div>
+
+            <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--tier-ambiguous);">
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--tier-ambiguous);">Manually Flagged for Re-Review</div>
+                <div style="font-size: 0.875rem; color: var(--text-dim);">
+                    These bills were manually flagged for comprehensive re-evaluation. During the next tracker run they will be automatically re-fetched via full bill detail (getBill) and re-scored by the LLM classifier. After each tracker run this queue should be empty — bills shown here are waiting for the next scheduled run.
+                    <br><br>
+                    <strong>Remove from Queue</strong> — cancels the re-review request and removes the bill from this list. The bill remains in the database with its current tier.<br>
+                    <strong>Delete Bill</strong> — permanently removes the bill from the database. It will not be tracked again.
+                </div>
+            </div>
+
+            <div id="ambiguousReviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem;">
+                <div class="loading"><p>Loading ambiguous bills...</p></div>
+            </div>
+        </div>
+
         <!-- FEEDBACK REVIEW VIEW -->
         <div class="view" id="feedbackReviewView">
             <div class="bills-header">
@@ -2202,32 +2567,13 @@
                 
                 <div class="filter-content collapsed" id="feedbackFilterContent">
                     <!-- Feedback Type -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Feedback Type</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="feedback-type-boosted" value="boosted" checked onchange="applyFeedbackFilters()">
-                                <label for="feedback-type-boosted">Boosted (Score Increased)</label>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="feedback-type-reduced" value="reduced" checked onchange="applyFeedbackFilters()">
-                                <label for="feedback-type-reduced">Reduced (Score Decreased)</label>
-                            </div>
-                            <div class="filter-checkbox">
-                                <input type="checkbox" id="feedback-type-reviewed" value="reviewed" checked onchange="applyFeedbackFilters()">
-                                <label for="feedback-type-reviewed">Reviewed (Score Confirmed)</label>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Sort -->
                     <div class="filter-section">
                         <div class="filter-section-title">Sort By</div>
                         <select class="filter-select" id="feedbackSortSelect" onchange="applyFeedbackFilters()" style="width: 100%; padding: 0.75rem;">
-                            <option value="recent">Most Recent Feedback</option>
-                            <option value="largest-change">Largest Score Change</option>
+                            <option value="recent">Most Recent</option>
                             <option value="state">By State</option>
-                            <option value="tier">By Current Tier</option>
+                            <option value="tier">By Tier</option>
                         </select>
                     </div>
                 </div>
@@ -2238,63 +2584,6 @@
             </div>
             
             <div class="bills-grid" id="feedbackBillsGrid"></div>
-        </div>
-
-        <!-- FILTERED BILLS REVIEW VIEW -->
-        <div class="view" id="filteredBillsView">
-            <div class="bills-header">
-                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
-                <h2 class="section-title">Filtered Bills Review (<span id="filteredCount">0</span> bills)</h2>
-            </div>
-            
-            <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--danger);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">These bills were filtered out (score = 0)</div>
-                <div style="font-size: 0.875rem; color: var(--text-dim);">
-                    Review these bills to confirm they should be excluded. Bills you mark as "Irrelevant" will be permanently deleted from the database.
-                </div>
-            </div>
-            
-            <!-- Filter Bar -->
-            <div class="filter-bar">
-                <div class="filter-header">
-                    <div class="filter-title">Filter</div>
-                    <div class="filter-actions">
-                        <button class="filter-toggle-btn" onclick="toggleFilteredFilters()">
-                            <span id="filteredFilterToggleText">Show Filters</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="filter-content collapsed" id="filteredFilterContent">
-                    <!-- Search -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Search</div>
-                        <input type="text" class="search-input" id="filteredSearchInput" placeholder="Search titles, descriptions..." oninput="applyFilteredFilters()">
-                    </div>
-                    
-                    <!-- States -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">States</div>
-                        <div class="filter-group" id="filteredStateFilters"></div>
-                    </div>
-                    
-                    <!-- Sort -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Sort By</div>
-                        <select class="filter-select" id="filteredSortSelect" onchange="applyFilteredFilters()" style="width: 100%; padding: 0.75rem;">
-                            <option value="state">By State</option>
-                            <option value="recent">Most Recent</option>
-                            <option value="billnumber">By Bill Number</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
-                Showing <span id="filteredBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> filtered bills
-            </div>
-            
-            <div class="bills-grid" id="filteredBillsGrid"></div>
         </div>
 
         <!-- BILL DETAIL VIEW -->
@@ -2328,43 +2617,46 @@
                 </div>
 
                 <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Scored</h3>
-                    <p>Every bill goes through an automated relevance scoring system that produces a score from 0 to 10, which maps to one of five tiers:</p>
+                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Classified</h3>
+                    <p>Every bill returned by the search is run through an automated classifier that assigns one of six tiers based on the bill's title and description. No numeric score is used — tiers are assigned directly based on what language is present and how it combines.</p>
 
                     <div style="margin: 1rem 0; display: grid; gap: 0.5rem;">
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag direct" style="min-width:80px; text-align:center;">DIRECT</span>
-                            <span>Bill directly addresses algorithmic feed control — for example, requiring platforms to offer a chronological feed option, mandating user opt-out of personalized recommendations, or restricting ranking signals for minors.</span>
+                            <span class="tag direct" style="min-width:90px; text-align:center;">DIRECT</span>
+                            <span>Bill title contains language directly describing feed-layer legislation — for example, "algorithmic transparency," "chronological feed," or "social media recommendation."</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag high" style="min-width:80px; text-align:center;">HIGH</span>
-                            <span>Bill substantially regulates algorithmic curation, including strong default settings for minors or significant platform design requirements tied to feed behavior.</span>
+                            <span class="tag high" style="min-width:90px; text-align:center;">HIGH</span>
+                            <span>Bill substantially regulates algorithmic curation — direct-match language in the description, platform/algorithm terms combined with governance language, or youth combined with platform.</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag medium" style="min-width:80px; text-align:center;">MEDIUM</span>
-                            <span>Bill meaningfully affects feed content through parental controls, age-gating, or platform design requirements that would change what users see, even if not the primary focus.</span>
+                            <span class="tag medium" style="min-width:90px; text-align:center;">MEDIUM</span>
+                            <span>Privacy terms combined with platform or algorithm keywords — likely feed-adjacent but not primarily focused on feed mechanics.</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag low" style="min-width:80px; text-align:center;">LOW</span>
-                            <span>Bill has indirect or marginal feed impact — for example, data privacy requirements that may limit personalization, or generic transparency mandates without user-facing controls.</span>
+                            <span class="tag low" style="min-width:90px; text-align:center;">LOW</span>
+                            <span>Platform or algorithm keywords present, but no governance, youth, or privacy combination. Weak signal — may be tangentially relevant.</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag minimal" style="min-width:80px; text-align:center;">MINIMAL</span>
-                            <span>Bill mentions relevant terms but does not materially affect what users see in their feed.</span>
+                            <span class="tag minimal" style="min-width:90px; text-align:center;">MINIMAL</span>
+                            <span>Only privacy keywords; no platform or algorithm signal. Unlikely to affect feed mechanics directly.</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <span class="tag ambiguous" style="min-width:90px; text-align:center;">AMBIGUOUS</span>
+                            <span>Bill title appears to be a backronym or acronym act name (e.g. "SAFE Act," "KIDS Act") with no descriptive keywords and no description available. Cannot be classified from available text — set aside for manual review.</span>
                         </div>
                     </div>
 
-                    <p style="margin-top: 0.75rem;">The scoring system works in two passes. First, it checks whether the bill mentions at least one of: a platform keyword (social media, online platform), an algorithm keyword (algorithm, AI, automated decision), or a privacy keyword (personal data, data broker). Bills that mention none of these are discarded immediately.</p>
-                    <p style="margin-top: 0.75rem;">Bills that pass the first filter are then scored by accumulating points for positive signals: matching specific phrase patterns like "user control," "opt-out," or "algorithmic transparency" in the title or description; mentioning platforms alongside governance language; combining algorithm terms with transparency or disclosure; referencing youth and social media together; and including enforcement language like civil penalties or attorney general authority. Scores are capped at 10.</p>
-                    <p style="margin-top: 0.75rem;">This automated scoring is intentionally broad. It catches relevant bills but also picks up noise. The deeper review layer below is designed to correct for that.</p>
+                    <p style="margin-top: 0.75rem;">Bills with no topic-relevant language at all — no platform, algorithm, or privacy keywords — are discarded and never stored. This eliminates the bulk of false positives from broad keyword searches.</p>
+                    <p style="margin-top: 0.75rem;">The classifier works on whatever text LegiScan provides. Titles are always available; descriptions are present for most bills but not all. When a description is absent, classification falls back to the title alone.</p>
                 </div>
 
                 <div class="chart-card" style="margin-bottom: 1.5rem;">
                     <h3 class="chart-title" style="margin-bottom: 1rem;">Deeper Review</h3>
-                    <p>For bills scoring DIRECT, HIGH, or MEDIUM, we fetch the full text of the bill from the legislative source. This text — not just the title and description — is then run through a two-part review process.</p>
+                    <p>For bills classified DIRECT, HIGH, or MEDIUM, we fetch the full text of the bill from the legislative source. This text — not just the title and description — is then run through a two-part review process.</p>
                     <p style="margin-top: 0.75rem;">The first part is a <strong style="color:var(--text-primary);">static analysis</strong>: a set of deterministic rules that scan the bill text for specific language patterns and classify the bill against our research taxonomy — what type of content control it creates, what mechanism it uses, and what platforms it covers.</p>
                     <p style="margin-top: 0.75rem;">The second part is an <strong style="color:var(--text-primary);">AI-assisted review</strong>: the bill text is sent to a language model with a structured prompt asking it to answer the research question directly. The model assigns a tier, classifies the bill against the same taxonomy, and provides a short rationale citing specific statutory language. Results are validated against the taxonomy before being stored.</p>
-                    <p style="margin-top: 0.75rem;">Where LLM review data is available, it is shown alongside the automated score in the bill detail view. The Analytics tab shows how the two scoring systems compare.</p>
+                    <p style="margin-top: 0.75rem;">Where AI review data is available, it is shown in the bill detail view alongside the automated tier. The Analytics tab shows coverage and distribution across the taxonomy.</p>
                 </div>
 
                 <div class="chart-card" style="margin-bottom: 1.5rem;">
@@ -2484,6 +2776,160 @@
             'WI': [500, 185], 'WY': [270, 215]
         };
 
+        // ---------------------------------------------------------------------------
+        // Companion bill helpers
+        // ---------------------------------------------------------------------------
+
+        /**
+         * Group a flat bill array into render items.
+         * Each item is either { type: 'single', bill } or { type: 'companion', primary, companion }.
+         * Companion bills (those whose bill_id appears as another bill's companion_bill_id)
+         * are suppressed from appearing as their own card.
+         */
+        function groupCompanions(bills) {
+            // Build a map of companion_bill_id -> primary bill_id
+            const companionOf = new Map(); // companion bill_id -> primary bill
+            const primaryMap = new Map();  // primary bill_id -> companion bill
+
+            bills.forEach(b => {
+                if (b.companion_bill_id) {
+                    // Find the primary in the list
+                    const primary = bills.find(p => p.bill_id === b.companion_bill_id);
+                    if (primary) {
+                        companionOf.set(b.bill_id, primary);
+                        primaryMap.set(primary.bill_id, b);
+                    }
+                }
+            });
+
+            const items = [];
+            const seen = new Set();
+
+            bills.forEach(b => {
+                if (seen.has(b.bill_id)) return;
+
+                if (companionOf.has(b.bill_id)) {
+                    // This bill is a companion — it will be rendered as part of its primary's card
+                    seen.add(b.bill_id);
+                    return;
+                }
+
+                if (primaryMap.has(b.bill_id)) {
+                    // This bill has a companion
+                    const companion = primaryMap.get(b.bill_id);
+                    seen.add(b.bill_id);
+                    seen.add(companion.bill_id);
+                    items.push({ type: 'companion', primary: b, companion });
+                } else {
+                    seen.add(b.bill_id);
+                    items.push({ type: 'single', bill: b });
+                }
+            });
+
+            return items;
+        }
+
+        /**
+         * Detect chamber from bill_number prefix.
+         * Returns 'house', 'senate', or 'unknown'.
+         */
+        function detectChamber(billNumber) {
+            const bn = (billNumber || '').trim().toUpperCase();
+            if (/^(AB|HB|HF|HJ|HM|HR|HA|AJR|ACR|AR|H)\d/.test(bn)) return 'house';
+            if (/^(SB|SF|SJ|SM|SR|SA|SJR|SCR|S)\d/.test(bn)) return 'senate';
+            return 'unknown';
+        }
+
+        function chamberLabel(billNumber) {
+            const ch = detectChamber(billNumber);
+            if (ch === 'house') return 'House / Assembly';
+            if (ch === 'senate') return 'Senate';
+            return 'Chamber';
+        }
+
+        /**
+         * Render a merged companion pair card.
+         */
+        function renderCompanionCard(primary, companion) {
+            const statusMap = {
+                '1': 'Introduced', '2': 'Engrossed', '3': 'Enrolled',
+                '4': 'Passed', '5': 'Vetoed', '6': 'Failed'
+            };
+
+            // Shared tier: prefer user override on primary, then LLM, then automated
+            const displayTier = primary.user_tier || primary.llm_tier || primary.relevance;
+            const hasLLM = !!(primary.llm_tier || companion.llm_tier);
+            const hasUserFeedback = !!primary.user_tier;
+            const isFailed = getBillStatusGroup(primary) === 'failed'
+                          || getBillStatusGroup(companion) === 'failed';
+            const reviewClass = hasUserFeedback ? 'user-reviewed' : (hasLLM ? 'llm-reviewed' : '');
+
+            function chamberBlock(bill) {
+                const ch = detectChamber(bill.bill_number);
+                const badgeClass = ch === 'senate' ? 'senate' : 'house';
+                const label = ch === 'senate' ? 'Senate' : 'House / Assembly';
+                const st = statusMap[bill.status] || bill.status || 'Unknown';
+                const date = bill.last_action_date || bill.status_date;
+                const dateLabel = bill.last_action_date ? 'Last Action' : 'Introduced';
+                return `
+                    <div class="companion-chamber companion-chamber-clickable"
+                         onclick="event.stopPropagation(); showBillDetail(${bill.bill_id})"
+                         title="Open ${bill.bill_number} detail">
+                        <div class="companion-chamber-badge ${badgeClass}">${label}</div>
+                        <div class="companion-bill-id">${bill.bill_number}</div>
+                        <div class="companion-meta">
+                            Status: ${st}
+                            ${date ? `<br>${dateLabel}: ${new Date(date).toLocaleDateString()}` : ''}
+                        </div>
+                        <div style="font-size:0.7rem;color:var(--accent);margin-top:0.4rem;opacity:0.8;">Open detail →</div>
+                    </div>`;
+            }
+
+            return `
+                <div class="bill-card ${displayTier} ${reviewClass}"
+                    style="${isFailed ? 'opacity:0.6; border-left-color: var(--danger);' : ''}">
+                    <div class="bill-header">
+                        <span class="bill-number"><strong>${primary.state}</strong>
+                            ${isFailed ? '<span style="font-size:0.65rem; font-weight:700; color:var(--danger); margin-left:0.4rem; letter-spacing:0.05em;">FAILED</span>' : ''}
+                        </span>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <h3 class="bill-title companion-title-clickable"
+                        onclick="showCompanionDetail(${primary.bill_id}, ${companion.bill_id})"
+                        title="View both bills">${primary.title || companion.title || 'No title'}</h3>
+                    <div class="companion-grid">
+                        ${chamberBlock(primary)}
+                        ${chamberBlock(companion)}
+                    </div>
+                    <div class="companion-footer">
+                        <div style="display:flex; gap:0.25rem; align-items:center;">
+                            <button id="flag-btn-${primary.bill_id}" class="card-flag-btn ${primary.flagged ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleFlagBill(${primary.bill_id})"
+                                title="${primary.flagged ? 'Remove flag' : 'Flag for review'}">&#9873;</button>
+                            <button id="star-btn-${primary.bill_id}" class="card-star-btn ${primary.starred ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleStarBill(${primary.bill_id})"
+                                title="${primary.starred ? 'Unstar' : 'Star'}">&#9733;</button>
+                        </div>
+                        <span class="companion-counted">companion bills · click title for overview · click panel to open individually</span>
+                    </div>
+                </div>`;
+        }
+
+        /**
+         * Render an array of bills into an HTML string, grouping companion pairs.
+         * Use this everywhere instead of bills.map(renderBillCard).join('').
+         */
+        function renderBillList(bills) {
+            return groupCompanions(bills).map(item => {
+                if (item.type === 'companion') {
+                    return renderCompanionCard(item.primary, item.companion);
+                }
+                return renderBillCard(item.bill);
+            }).join('');
+        }
+
         // Define navigation functions first (before they're used)
         function renderBillCard(bill) {
             const statusMap = {
@@ -2512,39 +2958,22 @@
                 dateLabel = statusDateLabels[bill.status] || 'Status Date';
             }
             
-            // LLM tier supersedes automated; user score supersedes both
+            // Tier precedence: user > LLM > automated
             const hasLLM = !!bill.llm_tier;
-            const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
-            const displayScore = hasUserFeedback ? bill.user_score : (bill.relevance_score || 0);
+            const hasUserFeedback = !!bill.user_tier;
             const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
-            const scoreClass = hasUserFeedback ? 'modified' : (hasLLM && bill.llm_tier !== bill.relevance ? 'llm-modified' : '');
-
-            // Badge
-            let feedbackBadge = '';
-            if (hasUserFeedback) {
-                if (bill.user_score > bill.relevance_score) feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
-                else if (bill.user_score < bill.relevance_score) feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
-                else feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
-            } else if (hasLLM) {
-                feedbackBadge = '<span class="feedback-badge" style="background:var(--blue);color:white;">AI</span>';
-            }
+            const reviewClass = hasUserFeedback ? 'user-reviewed' : (hasLLM ? 'llm-reviewed' : '');
 
             const isFailed = getBillStatusGroup(bill) === 'failed';
             return `
-                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})"
+                <div class="bill-card ${displayTier} ${reviewClass}" onclick="showBillDetail(${bill.bill_id})"
                     style="${isFailed ? 'opacity:0.6; border-left-color: var(--danger);' : ''}">
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}
                             ${isFailed ? '<span style="font-size:0.65rem; font-weight:700; color:var(--danger); margin-left:0.4rem; letter-spacing:0.05em;">FAILED</span>' : ''}
                         </span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            ${hasUserFeedback
-                                ? `<span class="relevance-score modified">${bill.user_score.toFixed(1)}</span>`
-                                : hasLLM
-                                    ? ''
-                                    : `<span class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</span>`
-                            }
-                            ${feedbackBadge}
+                            <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
                         </div>
                     </div>
                     <h3 class="bill-title">${bill.title || 'No title'}</h3>
@@ -2552,11 +2981,17 @@
                         <p class="bill-description">${(bill.description || '').substring(0, 200)}...</p>
                     ` : ''}
                     <div class="bill-meta">
-                        <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
-                        ${hasLLM && !hasUserFeedback ? `<span style="font-size:0.75rem; color:var(--blue);">AI reviewed</span>` : ''}
                         <span>Status: ${status}</span>
                         ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` :
                           bill.status_date ? `<span>${dateLabel}: ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
+                        <span style="display:flex; gap:0.25rem; align-items:center; margin-left:auto;">
+                            <button id="flag-btn-${bill.bill_id}" class="card-flag-btn ${bill.flagged ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleFlagBill(${bill.bill_id})"
+                                title="${bill.flagged ? 'Remove flag' : 'Flag for review'}">&#9873;</button>
+                            <button id="star-btn-${bill.bill_id}" class="card-star-btn ${bill.starred ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleStarBill(${bill.bill_id})"
+                                title="${bill.starred ? 'Unstar' : 'Star'}">&#9733;</button>
+                        </span>
                     </div>
                 </div>
             `;
@@ -2637,12 +3072,14 @@
             const mediumCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'medium').length;
             const lowCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'low').length;
             const minimalCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'minimal').length;
-            
+            const ambiguousCount = stateBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'ambiguous').length;
+
             document.getElementById('state-count-relevance-direct').textContent = directCount;
             document.getElementById('state-count-relevance-high').textContent = highCount;
             document.getElementById('state-count-relevance-medium').textContent = mediumCount;
             document.getElementById('state-count-relevance-low').textContent = lowCount;
             document.getElementById('state-count-relevance-minimal').textContent = minimalCount;
+            document.getElementById('state-count-relevance-ambiguous').textContent = ambiguousCount;
         }
         
         function toggleStateFilters() {
@@ -2658,66 +3095,37 @@
             let filtered = allBills.filter(b => b.state === currentState);
             const activeFilters = [];
             
-            // Search filter
-            const search = document.getElementById('stateSearchInput').value.toLowerCase().trim();
-            if (search) {
-                filtered = filtered.filter(b =>
-                    b.title?.toLowerCase().includes(search) ||
-                    b.description?.toLowerCase().includes(search) ||
-                    b.bill_number?.toLowerCase().includes(search)
-                );
-                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
-                    document.getElementById('stateSearchInput').value = '';
-                    applyStateFilters();
-                }});
-            }
-            
-            // Relevance filters
-            const selectedRelevance = [];
-            ['direct', 'high', 'medium', 'low', 'minimal'].forEach(tier => {
-                if (document.getElementById(`state-relevance-${tier}`)?.checked) {
-                    selectedRelevance.push(tier);
-                }
-            });
-            
-            if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
-                filtered = filtered.filter(b => selectedRelevance.includes(b.user_tier || b.llm_tier || b.relevance));
-                selectedRelevance.forEach(tier => {
-                    activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
-                        document.getElementById(`state-relevance-${tier}`).checked = false;
-                        applyStateFilters();
-                    }});
-                });
-            }
-            
-            // Tag filters
-            const selectedTags = Array.from(document.querySelectorAll('[id^="state-tag-"]:checked')).map(cb => cb.value);
-            if (selectedTags.length > 0) {
-                filtered = filtered.filter(b => 
-                    b.tags && selectedTags.some(tag => b.tags.includes(tag))
-                );
-                selectedTags.forEach(tag => {
-                    const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-                    activeFilters.push({ type: 'tag', label: displayName, clear: () => {
-                        document.getElementById(`state-tag-${tag}`).checked = false;
-                        applyStateFilters();
-                    }});
-                });
-            }
-            
-            // Subject filters
+            // Read controls
+            const search         = document.getElementById('stateSearchInput').value.toLowerCase().trim();
+            const selectedRelevance = ['direct','high','medium','low','minimal','ambiguous']
+                .filter(t => document.getElementById(`state-relevance-${t}`)?.checked);
+            const selectedTags     = Array.from(document.querySelectorAll('[id^="state-tag-"]:checked')).map(cb => cb.value);
             const selectedSubjects = Array.from(document.querySelectorAll('[id^="state-subject-"]:checked')).map(cb => cb.value);
-            if (selectedSubjects.length > 0) {
-                filtered = filtered.filter(b => 
-                    b.subjects && selectedSubjects.some(subject => b.subjects.includes(subject))
-                );
-                selectedSubjects.forEach(subject => {
-                    activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
-                        document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}`).checked = false;
-                        applyStateFilters();
-                    }});
-                });
-            }
+
+            // Delegate filtering to shared helper
+            filtered = applyBillFilters(filtered, {
+                search,
+                selectedTiers: selectedRelevance,
+                selectedTags,
+                selectedSubjects,
+            });
+
+            // Build chips
+            if (search)
+                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
+                    document.getElementById('stateSearchInput').value = ''; applyStateFilters(); }});
+            if (selectedRelevance.length && selectedRelevance.length < 7)
+                selectedRelevance.forEach(tier =>
+                    activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
+                        document.getElementById(`state-relevance-${tier}`).checked = false; applyStateFilters(); }}));
+            selectedTags.forEach(tag => {
+                const displayName = ({'ai-policy':'AI Policy'})[tag] || tag.split('-').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+                activeFilters.push({ type: 'tag', label: displayName, clear: () => {
+                    document.getElementById(`state-tag-${tag}`).checked = false; applyStateFilters(); }});
+            });
+            selectedSubjects.forEach(subject =>
+                activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
+                    document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked = false; applyStateFilters(); }}));
             
             // Sort
             const sort = document.getElementById('stateSortSelect').value;
@@ -2731,32 +3139,25 @@
             } else if (sort === 'recent') {
                 filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
             } else if (sort === 'relevance') {
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
                     const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
-                    
                     if (orderA !== orderB) return orderA - orderB;
-                    
-                    const scoreA = a.user_score !== null && a.user_score !== undefined ? a.user_score : (a.relevance_score || 0);
-                    const scoreB = b.user_score !== null && b.user_score !== undefined ? b.user_score : (b.relevance_score || 0);
-                    
-                    if (scoreA !== scoreB) return scoreB - scoreA;
-                    
                     return new Date(b.last_updated) - new Date(a.last_updated);
                 });
             } else if (sort === 'billnumber') {
                 filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
             }
-            
+
             // Render active filters
             renderStateActiveFilters(activeFilters);
             
             // Update count and render
             document.getElementById('stateBillCount').textContent = filtered.length;
-            document.getElementById('stateBillsGrid').innerHTML = filtered.map(renderBillCard).join('');
+            document.getElementById('stateBillsGrid').innerHTML = renderBillList(filtered);
         }
         
         function renderStateActiveFilters(filters) {
@@ -2786,7 +3187,7 @@
             if (searchInput) searchInput.value = '';
             
             // Clear relevance
-            ['direct', 'high', 'medium', 'low', 'minimal'].forEach(tier => {
+            ['direct', 'high', 'medium', 'low', 'minimal', 'ambiguous'].forEach(tier => {
                 const checkbox = document.getElementById(`state-relevance-${tier}`);
                 if (checkbox) checkbox.checked = false;
             });
@@ -2810,21 +3211,12 @@
             currentState = null;
         }
 
-        function filterByState(state) {
-            currentState = state;
-            const filtered = allBills.filter(b => b.state === state);
-            renderBills(filtered);
-            document.getElementById('billCount').textContent = filtered.length;
-            switchView('allBills');
-        }
-
-
         // ==============================================================================
         // ANALYTICS
         // ==============================================================================
 
         function renderAnalytics() {
-            const activeBills = allBills.filter(b => b.relevance_score > 0 && b.relevance !== 'none');
+            const activeBills = allBills.filter(b => b.relevance !== 'none');
             const reviewedBills = activeBills.filter(b => b.llm_tier);
 
             renderMechanismChart(activeBills);
@@ -3259,15 +3651,21 @@
         // Load data
         async function loadData() {
             try {
-                const response = await fetch('data/bills.json');
+                const [response, statsResponse, ambiguousResponse] = await Promise.all([
+                    fetch('/api/bills'),
+                    fetch('/api/stats'),
+                    Promise.resolve({ json: async () => [] }),
+                ]);
                 const allBillsData = await response.json();
-                
-                // Separate active bills from filtered bills
-                allBills = allBillsData.filter(b => b.relevance_score > 0 && b.relevance !== 'none');
-                
-                const statsResponse = await fetch('data/stats.json');
                 const stats = await statsResponse.json();
-                
+                const ambiguousData = await ambiguousResponse.json();
+
+                // Separate active bills (none/ambiguous no longer appear after auto-review)
+                allBills = allBillsData.filter(b => b.relevance !== 'none');
+
+                // Seed ambiguous queue count for menu badge
+                _ambiguousQueueCount = ambiguousData.length;
+
                 updateDashboard(stats);
                 updateReviewMenuCounts();
                 drawMap();
@@ -3287,11 +3685,12 @@
             
             // Top Priority = DIRECT + HIGH using effective tier (user > llm > auto)
             // LLM tier is authoritative when present — auto tier is ignored if LLM reviewed
-            const topPriority = allBills.filter(b => {
-                if (b.user_tier) return b.user_tier === 'direct' || b.user_tier === 'high';
-                if (b.llm_tier) return b.llm_tier === 'direct' || b.llm_tier === 'high';
-                return b.relevance === 'direct' || b.relevance === 'high';
-            }).length;
+            const topPriorityBills = allBills.filter(b => {
+                const t = b.user_tier || b.llm_tier || b.relevance;
+                return t === 'direct' || t === 'high';
+            });
+            // Count companion pairs as 1
+            const topPriority = groupCompanions(topPriorityBills).length;
             document.getElementById('topPriority').textContent = topPriority;
             
             document.getElementById('statesCovered').textContent = new Set(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) !== 'none').map(b => b.state)).size;
@@ -3516,34 +3915,6 @@
                 .text('Reset Zoom');
         }
 
-        function showRecentBills() {
-            const container = document.getElementById('recentBills');
-            const recent = allBills
-                .sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated))
-                .slice(0, 5);
-            
-            const statusMap = {
-                '1': 'Introduced',
-                '2': 'Engrossed',
-                '3': 'Enrolled',
-                '4': 'Passed',
-                '5': 'Vetoed',
-                '6': 'Failed'
-            };
-            
-            container.innerHTML = recent.map(bill => {
-                const status = statusMap[bill.status] || bill.status || 'Unknown';
-                return `
-                <div class="recent-item" onclick="showBillDetail(${bill.bill_id})">
-                    <div class="status-dot ${bill.status}"></div>
-                    <div class="recent-content">
-                        <div class="recent-title">${bill.state} ${bill.bill_number}</div>
-                        <div class="recent-meta">${status} • ${timeAgo(bill.last_updated)}</div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
         function populateStateGrid() {
             const container = document.getElementById('stateGrid');
             const stateCounts = {};
@@ -3764,10 +4135,16 @@
         let reviewCurrentBill = null;
 
         function startQuickReview() {
-            // Queue: auto-only bills (no llm_tier, no user_tier), sorted by score desc
+            // Queue: auto-only bills (no llm_tier, no user_tier), sorted by tier then date
+            const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5 };
             reviewQueue = allBills
                 .filter(b => !b.llm_tier && !b.user_tier)
-                .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0));
+                .sort((a, b) => {
+                    const orderA = tierOrder[a.relevance] !== undefined ? tierOrder[a.relevance] : 99;
+                    const orderB = tierOrder[b.relevance] !== undefined ? tierOrder[b.relevance] : 99;
+                    if (orderA !== orderB) return orderA - orderB;
+                    return new Date(b.last_updated) - new Date(a.last_updated);
+                });
 
             reviewIndex = 0;
             reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
@@ -3800,11 +4177,10 @@
             document.querySelector('.review-card-back').style.display = 'none';
 
             const tier = bill.user_tier || bill.llm_tier || bill.relevance;
-            const score = (bill.relevance_score || 0).toFixed(1);
 
             document.getElementById('reviewBillNumber').textContent = `${bill.state} ${bill.bill_number}`;
             document.getElementById('reviewBillNumberBack').textContent = `${bill.state} ${bill.bill_number}`;
-            document.getElementById('reviewScore').textContent = score;
+            document.getElementById('reviewScore').textContent = tier.toUpperCase();
             document.getElementById('reviewTitle').textContent = bill.title || 'No title';
             document.getElementById('reviewTitleBack').textContent = bill.title || 'No title';
             document.getElementById('reviewTier').textContent = tier.toUpperCase();
@@ -3824,6 +4200,19 @@
                 bill.subjects && bill.subjects.length > 0 ? bill.subjects.join(', ') : 'None';
             const legLink = document.getElementById('reviewLegiScanLink');
             if (legLink) legLink.href = bill.url || '#';
+
+            // Last reviewed timestamp
+            const lastReviewedRow = document.getElementById('reviewLastReviewedRow');
+            const lastReviewedEl = document.getElementById('reviewLastReviewed');
+            if (bill.reviewed_at && lastReviewedRow && lastReviewedEl) {
+                const d = new Date(bill.reviewed_at);
+                const formatted = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                lastReviewedEl.textContent = formatted;
+                lastReviewedRow.style.display = 'block';
+            } else if (lastReviewedRow) {
+                lastReviewedRow.style.display = 'none';
+            }
+
             updateReviewActionButtons();
 
             updateReviewProgress();
@@ -3857,7 +4246,6 @@
             const validTiers = ['minimal', 'low', 'medium', 'high', 'direct'];
             if (!validTiers.includes(tier)) return;
 
-            const scoreMap = { minimal: 1, low: 3, medium: 5, high: 8, direct: 10 };
             const statKey = (tier === 'direct' || tier === 'high') ? 'relevant'
                           : tier === 'medium' ? 'maybe' : 'irrelevant';
             reviewStats[statKey]++;
@@ -3870,13 +4258,13 @@
                     body: JSON.stringify({
                         bill_id: bill.bill_id,
                         feedback_type: 'custom',
-                        user_score: scoreMap[tier],
+                        user_score: null,
                         user_tier: tier,
                         notes: `Quick review: ${tier}`
                     })
                 });
                 bill.user_tier = tier;
-                bill.user_score = scoreMap[tier];
+                bill.reviewed_at = new Date().toISOString();
             } catch(e) {
                 // Continue even if save fails
             }
@@ -3886,7 +4274,7 @@
             if (reviewIndex >= reviewQueue.length) {
                 finishReview();
             } else {
-                loadReviewCard(reviewQueue[reviewIndex]);
+                animateCardTransition('forward', () => loadReviewCard(reviewQueue[reviewIndex]));
             }
         }
 
@@ -3905,11 +4293,49 @@
             switchView('dashboard', true);
         }
 
+        async function reviewIrrelevant() {
+            alert('Read-only view. Run the tracker locally to make changes.');
+            return;
+            if (!reviewCurrentBill) return;
+            const bill = reviewCurrentBill;
+
+            // Permanently delete bill and add to ambiguous_dismissed so tracker never re-flags it
+            try {
+                const resp = await fetch(`/api/ambiguous/${bill.bill_id}/dismiss`, { method: 'POST' });
+                const result = await resp.json();
+                if (!result.success) {
+                    console.warn('Could not dismiss bill:', result.error);
+                }
+            } catch(e) {
+                console.warn('Dismiss request failed:', e);
+            }
+
+            // Remove from allBills cache
+            const idx = allBills.findIndex(b => b.bill_id === bill.bill_id);
+            if (idx !== -1) allBills.splice(idx, 1);
+
+            // Remove from reviewQueue at current position and update total count
+            reviewQueue.splice(reviewIndex, 1);
+            document.getElementById('totalReviewCount').textContent = reviewQueue.length;
+
+            reviewStats.irrelevant++;
+            updateReviewProgress();
+
+            // Show next card (index unchanged since we removed the current item),
+            // or finish if queue is now exhausted
+            if (reviewQueue.length === 0 || reviewIndex >= reviewQueue.length) {
+                finishReview();
+            } else {
+                animateCardTransition('forward', () => loadReviewCard(reviewQueue[reviewIndex]));
+            }
+        }
+
         function handleReviewKey(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             const tierKeys = { '1': 'minimal', '2': 'low', '3': 'medium', '4': 'high', '5': 'direct' };
             if (tierKeys[e.key]) { e.preventDefault(); reviewBill(tierKeys[e.key]); return; }
             switch(e.key) {
+                case 'x': case 'X': e.preventDefault(); reviewIrrelevant(); break;
                 case 'ArrowLeft':  e.preventDefault(); reviewBack(); break;
                 case 'ArrowRight': e.preventDefault(); reviewSkip(); break;
                 case 's': case 'S': e.preventDefault(); reviewToggleStar(); break;
@@ -3919,17 +4345,39 @@
             }
         }
 
+        async function reviewClearSelection() {
+            if (!reviewCurrentBill) return;
+            const bill = reviewCurrentBill;
+            try {
+                await fetch(`/api/feedback/delete/${bill.bill_id}`, { method: 'DELETE' });
+                bill.user_tier = null;
+            } catch(e) {}
+            updateReviewActionButtons();
+        }
+
+        function animateCardTransition(direction, callback) {
+            const card = document.getElementById('reviewCard');
+            if (!card) { callback(); return; }
+            const outClass = direction === 'forward' ? 'slide-out-left' : 'slide-out-right';
+            card.classList.add(outClass);
+            setTimeout(() => {
+                card.classList.remove(outClass);
+                callback();
+                card.classList.add('slide-in');
+                setTimeout(() => card.classList.remove('slide-in'), 220);
+            }, 180);
+        }
+
         function reviewBack() {
             if (reviewIndex <= 0) return;
             reviewIndex--;
-            // Reverse the last stat
             const prev = reviewQueue[reviewIndex];
             if (prev.user_tier) {
                 const statKey = (prev.user_tier === 'direct' || prev.user_tier === 'high') ? 'relevant'
                                : prev.user_tier === 'medium' ? 'maybe' : 'irrelevant';
                 if (reviewStats[statKey] > 0) reviewStats[statKey]--;
             }
-            loadReviewCard(reviewQueue[reviewIndex]);
+            animateCardTransition('back', () => loadReviewCard(reviewQueue[reviewIndex]));
         }
 
         function reviewSkip() {
@@ -3938,7 +4386,7 @@
             if (reviewIndex >= reviewQueue.length) {
                 finishReview();
             } else {
-                loadReviewCard(reviewQueue[reviewIndex]);
+                animateCardTransition('forward', () => loadReviewCard(reviewQueue[reviewIndex]));
             }
         }
 
@@ -3970,26 +4418,215 @@
             const starBtn = document.getElementById('reviewStarBtn');
             const flagBtn = document.getElementById('reviewFlagBtn');
             const backBtn = document.getElementById('reviewBackBtn');
+            const clearBtn = document.getElementById('reviewClearBtn');
+            const tierBadge = document.getElementById('reviewCurrentTierBadge');
             if (starBtn) starBtn.classList.toggle('active', !!bill.starred);
             if (flagBtn) flagBtn.classList.toggle('active', !!bill.flagged);
             if (backBtn) backBtn.disabled = reviewIndex <= 0;
+            const assignedRow = document.getElementById('reviewAssignedRow');
+            if (assignedRow) assignedRow.style.display = bill.user_tier ? 'flex' : 'none';
+            if (tierBadge && bill.user_tier) {
+                tierBadge.textContent = bill.user_tier.toUpperCase();
+                tierBadge.className = `tag ${bill.user_tier}`;
+            }
         }
 
-        function startFlaggedReview() {
-            reviewQueue = allBills.filter(b => b.flagged);
-            reviewIndex = 0;
-            reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
-            if (reviewQueue.length === 0) {
-                alert('No flagged bills to review.');
+        function loadFlaggedBills() {
+            const flagged = allBills.filter(b => b.flagged);
+            document.getElementById('flaggedBillCount').textContent = flagged.length;
+            const grid = document.getElementById('flaggedBillsGrid');
+            if (!flagged.length) {
+                grid.innerHTML = '<div class="loading"><p>No flagged bills. Use the ⚑ button on any bill card to flag it for review.</p></div>';
                 return;
             }
-            document.getElementById('reviewComplete').style.display = 'none';
-            document.getElementById('quickReviewMain').style.display = 'flex';
-            document.getElementById('totalReviewCount').textContent = reviewQueue.length;
-            document.getElementById('reviewedCount').textContent = 0;
-            loadReviewCard(reviewQueue[0]);
-            document.addEventListener('keydown', handleReviewKey);
-            switchView('quickReview', true);
+            grid.innerHTML = renderBillList(flagged);
+        }
+
+        // ── Companion bill helpers ────────────────────────────────────────────
+
+        /** Return the companion bill object for a given billId, or null. */
+        function getCompanionBill(billId) {
+            const bill = allBills.find(b => b.bill_id === billId);
+            if (!bill) return null;
+            if (bill.companion_bill_id)
+                return allBills.find(b => b.bill_id === bill.companion_bill_id) || null;
+            return allBills.find(b => b.companion_bill_id === billId) || null;
+        }
+
+        let _companionDetailPrimary = null;
+        let _companionDetailCompanion = null;
+
+        function showCompanionDetail(primaryId, companionId) {
+            const primary = allBills.find(b => b.bill_id === primaryId);
+            const companion = allBills.find(b => b.bill_id === companionId);
+            if (!primary || !companion) { showBillDetail(primaryId); return; }
+            _companionDetailPrimary = primary;
+            _companionDetailCompanion = companion;
+
+            const statusMap = {'1':'Introduced','2':'Engrossed','3':'Enrolled','4':'Passed','5':'Vetoed','6':'Failed'};
+            const displayTier = primary.user_tier || primary.llm_tier || primary.relevance;
+
+            document.getElementById('companionModalTitle').textContent =
+                primary.title || companion.title || 'No title';
+            const desc = primary.description || companion.description || '';
+            document.getElementById('companionModalDesc').textContent =
+                desc.length > 280 ? desc.substring(0, 280) + '…' : desc;
+            document.getElementById('companionModalTier').innerHTML =
+                `<span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
+                 <span style="font-size:0.78rem;color:var(--text-dim);margin-left:0.6rem;">companion bills · click a panel to open individually</span>`;
+
+            function billPanel(bill) {
+                const ch = detectChamber(bill.bill_number);
+                const chLabel = ch === 'senate' ? 'Senate' : 'House / Assembly';
+                const status = statusMap[bill.status] || bill.status || '—';
+                const date = bill.last_action_date || bill.status_date;
+                const dateLabel = bill.last_action_date ? 'Last Action' : 'Introduced';
+                return `
+                    <div class="companion-modal-bill-num">${bill.state} ${bill.bill_number}
+                        <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;"> · ${chLabel}</span>
+                    </div>
+                    <div class="companion-modal-bill-meta">
+                        Status: ${status}<br>
+                        ${date ? `${dateLabel}: ${new Date(date).toLocaleDateString()}<br>` : ''}
+                        ${bill.sponsor_name ? `Sponsor: ${bill.sponsor_name}${bill.sponsor_party ? ` (${bill.sponsor_party})` : ''}<br>` : ''}
+                    </div>
+                    <div>
+                        <button class="companion-modal-open-btn"
+                            onclick="closeCompanionDetail(); showBillDetail(${bill.bill_id})">Open detail →</button>
+                        ${bill.url ? `<a class="companion-modal-open-btn" href="${bill.url}" target="_blank" rel="noopener">LegiScan ↗</a>` : ''}
+                    </div>`;
+            }
+
+            document.getElementById('companionModalBill1').innerHTML = billPanel(primary);
+            document.getElementById('companionModalBill2').innerHTML = billPanel(companion);
+
+            const bothFlagged = !!(primary.flagged && companion.flagged);
+            const bothStarred = !!(primary.starred && companion.starred);
+            const flagBtn = document.getElementById('companionModalFlag');
+            const starBtn = document.getElementById('companionModalStar');
+            flagBtn.classList.toggle('active', bothFlagged);
+            flagBtn.title = bothFlagged ? 'Remove flag from both' : 'Flag both for review';
+            starBtn.classList.toggle('active', bothStarred);
+            starBtn.title = bothStarred ? 'Unstar both' : 'Star both';
+
+            document.getElementById('companionDetailModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCompanionDetail() {
+            document.getElementById('companionDetailModal').classList.remove('open');
+            document.body.style.overflow = '';
+            _companionDetailPrimary = null;
+            _companionDetailCompanion = null;
+        }
+
+        async function toggleCompanionFlag() {
+            if (!_companionDetailPrimary || !_companionDetailCompanion) return;
+            await _flagBillSilent(_companionDetailPrimary.bill_id);
+            await _flagBillSilent(_companionDetailCompanion.bill_id);
+            // Refresh state
+            _companionDetailPrimary = allBills.find(b => b.bill_id === _companionDetailPrimary.bill_id);
+            _companionDetailCompanion = allBills.find(b => b.bill_id === _companionDetailCompanion.bill_id);
+            const bothFlagged = !!(_companionDetailPrimary?.flagged && _companionDetailCompanion?.flagged);
+            const btn = document.getElementById('companionModalFlag');
+            btn.classList.toggle('active', bothFlagged);
+            btn.title = bothFlagged ? 'Remove flag from both' : 'Flag both for review';
+            updateReviewMenuCounts();
+        }
+
+        async function toggleCompanionStar() {
+            if (!_companionDetailPrimary || !_companionDetailCompanion) return;
+            await _starBillSilent(_companionDetailPrimary.bill_id);
+            await _starBillSilent(_companionDetailCompanion.bill_id);
+            _companionDetailPrimary = allBills.find(b => b.bill_id === _companionDetailPrimary.bill_id);
+            _companionDetailCompanion = allBills.find(b => b.bill_id === _companionDetailCompanion.bill_id);
+            const bothStarred = !!(_companionDetailPrimary?.starred && _companionDetailCompanion?.starred);
+            const btn = document.getElementById('companionModalStar');
+            btn.classList.toggle('active', bothStarred);
+            btn.title = bothStarred ? 'Unstar both' : 'Star both';
+            updateReviewMenuCounts();
+        }
+
+        /** Toggle flag without triggering the companion-propagation prompt (used by companion modal). */
+        async function _flagBillSilent(billId) {
+            const resp = await fetch(`/api/feedback/flag/${billId}`, { method: 'POST' });
+            const data = await resp.json();
+            if (!resp.ok) return;
+            const bill = allBills.find(b => b.bill_id === billId);
+            if (bill) bill.flagged = data.flagged ? 1 : 0;
+            document.querySelectorAll(`#flag-btn-${billId}`).forEach(btn => {
+                btn.classList.toggle('active', !!data.flagged);
+                btn.title = data.flagged ? 'Remove flag' : 'Flag for review';
+            });
+            const detailBtn = document.getElementById(`detail-flag-btn-${billId}`);
+            if (detailBtn) {
+                detailBtn.classList.toggle('active', !!data.flagged);
+                detailBtn.title = data.flagged ? 'Remove flag' : 'Flag for review';
+            }
+        }
+
+        /** Toggle star without triggering the companion-propagation prompt. */
+        async function _starBillSilent(billId) {
+            const resp = await fetch(`/api/feedback/star/${billId}`, { method: 'POST' });
+            const data = await resp.json();
+            if (!resp.ok) return;
+            const bill = allBills.find(b => b.bill_id === billId);
+            if (bill) bill.starred = data.starred ? 1 : 0;
+            document.querySelectorAll(`#star-btn-${billId}`).forEach(btn => {
+                btn.classList.toggle('active', !!data.starred);
+                btn.title = data.starred ? 'Unstar' : 'Star';
+            });
+            const detailBtn = document.getElementById(`detail-star-btn-${billId}`);
+            if (detailBtn) {
+                detailBtn.classList.toggle('active', !!data.starred);
+                detailBtn.title = data.starred ? 'Unstar' : 'Star';
+            }
+        }
+
+        // ── Flag / Star (with companion propagation prompt) ─────────────────
+
+        async function toggleFlagBill(billId) {
+            try {
+                await _flagBillSilent(billId);
+                updateReviewMenuCounts();
+                if (document.getElementById('flaggedBillsView').classList.contains('active')) loadFlaggedBills();
+
+                // Offer to apply to companion bill (skip if called from companion modal)
+                const companion = getCompanionBill(billId);
+                if (companion && !_companionDetailPrimary) {
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    const action = bill?.flagged ? 'flag' : 'remove flag from';
+                    if (confirm(`Also ${action} companion bill ${companion.state} ${companion.bill_number}?`)) {
+                        await _flagBillSilent(companion.bill_id);
+                        updateReviewMenuCounts();
+                        if (document.getElementById('flaggedBillsView').classList.contains('active')) loadFlaggedBills();
+                    }
+                }
+            } catch (e) {
+                console.error('Flag toggle failed:', e);
+            }
+        }
+
+        async function toggleStarBill(billId) {
+            try {
+                await _starBillSilent(billId);
+                updateReviewMenuCounts();
+                if (document.getElementById('starredBillsView').classList.contains('active')) loadStarredBills();
+
+                // Offer to apply to companion bill (skip if called from companion modal)
+                const companion = getCompanionBill(billId);
+                if (companion && !_companionDetailPrimary) {
+                    const bill = allBills.find(b => b.bill_id === billId);
+                    const action = bill?.starred ? 'star' : 'unstar';
+                    if (confirm(`Also ${action} companion bill ${companion.state} ${companion.bill_number}?`)) {
+                        await _starBillSilent(companion.bill_id);
+                        updateReviewMenuCounts();
+                        if (document.getElementById('starredBillsView').classList.contains('active')) loadStarredBills();
+                    }
+                }
+            } catch (e) {
+                console.error('Star toggle failed:', e);
+            }
         }
 
         function loadStarredBills() {
@@ -4000,7 +4637,7 @@
                 grid.innerHTML = '<div class="loading"><p>No starred bills yet.</p></div>';
                 return;
             }
-            grid.innerHTML = starred.map(b => renderBillCard(b)).join('');
+            grid.innerHTML = renderBillList(starred);
         }
 
         function updateReviewMenuCounts() {
@@ -4010,9 +4647,11 @@
             const qrEl = document.getElementById('quickReviewCount');
             const flEl = document.getElementById('flaggedCount');
             const stEl = document.getElementById('starredCount');
+            const amEl = document.getElementById('ambiguousCount');
             if (qrEl) qrEl.textContent = queueCount > 0 ? `(${queueCount})` : '';
             if (flEl) flEl.textContent = flaggedCount > 0 ? `(${flaggedCount})` : '';
             if (stEl) stEl.textContent = starredCount > 0 ? `(${starredCount})` : '';
+            if (amEl) amEl.textContent = _ambiguousQueueCount > 0 ? `(${_ambiguousQueueCount})` : '';
         }
         function updateClearBtn() {
             const btn = document.getElementById('clearFiltersBtn');
@@ -4037,6 +4676,12 @@
             document.getElementById('clearFiltersBtn') && (document.getElementById('clearFiltersBtn').style.display = 'none');
             // Clear search
             document.getElementById('searchInput').value = '';
+            const reviewedFrom = document.getElementById('reviewedFrom');
+            const reviewedTo = document.getElementById('reviewedTo');
+            const reviewedOnly = document.getElementById('filter-reviewed-only');
+            if (reviewedFrom) reviewedFrom.value = '';
+            if (reviewedTo) reviewedTo.value = '';
+            if (reviewedOnly) reviewedOnly.checked = false;
             
             // Clear all checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -4054,6 +4699,76 @@
         }
         
 
+        /**
+         * Shared bill-filter engine. All filter views call this instead of
+         * duplicating filter logic. opts keys are all optional (falsy = skip).
+         *
+         * search (string), selectedTiers (string[]), selectedStates (string[]),
+         * selectedStatuses (string[]), selectedParties (string[]),
+         * selectedTags (string[]), selectedSubjects (string[]),
+         * selectedBillTypes (string[]),
+         * aiOnly (bool), reviewedOnly (bool), companionOnly (bool),
+         * statusFrom, statusTo, updatedFrom, updatedTo,
+         * reviewedFrom, reviewedTo  (all ISO date strings)
+         */
+        function applyBillFilters(bills, opts = {}) {
+            let filtered = [...bills];
+            const {
+                search, selectedTiers, selectedStates, selectedStatuses,
+                selectedParties, selectedTags, selectedSubjects, selectedBillTypes,
+                aiOnly, reviewedOnly, companionOnly,
+                statusFrom, statusTo, updatedFrom, updatedTo, reviewedFrom, reviewedTo
+            } = opts;
+
+            if (search) {
+                const tokens = search.toLowerCase().split(/\s+/).filter(Boolean);
+                filtered = filtered.filter(b => {
+                    const hay = [b.title, b.description, b.bill_number, b.state, b.sponsor_name,
+                                 (b.tags || []).join(' '), (b.subjects || []).join(' ')].join(' ').toLowerCase();
+                    return tokens.every(t => hay.includes(t));
+                });
+            }
+            if (aiOnly) filtered = filtered.filter(b => !!b.llm_tier);
+            if (companionOnly)
+                filtered = filtered.filter(b =>
+                    !!b.companion_bill_id || allBills.some(o => o.companion_bill_id === b.bill_id));
+            if (selectedStates?.length)
+                filtered = filtered.filter(b => selectedStates.includes(b.state));
+            if (selectedTiers?.length && selectedTiers.length < 7)
+                filtered = filtered.filter(b =>
+                    selectedTiers.includes(b.user_tier || b.llm_tier || b.relevance));
+            if (selectedTags?.length)
+                filtered = filtered.filter(b => b.tags && selectedTags.some(t => b.tags.includes(t)));
+            if (selectedSubjects?.length)
+                filtered = filtered.filter(b => b.subjects && selectedSubjects.some(s => b.subjects.includes(s)));
+            if (selectedParties?.length)
+                filtered = filtered.filter(b => selectedParties.includes(b.sponsor_party));
+            if (selectedStatuses?.length && selectedStatuses.length < 4)
+                filtered = filtered.filter(b => selectedStatuses.includes(getBillStatusGroup(b)));
+            if (selectedBillTypes?.length)
+                filtered = filtered.filter(b => selectedBillTypes.includes(b.bill_type));
+            if (reviewedOnly) filtered = filtered.filter(b => b.reviewed_at);
+            if (reviewedFrom) filtered = filtered.filter(b => b.reviewed_at && b.reviewed_at >= reviewedFrom);
+            if (reviewedTo)   filtered = filtered.filter(b => b.reviewed_at && b.reviewed_at <= reviewedTo + 'T23:59:59');
+            if (statusFrom || statusTo)
+                filtered = filtered.filter(b => {
+                    if (!b.status_date) return false;
+                    const d = new Date(b.status_date);
+                    if (statusFrom && d < new Date(statusFrom)) return false;
+                    if (statusTo   && d > new Date(statusTo))   return false;
+                    return true;
+                });
+            if (updatedFrom || updatedTo)
+                filtered = filtered.filter(b => {
+                    if (!b.last_updated) return false;
+                    const d = new Date(b.last_updated);
+                    if (updatedFrom && d < new Date(updatedFrom)) return false;
+                    if (updatedTo   && d > new Date(updatedTo))   return false;
+                    return true;
+                });
+            return filtered;
+        }
+
         function getBillStatusGroup(bill) {
             const s = bill.status ? String(bill.status) : null;
             if (!s) return 'unknown';
@@ -4063,165 +4778,87 @@
             return 'unknown';
         }
         function applyFilters() {
-            let filtered = [...allBills];
             const activeFilters = [];
-            
-            // Text search — fuzzy: all tokens must match somewhere
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (search) {
-                const tokens = search.split(/\s+/).filter(Boolean);
-                filtered = filtered.filter(b => {
-                    const haystack = [
-                        b.title || '',
-                        b.description || '',
-                        b.bill_number || '',
-                        b.state || '',
-                        b.sponsor_name || '',
-                        (b.tags || []).join(' '),
-                        (b.subjects || []).join(' ')
-                    ].join(' ').toLowerCase();
-                    return tokens.every(token => haystack.includes(token));
-                });
-                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
-                    document.getElementById('searchInput').value = '';
-                    applyFilters();
-                }});
-            }
-            
-            // AI review filter
-            if (document.getElementById('filter-ai-reviewed')?.checked) {
-                filtered = filtered.filter(b => !!b.llm_tier);
-                activeFilters.push({ type: 'ai', label: 'AI Reviewed', clear: () => {
-                    document.getElementById('filter-ai-reviewed').checked = false;
-                    applyFilters();
-                }});
-            }
 
-            // State filters
+            // ── Read all control values ───────────────────────────────────────
+            const search         = document.getElementById('searchInput').value.toLowerCase().trim();
+            const aiOnly         = !!document.getElementById('filter-ai-reviewed')?.checked;
+            const companionOnly  = !!document.getElementById('filter-companion-only')?.checked;
+            const reviewedOnly   = !!document.getElementById('filter-reviewed-only')?.checked;
+            const reviewedFrom   = document.getElementById('reviewedFrom')?.value || '';
+            const reviewedTo     = document.getElementById('reviewedTo')?.value || '';
+            const statusFrom     = document.getElementById('statusDateFrom').value;
+            const statusTo       = document.getElementById('statusDateTo').value;
+            const updatedFrom    = document.getElementById('lastUpdatedFrom').value;
+            const updatedTo      = document.getElementById('lastUpdatedTo').value;
             const selectedStates = Array.from(document.querySelectorAll('[id^="state-"]:checked')).map(cb => cb.value);
-            if (selectedStates.length > 0) {
-                filtered = filtered.filter(b => selectedStates.includes(b.state));
-                const label = selectedStates.length === 1 
-                    ? `State: ${selectedStates[0]}` 
-                    : `States: ${selectedStates.length} selected`;
+            const selectedRelevance = ['direct','high','medium','low','minimal']
+                .filter(t => document.getElementById(`relevance-${t}`)?.checked);
+            const selectedTags     = Array.from(document.querySelectorAll('[id^="tag-"]:checked')).map(cb => cb.value);
+            const selectedSubjects = Array.from(document.querySelectorAll('[id^="subject-"]:checked')).map(cb => cb.value);
+            const selectedParties  = ['D','R','I'].filter(p => document.getElementById(`party-${p}`)?.checked);
+            const selectedStatuses = ['active','passed','failed','unknown']
+                .filter(s => document.getElementById(`status-${s}`)?.checked);
+            const selectedBillTypes = Array.from(document.querySelectorAll('[id^="billtype-"]:checked')).map(cb => cb.value);
+
+            // ── Delegate all filtering to shared helper ───────────────────────
+            let filtered = applyBillFilters(allBills, {
+                search, aiOnly, companionOnly, reviewedOnly, reviewedFrom, reviewedTo,
+                statusFrom, statusTo, updatedFrom, updatedTo,
+                selectedStates, selectedTiers: selectedRelevance,
+                selectedTags, selectedSubjects, selectedParties,
+                selectedStatuses, selectedBillTypes
+            });
+
+            // ── Build active-filter chips (display only, no re-filtering) ─────
+            if (search)
+                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
+                    document.getElementById('searchInput').value = ''; applyFilters(); }});
+            if (aiOnly)
+                activeFilters.push({ type: 'ai', label: 'AI Reviewed', clear: () => {
+                    document.getElementById('filter-ai-reviewed').checked = false; applyFilters(); }});
+            if (companionOnly)
+                activeFilters.push({ type: 'companion', label: 'Companion bills', clear: () => {
+                    document.getElementById('filter-companion-only').checked = false; applyFilters(); }});
+            if (selectedStates.length) {
+                const label = selectedStates.length === 1 ? `State: ${selectedStates[0]}` : `States: ${selectedStates.length} selected`;
                 activeFilters.push({ type: 'states', label, clear: clearAllStates });
             }
-            
-            // Relevance filters
-            const selectedRelevance = [];
-            if (document.getElementById('relevance-direct').checked) selectedRelevance.push('direct');
-            if (document.getElementById('relevance-high').checked) selectedRelevance.push('high');
-            if (document.getElementById('relevance-medium').checked) selectedRelevance.push('medium');
-            if (document.getElementById('relevance-low').checked) selectedRelevance.push('low');
-            if (document.getElementById('relevance-minimal').checked) selectedRelevance.push('minimal');
-            
-            if (selectedRelevance.length > 0 && selectedRelevance.length < 5) {
-                filtered = filtered.filter(b => {
-                    if (b.user_tier) return selectedRelevance.includes(b.user_tier);
-                    if (b.llm_tier) return selectedRelevance.includes(b.llm_tier);
-                    return selectedRelevance.includes(b.relevance);
-                });
-                selectedRelevance.forEach(tier => {
-                    activeFilters.push({ type: 'relevance', label: `${tier.toUpperCase()}`, clear: () => {
-                        document.getElementById(`relevance-${tier}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-            
-            // Tag filters
-            const selectedTags = Array.from(document.querySelectorAll('[id^="tag-"]:checked')).map(cb => cb.value);
-            if (selectedTags.length > 0) {
-                filtered = filtered.filter(b => 
-                    b.tags && selectedTags.some(tag => b.tags.includes(tag))
-                );
-                selectedTags.forEach(tag => {
-                    const displayName = (({'ai-policy': 'AI Policy'})[tag] || tag.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-                    activeFilters.push({ type: 'tag', label: displayName, clear: () => {
-                        document.getElementById(`tag-${tag}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-            
-            // Subject filters
-            const selectedSubjects = Array.from(document.querySelectorAll('[id^="subject-"]:checked')).map(cb => cb.value);
-            if (selectedSubjects.length > 0) {
-                filtered = filtered.filter(b => 
-                    b.subjects && selectedSubjects.some(subject => b.subjects.includes(subject))
-                );
-                selectedSubjects.forEach(subject => {
-                    activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
-                        document.getElementById(`subject-${subject.replace(/[^a-zA-Z0-9]/g, '-')}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-            
-            // Party filters
-            const selectedParties = [];
-            if (document.getElementById('party-D').checked) selectedParties.push('D');
-            if (document.getElementById('party-R').checked) selectedParties.push('R');
-            if (document.getElementById('party-I').checked) selectedParties.push('I');
-            if (selectedParties.length > 0) {
-                filtered = filtered.filter(b => selectedParties.includes(b.sponsor_party));
-                const partyNames = { 'D': 'Democrat', 'R': 'Republican', 'I': 'Independent' };
-                selectedParties.forEach(party => {
-                    activeFilters.push({ type: 'party', label: `Party: ${partyNames[party]}`, clear: () => {
-                        document.getElementById(`party-${party}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-            
-            // Bill status filters
-            const selectedStatuses = [];
-            if (document.getElementById('status-active')?.checked) selectedStatuses.push('active');
-            if (document.getElementById('status-passed')?.checked) selectedStatuses.push('passed');
-            if (document.getElementById('status-failed')?.checked) selectedStatuses.push('failed');
-            if (document.getElementById('status-unknown')?.checked) selectedStatuses.push('unknown');
-            if (selectedStatuses.length > 0 && selectedStatuses.length < 4) {
-                filtered = filtered.filter(b => selectedStatuses.includes(getBillStatusGroup(b)));
-                selectedStatuses.forEach(s => {
-                    const labels = { active: 'Active', passed: 'Passed', failed: 'Failed', unknown: 'Unknown' };
-                    activeFilters.push({ type: 'status', label: `Status: ${labels[s]}`, clear: () => {
-                        document.getElementById(`status-${s}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-
-            // Bill type filters
-            const selectedBillTypes = Array.from(document.querySelectorAll('[id^="billtype-"]:checked')).map(cb => cb.value);
-            if (selectedBillTypes.length > 0) {
-                filtered = filtered.filter(b => selectedBillTypes.includes(b.bill_type));
-                const billTypeNames = {
-                    'B': 'Bill',
-                    'R': 'Resolution',
-                    'CR': 'Concurrent Resolution',
-                    'JR': 'Joint Resolution',
-                    'JRCA': 'Joint Resolution Constitutional Amendment'
-                };
-                selectedBillTypes.forEach(type => {
-                    const displayName = billTypeNames[type] || type;
-                    activeFilters.push({ type: 'billtype', label: `Type: ${displayName}`, clear: () => {
-                        document.getElementById(`billtype-${type}`).checked = false;
-                        applyFilters();
-                    }});
-                });
-            }
-            
-            // Status date range
-            const statusFrom = document.getElementById('statusDateFrom').value;
-            const statusTo = document.getElementById('statusDateTo').value;
+            if (selectedRelevance.length && selectedRelevance.length < 6)
+                selectedRelevance.forEach(tier =>
+                    activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
+                        document.getElementById(`relevance-${tier}`).checked = false; applyFilters(); }}));
+            selectedTags.forEach(tag => {
+                const displayName = ({'ai-policy':'AI Policy'})[tag] || tag.split('-').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+                activeFilters.push({ type: 'tag', label: displayName, clear: () => {
+                    document.getElementById(`tag-${tag}`).checked = false; applyFilters(); }});
+            });
+            selectedSubjects.forEach(subject =>
+                activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
+                    document.getElementById(`subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked = false; applyFilters(); }}));
+            const partyNames = { 'D': 'Democrat', 'R': 'Republican', 'I': 'Independent' };
+            selectedParties.forEach(party =>
+                activeFilters.push({ type: 'party', label: `Party: ${partyNames[party]}`, clear: () => {
+                    document.getElementById(`party-${party}`).checked = false; applyFilters(); }}));
+            const statusLabels = { active:'Active', passed:'Passed', failed:'Failed', unknown:'Unknown' };
+            if (selectedStatuses.length && selectedStatuses.length < 4)
+                selectedStatuses.forEach(s =>
+                    activeFilters.push({ type: 'status', label: `Status: ${statusLabels[s]}`, clear: () => {
+                        document.getElementById(`status-${s}`).checked = false; applyFilters(); }}));
+            if (reviewedOnly)
+                activeFilters.push({ type: 'reviewed', label: 'Has manual review', clear: () => {
+                    document.getElementById('filter-reviewed-only').checked = false; applyFilters(); }});
+            if (reviewedFrom)
+                activeFilters.push({ type: 'reviewed-from', label: `Reviewed from ${reviewedFrom}`, clear: () => {
+                    document.getElementById('reviewedFrom').value = ''; applyFilters(); }});
+            if (reviewedTo)
+                activeFilters.push({ type: 'reviewed-to', label: `Reviewed to ${reviewedTo}`, clear: () => {
+                    document.getElementById('reviewedTo').value = ''; applyFilters(); }});
+            const billTypeNames = {'B':'Bill','R':'Resolution','CR':'Concurrent Resolution','JR':'Joint Resolution','JRCA':'Joint Resolution Constitutional Amendment'};
+            selectedBillTypes.forEach(type =>
+                activeFilters.push({ type: 'billtype', label: `Type: ${billTypeNames[type]||type}`, clear: () => {
+                    document.getElementById(`billtype-${type}`).checked = false; applyFilters(); }}));
             if (statusFrom || statusTo) {
-                filtered = filtered.filter(b => {
-                    if (!b.status_date) return false;
-                    const billDate = new Date(b.status_date);
-                    if (statusFrom && billDate < new Date(statusFrom)) return false;
-                    if (statusTo && billDate > new Date(statusTo)) return false;
-                    return true;
-                });
                 let label = 'Status Date: ';
                 if (statusFrom && statusTo) label += `${statusFrom} to ${statusTo}`;
                 else if (statusFrom) label += `after ${statusFrom}`;
@@ -4229,21 +4866,9 @@
                 activeFilters.push({ type: 'statusDate', label, clear: () => {
                     document.getElementById('statusDateFrom').value = '';
                     document.getElementById('statusDateTo').value = '';
-                    applyFilters();
-                }});
+                    applyFilters(); }});
             }
-            
-            // Last updated range
-            const updatedFrom = document.getElementById('lastUpdatedFrom').value;
-            const updatedTo = document.getElementById('lastUpdatedTo').value;
             if (updatedFrom || updatedTo) {
-                filtered = filtered.filter(b => {
-                    if (!b.last_updated) return false;
-                    const billDate = new Date(b.last_updated);
-                    if (updatedFrom && billDate < new Date(updatedFrom)) return false;
-                    if (updatedTo && billDate > new Date(updatedTo)) return false;
-                    return true;
-                });
                 let label = 'Updated: ';
                 if (updatedFrom && updatedTo) label += `${updatedFrom} to ${updatedTo}`;
                 else if (updatedFrom) label += `after ${updatedFrom}`;
@@ -4251,10 +4876,9 @@
                 activeFilters.push({ type: 'updatedDate', label, clear: () => {
                     document.getElementById('lastUpdatedFrom').value = '';
                     document.getElementById('lastUpdatedTo').value = '';
-                    applyFilters();
-                }});
+                    applyFilters(); }});
             }
-            
+
             // Sort - default to most recent
             const sort = document.getElementById('sortSelect').value;
             if (sort === 'introduced') {
@@ -4267,28 +4891,14 @@
             } else if (sort === 'recent') {
                 filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
             } else if (sort === 'relevance') {
-                // Sort by tier: direct > high > medium > low > minimal
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                // Sort by tier: direct > high > medium > low > minimal > ambiguous
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
-                    // Get effective tier (user override or automated)
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
                     const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
-                    
-                    if (orderA !== orderB) {
-                        return orderA - orderB;
-                    }
-                    
-                    // Within same tier, sort by score (high to low)
-                    const scoreA = a.user_score !== null && a.user_score !== undefined ? a.user_score : (a.relevance_score || 0);
-                    const scoreB = b.user_score !== null && b.user_score !== undefined ? b.user_score : (b.relevance_score || 0);
-                    
-                    if (scoreA !== scoreB) {
-                        return scoreB - scoreA;
-                    }
-                    
-                    // Finally by date
+                    if (orderA !== orderB) return orderA - orderB;
                     return new Date(b.last_updated) - new Date(a.last_updated);
                 });
             } else if (sort === 'state') {
@@ -4355,14 +4965,14 @@
                 '6': 'Failed'
             };
             
-            container.innerHTML = bills.map(bill => {
+            function renderSingleBillInline(bill) {
                 const description = bill.description || '';
-                const truncatedDesc = description.length > 150 
-                    ? description.substring(0, 150) + '...' 
+                const truncatedDesc = description.length > 150
+                    ? description.substring(0, 150) + '...'
                     : description;
-                
+
                 const status = statusMap[bill.status] || bill.status || 'Unknown';
-                
+
                 // Dynamic date label based on status
                 let dateLabel = 'Status Date';
                 if (bill.last_action_date) {
@@ -4378,35 +4988,19 @@
                     };
                     dateLabel = statusDateLabels[bill.status] || 'Status Date';
                 }
-                
-                // Get display score (user score if exists, otherwise automated)
-                const hasLLM2 = !!bill.llm_tier;
-                const hasUserFeedback = bill.user_score !== null && bill.user_score !== undefined;
-                const displayScore = hasUserFeedback ? bill.user_score : (bill.relevance_score || 0);
-                const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
-                const scoreClass = hasUserFeedback ? 'modified' : (hasLLM2 && bill.llm_tier !== bill.relevance ? 'llm-modified' : '');
 
-                let feedbackBadge = '';
-                if (hasUserFeedback) {
-                    if (bill.user_score > bill.relevance_score) feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
-                    else if (bill.user_score < bill.relevance_score) feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
-                    else feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
-                } else if (hasLLM2) {
-                    feedbackBadge = '<span class="feedback-badge" style="background:var(--blue);color:white;">AI</span>';
-                }
-                
+                // Tier precedence: user > LLM > automated
+                const hasLLM2 = !!bill.llm_tier;
+                const hasUserFeedback2 = !!bill.user_tier;
+                const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
+                const reviewClass2 = hasUserFeedback2 ? 'user-reviewed' : (hasLLM2 ? 'llm-reviewed' : '');
+
                 return `
-                <div class="bill-card ${displayTier}" onclick="showBillDetail(${bill.bill_id})">
+                <div class="bill-card ${displayTier} ${reviewClass2}" onclick="showBillDetail(${bill.bill_id})">
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            ${hasUserFeedback
-                                ? `<span class="relevance-score modified">${bill.user_score.toFixed(1)}</span>`
-                                : hasLLM2
-                                    ? ''
-                                    : `<span class="relevance-score">${(bill.relevance_score || 0).toFixed(1)}</span>`
-                            }
-                            ${feedbackBadge}
+                            <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
                         </div>
                     </div>
                     <h3 class="bill-title">${bill.title || 'No title'}</h3>
@@ -4414,13 +5008,27 @@
                         <p class="bill-description-truncated">${truncatedDesc}</p>
                     ` : ''}
                     <div class="bill-meta">
-                        <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
                         <span>Status: ${status}</span>
-                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` : 
+                        ${bill.last_action_date ? `<span>${dateLabel}: ${new Date(bill.last_action_date).toLocaleDateString()}</span>` :
                           bill.status_date ? `<span>${dateLabel}: ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
+                        <span style="display:flex; gap:0.25rem; align-items:center; margin-left:auto;">
+                            <button id="flag-btn-${bill.bill_id}" class="card-flag-btn ${bill.flagged ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleFlagBill(${bill.bill_id})"
+                                title="${bill.flagged ? 'Remove flag' : 'Flag for review'}">&#9873;</button>
+                            <button id="star-btn-${bill.bill_id}" class="card-star-btn ${bill.starred ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleStarBill(${bill.bill_id})"
+                                title="${bill.starred ? 'Unstar' : 'Star'}">&#9733;</button>
+                        </span>
                     </div>
                 </div>
-            `;
+            `;}
+
+            const groupedItems = groupCompanions(bills);
+            container.innerHTML = groupedItems.map(item => {
+                if (item.type === 'companion') {
+                    return renderCompanionCard(item.primary, item.companion);
+                }
+                return renderSingleBillInline(item.bill);
             }).join('');
         }
 
@@ -4452,10 +5060,9 @@
                 document.getElementById('feedbackReviewView').classList.add('active');
                 document.querySelectorAll('.menu-item')[3].classList.add('active');
                 applyFeedbackFilters();
-            } else if (view === 'filteredBills') {
-                document.getElementById('filteredBillsView').classList.add('active');
-                document.querySelectorAll('.menu-item')[4].classList.add('active');
-                loadFilteredBills();
+            } else if (view === 'ambiguousReview') {
+                document.getElementById('ambiguousReviewView').classList.add('active');
+                loadAmbiguousReview();
             } else if (view === 'analytics') {
                 document.getElementById('analyticsView').classList.add('active');
                 document.querySelectorAll('.menu-item')[5].classList.add('active');
@@ -4463,6 +5070,9 @@
             } else if (view === 'starredBills') {
                 document.getElementById('starredBillsView').classList.add('active');
                 loadStarredBills();
+            } else if (view === 'flaggedBills') {
+                document.getElementById('flaggedBillsView').classList.add('active');
+                loadFlaggedBills();
             } else if (view === 'about') {
                 document.getElementById('aboutView').classList.add('active');
             } else if (view === 'billDetail') {
@@ -4518,8 +5128,8 @@
             const container = document.getElementById('billDetailContent');
             
             container.innerHTML = `
-                <div class="bill-detail-header">
-                    <div class="bill-detail-title-section">
+                <div class="bill-detail-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                    <div class="bill-detail-title-section" style="flex:1;">
                         <div class="bill-detail-number">${bill.state} ${bill.bill_number}</div>
                         <h1 class="bill-detail-title">${bill.title || 'No title available'}</h1>
                         <div class="bill-detail-meta-row">
@@ -4528,10 +5138,19 @@
                             ${bill.status_date ? `<span><strong>Status Date:</strong> ${new Date(bill.status_date).toLocaleDateString()}</span>` : ''}
                             <span><strong>Tier:</strong>
                                 <span class="tag ${bill.user_tier || bill.llm_tier || bill.relevance}">${(bill.user_tier || bill.llm_tier || bill.relevance).toUpperCase()}</span>
-                                ${(bill.llm_tier && !bill.user_tier && bill.llm_tier !== bill.relevance) ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.25rem;">(auto: ${bill.relevance.toUpperCase()})</span>` : ''}
                                 ${bill.user_tier ? `<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.25rem;">(manual override)</span>` : ''}
                             </span>
                         </div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-shrink:0; padding-top:0.25rem;">
+                        <button id="detail-flag-btn-${bill.bill_id}"
+                            class="review-icon-btn flag ${bill.flagged ? 'active' : ''}"
+                            onclick="toggleFlagBill(${bill.bill_id})"
+                            title="${bill.flagged ? 'Remove flag' : 'Flag for review'}">&#9873;</button>
+                        <button id="detail-star-btn-${bill.bill_id}"
+                            class="review-icon-btn star ${bill.starred ? 'active' : ''}"
+                            onclick="toggleStarBill(${bill.bill_id})"
+                            title="${bill.starred ? 'Unstar' : 'Star'}">&#9733;</button>
                     </div>
                 </div>
 
@@ -4546,11 +5165,6 @@
                         <div>
                             <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">AI TIER</div>
                             <span class="tag ${bill.llm_tier}">${bill.llm_tier.toUpperCase()}</span>
-                            ${bill.llm_tier !== bill.relevance ? `
-                                <span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;">
-                                    (auto: ${bill.relevance.toUpperCase()})
-                                </span>
-                            ` : '<span style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;">agrees with auto</span>'}
                         </div>
                         <div>
                             <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">SCOPE</div>
@@ -4664,52 +5278,33 @@
                 
                 <!-- Feedback Panel -->
                 <div class="feedback-panel">
-                    <div class="feedback-section-title">
-                        Relevance Assessment
-                        <span class="info-icon">i
-                            <div class="info-tooltip">
-                                <strong>Scoring Breakdown (0-10):</strong><br>
-                                • Platform terms: +3.0<br>
-                                • Algorithm terms: +3.0<br>
-                                • Governance terms: +3.0<br>
-                                • Title matches: +0.1 each<br>
-                                • Multiple terms: +0.05 each<br>
-                                • Enforcement language: +0.05<br>
-                                • Penalty language: +0.05<br><br>
-                                <strong>Tiers:</strong><br>
-                                DIRECT (9.0-10.0) • HIGH (7.0-8.9)<br>
-                                MEDIUM (4.0-6.9) • LOW (2.0-3.9)<br>
-                                MINIMAL (0.1-1.9)
-                            </div>
+                    <div class="feedback-section-title" style="cursor:pointer; user-select:none; display:flex; justify-content:space-between; align-items:center;"
+                         onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.ra-toggle').textContent = this.nextElementSibling.style.display === 'none' ? '▸' : '▾';">
+                        <span>
+                            Relevance Assessment
+                            <span class="info-icon">i
+                                <div class="info-tooltip">
+                                    <strong>Tier Classification:</strong><br>
+                                    <strong>DIRECT</strong> — feed ranking/recommendation control is the bill's primary purpose<br>
+                                    <strong>HIGH</strong> — strong feed impact; direct pattern in description, or platform + governance signal<br>
+                                    <strong>MEDIUM</strong> — privacy + platform/algorithm keywords; indirect feed impact<br>
+                                    <strong>LOW</strong> — platform or algorithm keywords present, no governance signal<br>
+                                    <strong>MINIMAL</strong> — privacy keywords only; no platform or algorithm signal<br>
+                                    <strong>AMBIGUOUS</strong> — acronym act name with no descriptive keywords; requires manual review
+                                </div>
+                            </span>
                         </span>
+                        <span class="ra-toggle" style="font-size:0.75rem; color:var(--text-dim);">▸</span>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Automated Score
-                                ${bill.llm_tier && !bill.user_tier ? '<span style="font-size:0.7rem; color:var(--blue); margin-left:0.25rem;">(overridden by AI)</span>' : ''}
-                            </label>
-                            <div class="relevance-score" style="${bill.llm_tier && !bill.user_tier ? 'opacity:0.5;' : ''}">${(bill.relevance_score || 0).toFixed(1)}</div>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Your Score Override</label>
-                            <div class="score-input-group">
-                                <input type="number" 
-                                       id="userScore_${bill.bill_id}" 
-                                       class="score-input" 
-                                       min="0" 
-                                       max="10" 
-                                       step="0.1" 
-                                       value="${bill.user_score !== null && bill.user_score !== undefined ? bill.user_score.toFixed(1) : ''}"
-                                       placeholder="0.0">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 1.5rem;">
-                        <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.75rem;">
+                    <div style="display:none;">
+                    ${!bill.llm_tier ? `
+                    <div style="margin-bottom: 1.5rem; margin-top: 1rem;">
+                        <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">
                             Automated Tier: <span class="tag ${bill.relevance}">${bill.relevance.toUpperCase()}</span>
                         </label>
+                    </div>` : ''}
+
+                    <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.75rem;">Override Tier:</label>
                         <div class="tier-radio-group">
                             <input type="radio" id="tier_direct_${bill.bill_id}" name="tier_${bill.bill_id}" value="direct" class="tier-radio" ${bill.user_tier === 'direct' ? 'checked' : ''}>
@@ -4726,32 +5321,36 @@
                             
                             <input type="radio" id="tier_minimal_${bill.bill_id}" name="tier_${bill.bill_id}" value="minimal" class="tier-radio" ${bill.user_tier === 'minimal' ? 'checked' : ''}>
                             <label for="tier_minimal_${bill.bill_id}" class="tier-radio-label tier-minimal">MINIMAL</label>
+
+                            <input type="radio" id="tier_ambiguous_${bill.bill_id}" name="tier_${bill.bill_id}" value="ambiguous" class="tier-radio" ${bill.user_tier === 'ambiguous' ? 'checked' : ''}>
+                            <label for="tier_ambiguous_${bill.bill_id}" class="tier-radio-label tier-ambiguous">AMBIGUOUS</label>
                         </div>
                     </div>
-                    
+
                     <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-size: 0.875rem; color: var(--text-dim); margin-bottom: 0.5rem;">Feedback Notes (optional)</label>
-                        <textarea id="feedbackNotes_${bill.bill_id}" 
-                                  class="feedback-textarea" 
-                                  placeholder="Add notes about why you adjusted the score or tier...">${bill.feedback_notes || ''}</textarea>
+                        <textarea id="feedbackNotes_${bill.bill_id}"
+                                  class="feedback-textarea"
+                                  placeholder="Add notes about your tier assessment...">${bill.feedback_notes || ''}</textarea>
                     </div>
-                    
+
                     <div class="feedback-actions">
                         <button class="feedback-btn feedback-btn-primary" onclick="submitFeedback(${bill.bill_id}, 'custom')">
-                            Save Custom Assessment
+                            Save Tier Override
                         </button>
                         <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'confirm')">
-                            Confirm Automated Score
+                            Confirm Automated Tier
                         </button>
                         <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'reject')">
                             Mark as Irrelevant
                         </button>
-                        ${bill.user_score !== null && bill.user_score !== undefined ? `
+                        ${bill.user_tier ? `
                             <button class="feedback-btn feedback-btn-danger" onclick="clearFeedback(${bill.bill_id})">
                                 Clear Override
                             </button>
                         ` : ''}
                     </div>
+                    </div><!-- end collapsible -->
                 </div>
                 
                 <div class="bill-detail-actions">
@@ -4769,7 +5368,7 @@
         
         // Feedback functions
         async function submitFeedback(billId, feedbackType) {
-            alert('Read-only view. Run the tracker locally to submit feedback.');
+            alert('Read-only view. Run the tracker locally to make changes.');
             return;
             const bill = allBills.find(b => b.bill_id === billId);
             if (!bill) return;
@@ -4779,35 +5378,21 @@
             let notes = '';
             
             if (feedbackType === 'custom') {
-                // Get custom values
-                const scoreInput = document.getElementById(`userScore_${billId}`);
                 const notesInput = document.getElementById(`feedbackNotes_${billId}`);
                 const selectedTier = document.querySelector(`input[name="tier_${billId}"]:checked`);
-                
-                userScore = scoreInput.value ? parseFloat(scoreInput.value) : null;
                 userTier = selectedTier ? selectedTier.value : null;
-                notes = notesInput.value;
-                
-                if (userScore === null && userTier === null) {
-                    alert('Please enter a score override or select a tier');
+                notes = notesInput ? notesInput.value : '';
+
+                if (userTier === null) {
+                    alert('Please select a tier');
                     return;
                 }
-                
-                // Validate score
-                if (userScore !== null && (userScore < 0 || userScore > 10)) {
-                    alert('Score must be between 0 and 10');
-                    return;
-                }
-                
+
             } else if (feedbackType === 'confirm') {
-                // Confirm automated score
-                userScore = bill.relevance_score;
                 userTier = bill.relevance;
-                notes = 'Confirmed automated assessment';
-                
+                notes = 'Confirmed automated tier';
+
             } else if (feedbackType === 'reject') {
-                // Mark as irrelevant
-                userScore = 0;
                 userTier = 'minimal';
                 notes = 'Marked as irrelevant';
             }
@@ -4819,17 +5404,15 @@
                     body: JSON.stringify({
                         bill_id: billId,
                         feedback_type: feedbackType,
-                        user_score: userScore,
+                        user_score: null,
                         user_tier: userTier,
                         notes: notes
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    // Update bill in allBills
-                    bill.user_score = userScore;
                     bill.user_tier = userTier;
                     bill.feedback_notes = notes;
                     
@@ -4848,7 +5431,7 @@
         }
         
         async function clearFeedback(billId) {
-            alert('Read-only view. Run the tracker locally to clear feedback.');
+            alert('Read-only view. Run the tracker locally to make changes.');
             return;
             if (!confirm('Clear your feedback for this bill?')) return;
             
@@ -4860,14 +5443,12 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Update bill in allBills
                     const bill = allBills.find(b => b.bill_id === billId);
                     if (bill) {
-                        bill.user_score = null;
                         bill.user_tier = null;
                         bill.feedback_notes = null;
                     }
-                    
+
                     // Refresh the detail view
                     showBillDetail(billId);
                     
@@ -4881,229 +5462,178 @@
             }
         }
 
-        // Filtered Bills Review functions
-        async function loadFilteredBills() {
-            // Need to fetch all bills including filtered ones
+        let _ambiguousQueueCount = 0;  // cached count for menu badge
+
+        async function loadAmbiguousReview() {
+            const grid = document.getElementById('ambiguousReviewGrid');
+            grid.innerHTML = '<div class="loading"><p>Loading...</p></div>';
             try {
-                const response = await fetch('data/bills.json');
-                const allBillsData = await response.json();
-                
-                // Get only filtered bills for this view
-                const filteredBillsData = allBillsData.filter(b => b.relevance_score === 0 || b.relevance === 'none');
-                
-                // Store in a separate variable for filtered view
-                window.filteredBillsCache = filteredBillsData;
-                
-                applyFilteredFilters();
-            } catch (error) {
-                console.error('Error loading filtered bills:', error);
+                const resp = await fetch('/api/ambiguous');
+                const bills = await resp.json();
+                _ambiguousQueueCount = bills.length;
+                document.getElementById('ambiguousReviewCount').textContent = bills.length;
+                updateReviewMenuCounts();
+                if (bills.length === 0) {
+                    grid.innerHTML = '<div class="loading"><p>No bills pending re-review. Queue is empty — all ambiguous bills were resolved in the last tracker run.</p></div>';
+                    return;
+                }
+                renderAmbiguousReview(bills);
+            } catch(e) {
+                grid.innerHTML = '<div class="loading"><p>Error loading ambiguous bills.</p></div>';
             }
         }
-        
-        function toggleFilteredFilters() {
-            const content = document.getElementById('filteredFilterContent');
-            const toggleText = document.getElementById('filteredFilterToggleText');
-            content.classList.toggle('collapsed');
-            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
-        }
-        
-        function initializeFilteredStateFilters() {
-            // Get unique states from filtered bills
-            const filteredBills = window.filteredBillsCache || [];
-            const states = [...new Set(filteredBills.map(b => b.state))].sort();
-            
-            const container = document.getElementById('filteredStateFilters');
-            container.innerHTML = states.map(state => `
-                <div class="filter-checkbox">
-                    <input type="checkbox" id="filtered-state-${state}" value="${state}" checked onchange="applyFilteredFilters()">
-                    <label for="filtered-state-${state}">${state}</label>
-                    <span class="filter-count">${filteredBills.filter(b => b.state === state).length}</span>
-                </div>
-            `).join('');
-        }
-        
-        function applyFilteredFilters() {
-            // Use cached filtered bills
-            if (!window.filteredBillsCache) {
-                document.getElementById('filteredBillsGrid').innerHTML = '<div class="loading"><p>Loading filtered bills...</p></div>';
-                return;
-            }
-            
-            let filtered = [...window.filteredBillsCache];
-            
-            // Initialize state filters if needed
-            if (document.getElementById('filteredStateFilters').innerHTML === '') {
-                initializeFilteredStateFilters();
-            }
-            
-            // Search filter
-            const search = document.getElementById('filteredSearchInput')?.value.toLowerCase().trim();
-            if (search) {
-                filtered = filtered.filter(b =>
-                    b.title?.toLowerCase().includes(search) ||
-                    b.description?.toLowerCase().includes(search) ||
-                    b.bill_number?.toLowerCase().includes(search)
-                );
-            }
-            
-            // State filter
-            const selectedStates = Array.from(document.querySelectorAll('[id^="filtered-state-"]:checked')).map(cb => cb.value);
-            if (selectedStates.length > 0) {
-                filtered = filtered.filter(b => selectedStates.includes(b.state));
-            }
-            
-            // Sort
-            const sort = document.getElementById('filteredSortSelect')?.value || 'state';
-            if (sort === 'state') {
-                filtered.sort((a, b) => a.state.localeCompare(b.state));
-            } else if (sort === 'recent') {
-                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
-            } else if (sort === 'billnumber') {
-                filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
-            }
-            
-            // Update counts
-            const totalFiltered = window.filteredBillsCache ? window.filteredBillsCache.length : 0;
-            document.getElementById('filteredCount').textContent = totalFiltered;
-            document.getElementById('filteredBillCount').textContent = filtered.length;
-            
-            // Render bills
-            renderFilteredBills(filtered);
-        }
-        
-        function renderFilteredBills(bills) {
-            const container = document.getElementById('filteredBillsGrid');
-            
-            if (bills.length === 0) {
-                container.innerHTML = '<div class="loading"><p>No filtered bills found</p></div>';
-                return;
-            }
-            
-            container.innerHTML = bills.map(bill => {
+
+        function renderAmbiguousReview(bills) {
+            // Cache by bill_id for the detail popup
+            window._ambiguousCache = {};
+            bills.forEach(b => { window._ambiguousCache[b.bill_id] = b; });
+
+            const grid = document.getElementById('ambiguousReviewGrid');
+            grid.innerHTML = bills.map(bill => {
+                const promotedDate = bill.promoted_at
+                    ? new Date(bill.promoted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : 'Unknown date';
+                const currentTier = bill.relevance || 'unknown';
+                const tierColor = `var(--tier-${currentTier}, var(--text-dim))`;
+                const titleFull = bill.title || 'No title available';
+                const titlePreview = titleFull.length > 80 ? titleFull.substring(0, 80) + '…' : titleFull;
                 return `
-                <div class="bill-card" style="border: 2px solid var(--danger); opacity: 0.8;">
+                <div class="bill-card" id="ambiguous-card-${bill.bill_id}"
+                     style="border: 2px solid var(--tier-ambiguous); cursor:pointer;"
+                     onclick="showAmbiguousDetail(${bill.bill_id})">
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="relevance-score" style="background: var(--danger);">0.0</span>
-                            <span class="feedback-badge" style="background: var(--danger);">Filtered</span>
-                        </div>
+                        <span class="tier-indicator auto" style="border-color:${tierColor};color:${tierColor};">${currentTier.toUpperCase()}</span>
                     </div>
-                    <h3 class="bill-title">${bill.title || 'No title'}</h3>
-                    
-                    ${bill.description ? `
-                        <p class="bill-description">${(bill.description || '').substring(0, 200)}...</p>
-                    ` : ''}
-                    
-                    <div style="background: var(--bg-dark); padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; font-size: 0.875rem;">
-                        <div style="color: var(--text-dim); margin-bottom: 0.5rem;">Why filtered:</div>
-                        <div style="font-style: italic;">
-                            ${getFilterReason(bill)}
-                        </div>
+                    <h3 class="bill-title" style="margin-bottom:0.5rem;">${titlePreview}</h3>
+                    <div style="font-size:0.75rem; color:var(--tier-ambiguous); margin-bottom:0.75rem;">
+                        Flagged ${promotedDate} · Click to expand
                     </div>
-                    
-                    <div class="bill-meta">
-                        ${bill.subjects && bill.subjects.length > 0 ? `
-                            <span>Subjects: ${bill.subjects.slice(0, 2).join(', ')}</span>
-                        ` : ''}
-                        <span>Bill ID: ${bill.bill_id}</span>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem;">
-                        <button class="action-btn action-btn-primary" onclick="event.stopPropagation(); restoreBill(${bill.bill_id})" style="padding: 0.5rem;">
-                            Mark as Relevant
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <button class="action-btn"
+                                onclick="event.stopPropagation(); cancelAmbiguous(${bill.bill_id})"
+                                style="padding:0.5rem; font-size:0.85rem; border-color:var(--text-dim); color:var(--text-dim);">
+                            Remove from Queue
                         </button>
-                        <button class="action-btn action-btn-danger" onclick="event.stopPropagation(); confirmDeleteBill(${bill.bill_id}, '${bill.state} ${bill.bill_number}')" style="padding: 0.5rem;">
-                            Permanently Delete
-                        </button>
-                    </div>
-                    
-                    <div style="margin-top: 0.5rem;">
-                        <button class="action-btn action-btn-secondary" onclick="event.stopPropagation(); showBillDetail(${bill.bill_id})" style="width: 100%; padding: 0.5rem; font-size: 0.875rem;">
-                            View Full Details
+                        <button class="action-btn action-btn-danger"
+                                onclick="event.stopPropagation(); dismissAmbiguous(${bill.bill_id})"
+                                style="padding:0.5rem; font-size:0.85rem;">
+                            Delete Bill
                         </button>
                     </div>
                 </div>
             `;
             }).join('');
         }
-        
-        function getFilterReason(bill) {
-            const title = (bill.title || '').toLowerCase();
-            const desc = (bill.description || '').toLowerCase();
-            const text = `${title} ${desc}`;
-            
-            // Check for exclusion patterns
-            if (/appropriation|budget bill/i.test(title) && !(/platform|transparency/i.test(text))) {
-                return "Appropriations-only bill (no platform regulation)";
+
+        function showAmbiguousDetail(billId) {
+            const bill = window._ambiguousCache && window._ambiguousCache[billId];
+            if (!bill) return;
+
+            const currentTier = bill.relevance || 'unknown';
+            const tierColor = `var(--tier-${currentTier}, var(--text-dim))`;
+            const promotedDate = bill.promoted_at
+                ? new Date(bill.promoted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                : 'Unknown date';
+
+            document.getElementById('ambiguousModalTier').innerHTML =
+                `<span class="tier-indicator auto" style="border-color:${tierColor};color:${tierColor};">${currentTier.toUpperCase()}</span>
+                 <span style="font-size:0.8rem;color:var(--text-dim);margin-left:0.6rem;">${bill.state} · ${bill.bill_number}</span>`;
+
+            document.getElementById('ambiguousModalTitle').textContent = bill.title || 'No title available';
+
+            const descEl = document.getElementById('ambiguousModalDesc');
+            descEl.textContent = bill.description || '';
+            descEl.style.display = bill.description ? 'block' : 'none';
+
+            document.getElementById('ambiguousModalDate').textContent =
+                `Flagged for re-review on ${promotedDate} — will be re-evaluated during the next tracker run.`;
+
+            const linkEl = document.getElementById('ambiguousModalLink');
+            if (bill.url) {
+                linkEl.href = bill.url;
+                linkEl.style.display = 'inline-block';
+            } else {
+                linkEl.style.display = 'none';
             }
-            if (/literacy|citizenship|education/i.test(title) && !(/platform must|platform shall/i.test(text))) {
-                return "Education/literacy bill (no platform requirements)";
-            }
-            if (/workforce|job training|career/i.test(title)) {
-                return "Workforce development bill (not platform regulation)";
-            }
-            if (/task force to study|commission to study/i.test(title) && !(/shall|penalty|enforcement/i.test(text))) {
-                return "Study-only bill (no enforcement mechanism)";
-            }
-            if (/assistive|medical|agricultural|vehicle|clean/i.test(text)) {
-                return "Wrong type of technology (not digital platforms)";
-            }
-            if (!(/social media|platform|algorithm|privacy|personal data|data broker/i.test(text))) {
-                return "Does not mention platforms, algorithms, or privacy";
-            }
-            return "Does not meet core relevance criteria";
+
+            // Wire action buttons
+            document.getElementById('ambiguousModalCancel').onclick = (e) => {
+                e.stopPropagation();
+                closeAmbiguousDetail();
+                cancelAmbiguous(billId);
+            };
+            document.getElementById('ambiguousModalDelete').onclick = (e) => {
+                e.stopPropagation();
+                closeAmbiguousDetail();
+                dismissAmbiguous(billId);
+            };
+
+            document.getElementById('ambiguousDetailModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
         }
-        
-        async function restoreBill(billId) {
-            if (!confirm('Mark this bill as relevant? You can set a custom score.')) return;
-            
-            // Open bill detail for manual scoring
-            showBillDetail(billId);
+
+        function closeAmbiguousDetail() {
+            document.getElementById('ambiguousDetailModal').classList.remove('open');
+            document.body.style.overflow = '';
         }
-        
-        async function confirmDeleteBill(billId, billName) {
-            alert('Read-only view. Run the tracker locally to delete bills.');
+
+        /** Flag any bill for re-review in the next tracker run. */
+        async function promoteAmbiguous(billId) {
+            alert('Read-only view. Run the tracker locally to make changes.');
             return;
-            const confirmed = confirm(`Permanently delete "${billName}" from the database?\n\nThis action cannot be undone. The bill will be completely removed.`);
-            
-            if (!confirmed) return;
-            
             try {
-                const response = await fetch(`/api/bills/${billId}`, {
-                    method: 'DELETE'
-                });
-                
-                const result = await response.json();
-                
+                const resp = await fetch(`/api/ambiguous/${billId}/promote`, { method: 'POST' });
+                const result = await resp.json();
                 if (result.success) {
-                    // Remove from filtered bills cache
-                    if (window.filteredBillsCache) {
-                        const index = window.filteredBillsCache.findIndex(b => b.bill_id === billId);
-                        if (index !== -1) {
-                            window.filteredBillsCache.splice(index, 1);
-                        }
-                    }
-                    
-                    // Refresh the filtered bills view
-                    applyFilteredFilters();
-                    
-                    alert('Bill permanently deleted from database!');
+                    loadAmbiguousReview();
                 } else {
-                    alert('Error deleting bill: ' + result.error);
+                    alert('Error: ' + result.error);
                 }
-            } catch (error) {
-                console.error('Delete bill error:', error);
-                alert('Error deleting bill. Check console for details.');
+            } catch(e) {
+                alert('Error flagging bill for re-review.');
+            }
+        }
+
+        /** Remove a bill from the re-review queue (without deleting it). */
+        async function cancelAmbiguous(billId) {
+            alert('Read-only view. Run the tracker locally to make changes.');
+            return;
+            if (!confirm('Remove this bill from the re-review queue? It will keep its current tier and won\'t be re-evaluated next run.')) return;
+            try {
+                const resp = await fetch(`/api/ambiguous/${billId}/cancel`, { method: 'POST' });
+                const result = await resp.json();
+                if (result.success) {
+                    loadAmbiguousReview();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch(e) {
+                alert('Error removing from queue.');
+            }
+        }
+
+        async function dismissAmbiguous(billId) {
+            alert('Read-only view. Run the tracker locally to make changes.');
+            return;
+            if (!confirm('Permanently delete this bill? It will be removed from the database and not tracked again.')) return;
+            try {
+                const resp = await fetch(`/api/ambiguous/${billId}/dismiss`, { method: 'POST' });
+                const result = await resp.json();
+                if (result.success) {
+                    const idx = allBills.findIndex(b => b.bill_id === billId);
+                    if (idx !== -1) allBills.splice(idx, 1);
+                    loadAmbiguousReview();
+                    updateReviewMenuCounts();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch(e) {
+                alert('Error deleting bill.');
             }
         }
 
         // Feedback Review functions
-        function loadFeedbackReview() {
-            switchView('feedbackReview', true);
-            applyFeedbackFilters();
-        }
-        
         function toggleFeedbackFilters() {
             const content = document.getElementById('feedbackFilterContent');
             const toggleText = document.getElementById('feedbackFilterToggleText');
@@ -5115,57 +5645,26 @@
             console.log('applyFeedbackFilters called');
             console.log('Total bills:', allBills.length);
             
-            // Get all bills with feedback
-            let filtered = allBills.filter(b => 
-                b.user_score !== null && b.user_score !== undefined
-            );
-            
-            console.log('Bills with feedback:', filtered.length);
-            
-            // Filter by feedback type
-            const selectedTypes = [];
-            if (document.getElementById('feedback-type-boosted')?.checked) selectedTypes.push('boosted');
-            if (document.getElementById('feedback-type-reduced')?.checked) selectedTypes.push('reduced');
-            if (document.getElementById('feedback-type-reviewed')?.checked) selectedTypes.push('reviewed');
-            
-            console.log('Selected types:', selectedTypes);
-            
-            if (selectedTypes.length > 0 && selectedTypes.length < 3) {
-                filtered = filtered.filter(b => {
-                    if (b.user_score > b.relevance_score) return selectedTypes.includes('boosted');
-                    if (b.user_score < b.relevance_score) return selectedTypes.includes('reduced');
-                    return selectedTypes.includes('reviewed');
-                });
-            }
-            
-            console.log('After type filter:', filtered.length);
-            
+            // Get all bills with user tier feedback
+            let filtered = allBills.filter(b => !!b.user_tier);
+
             // Sort
             const sort = document.getElementById('feedbackSortSelect')?.value || 'recent';
             if (sort === 'recent') {
-                // Would need updated_at from feedback table - use last_updated for now
                 filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
-            } else if (sort === 'largest-change') {
-                filtered.sort((a, b) => {
-                    const changeA = Math.abs(a.user_score - a.relevance_score);
-                    const changeB = Math.abs(b.user_score - b.relevance_score);
-                    return changeB - changeA;
-                });
             } else if (sort === 'state') {
                 filtered.sort((a, b) => a.state.localeCompare(b.state));
             } else if (sort === 'tier') {
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'none': 5 };
+                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
                     return (tierOrder[tierA] || 999) - (tierOrder[tierB] || 999);
                 });
             }
-            
+
             // Update counts
-            document.getElementById('feedbackCount').textContent = allBills.filter(b => 
-                b.user_score !== null && b.user_score !== undefined
-            ).length;
+            document.getElementById('feedbackCount').textContent = allBills.filter(b => !!b.user_tier).length;
             document.getElementById('feedbackBillCount').textContent = filtered.length;
             
             // Render bills with enhanced feedback cards
@@ -5181,53 +5680,35 @@
             }
             
             container.innerHTML = bills.map(bill => {
-                const displayScore = bill.user_score;
                 const displayTier = bill.user_tier || bill.llm_tier || bill.relevance;
-                const scoreDiff = bill.user_score - bill.relevance_score;
-                
-                let feedbackType = '';
-                let feedbackBadge = '';
-                if (scoreDiff > 0) {
-                    feedbackType = 'boosted';
-                    feedbackBadge = '<span class="feedback-badge boosted">Boosted</span>';
-                } else if (scoreDiff < 0) {
-                    feedbackType = 'reduced';
-                    feedbackBadge = '<span class="feedback-badge reduced">Reduced</span>';
-                } else {
-                    feedbackType = 'reviewed';
-                    feedbackBadge = '<span class="feedback-badge reviewed">Reviewed</span>';
-                }
-                
+                const tierChanged = bill.user_tier && bill.user_tier !== bill.relevance;
+
                 return `
                 <div class="bill-card ${displayTier}" style="border: 2px solid var(--accent);">
                     <div class="bill-header">
                         <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="relevance-score modified">${displayScore.toFixed(1)}</span>
-                            ${feedbackBadge}
+                            <span class="tier-indicator user-override">${displayTier.toUpperCase()}</span>
+                            <span class="feedback-badge reviewed">Reviewed</span>
                         </div>
                     </div>
                     <h3 class="bill-title">${bill.title || 'No title'}</h3>
-                    
+
                     <div style="background: var(--bg-dark); padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; font-size: 0.875rem;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                             <div>
                                 <span style="color: var(--text-dim);">Automated:</span>
-                                <strong>${bill.relevance_score.toFixed(1)}</strong>
-                                <span style="color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem;">${bill.relevance}</span>
+                                <span class="tag ${bill.relevance}" style="font-size:0.7rem; padding:0.1rem 0.4rem;">${bill.relevance.toUpperCase()}</span>
                             </div>
                             <div>
-                                <span style="color: var(--text-dim);">Your Score:</span>
-                                <strong style="color: var(--accent);">${bill.user_score.toFixed(1)}</strong>
-                                <span style="color: var(--accent); text-transform: uppercase; font-size: 0.75rem;">${displayTier}</span>
+                                <span style="color: var(--text-dim);">Your Tier:</span>
+                                <span class="tag ${displayTier}" style="font-size:0.7rem; padding:0.1rem 0.4rem;">${displayTier.toUpperCase()}</span>
                             </div>
                         </div>
-                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                            <span style="color: var(--text-dim);">Change:</span>
-                            <strong style="color: ${scoreDiff > 0 ? 'var(--accent)' : 'var(--danger)'};">
-                                ${scoreDiff > 0 ? '+' : ''}${scoreDiff.toFixed(1)}
-                            </strong>
-                        </div>
+                        ${tierChanged ? `
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size:0.8rem; color: var(--warning);">
+                            Tier overridden: ${bill.relevance.toUpperCase()} → ${bill.user_tier.toUpperCase()}
+                        </div>` : ''}
                         ${bill.feedback_notes ? `
                             <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
                                 <span style="color: var(--text-dim);">Notes:</span>
@@ -5255,7 +5736,7 @@
         }
         
         async function revertFeedback(billId) {
-            alert('Read-only view. Run the tracker locally to revert feedback.');
+            alert('Read-only view. Run the tracker locally to make changes.');
             return;
             if (!confirm('Revert to automated score and tier? This will delete your feedback.')) return;
             
@@ -5267,14 +5748,12 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Update bill in allBills
                     const bill = allBills.find(b => b.bill_id === billId);
                     if (bill) {
-                        bill.user_score = null;
                         bill.user_tier = null;
                         bill.feedback_notes = null;
                     }
-                    
+
                     // Refresh the feedback review view
                     applyFeedbackFilters();
                     
@@ -5337,5 +5816,52 @@
 
         loadData();
     </script>
+
+<!-- ============================================================ -->
+<!-- COMPANION DETAIL MODAL -->
+<!-- ============================================================ -->
+<div id="ambiguousDetailModal" onclick="if(event.target===this)closeAmbiguousDetail()">
+    <div class="ambiguous-modal-box">
+        <button class="ambiguous-modal-close" onclick="closeAmbiguousDetail()">×</button>
+        <div id="ambiguousModalTier" style="margin-bottom:0.6rem;"></div>
+        <h2 id="ambiguousModalTitle" style="font-size:1.05rem;font-weight:700;margin:0 0 0.75rem;line-height:1.5;padding-right:2rem;"></h2>
+        <p id="ambiguousModalDesc" style="font-size:0.875rem;color:var(--text-dim);line-height:1.6;margin:0 0 0.75rem;"></p>
+        <div id="ambiguousModalDate" style="font-size:0.75rem;color:var(--text-dim);font-style:italic;margin-bottom:1rem;"></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;">
+            <a id="ambiguousModalLink" href="#" target="_blank" rel="noopener"
+               style="padding:0.4rem 0.9rem;background:rgba(139,92,246,0.12);border:1px solid var(--tier-ambiguous);color:var(--tier-ambiguous);border-radius:6px;font-size:0.8rem;font-weight:600;text-decoration:none;">
+                View on LegiScan →
+            </a>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <button id="ambiguousModalCancel" class="action-btn"
+                    style="padding:0.6rem;font-size:0.875rem;border-color:var(--text-dim);color:var(--text-dim);">
+                Remove from Queue
+            </button>
+            <button id="ambiguousModalDelete" class="action-btn action-btn-danger"
+                    style="padding:0.6rem;font-size:0.875rem;">
+                Delete Bill
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="companionDetailModal" onclick="if(event.target===this)closeCompanionDetail()">
+    <div class="companion-modal-box">
+        <button class="companion-modal-close" onclick="closeCompanionDetail()">×</button>
+        <div id="companionModalTier" style="margin-bottom:0.6rem;"></div>
+        <h2 id="companionModalTitle" style="font-size:1.05rem;font-weight:700;margin:0 0 0.4rem;line-height:1.45;padding-right:2rem;"></h2>
+        <div id="companionModalDesc" style="font-size:0.85rem;color:var(--text-dim);line-height:1.5;margin-bottom:0.25rem;"></div>
+        <div class="companion-modal-bills">
+            <div class="companion-modal-bill" id="companionModalBill1"></div>
+            <div class="companion-modal-bill" id="companionModalBill2"></div>
+        </div>
+        <div class="companion-modal-actions">
+            <span style="font-size:0.8rem;color:var(--text-dim);">Apply to both:</span>
+            <button id="companionModalFlag" class="card-flag-btn" onclick="toggleCompanionFlag()" title="Flag both">&#9873;</button>
+            <button id="companionModalStar" class="card-star-btn" onclick="toggleCompanionStar()" title="Star both">&#9733;</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
