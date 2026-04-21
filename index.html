@@ -3652,8 +3652,8 @@
         async function loadData() {
             try {
                 const [response, statsResponse, ambiguousResponse] = await Promise.all([
-                    fetch('/api/bills'),
-                    fetch('/api/stats'),
+                    fetch('data/bills.json'),
+                    fetch('data/stats.json'),
                     Promise.resolve({ json: async () => [] }),
                 ]);
                 const allBillsData = await response.json();
@@ -5468,7 +5468,7 @@
             const grid = document.getElementById('ambiguousReviewGrid');
             grid.innerHTML = '<div class="loading"><p>Loading...</p></div>';
             try {
-                const resp = await fetch('/api/ambiguous');
+                const resp = { ok: true, json: async () => [] };
                 const bills = await resp.json();
                 _ambiguousQueueCount = bills.length;
                 document.getElementById('ambiguousReviewCount').textContent = bills.length;
