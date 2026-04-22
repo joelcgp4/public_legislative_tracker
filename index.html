@@ -2034,10 +2034,10 @@
                         <div class="filter-section">
                             <div class="filter-section-title">Sort By</div>
                             <div class="filter-group">
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="state-sort-introduced">Last Introduced</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-recent" value="recent" onchange="applyStateFilters()"><label for="state-sort-recent">Most Recent</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-relevance" value="relevance" onchange="applyStateFilters()"><label for="state-sort-relevance">By Relevance</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="state-sort-billnumber">By Bill Number</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="ssort-introduced">Last Introduced</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-recent" value="recent" onchange="applyStateFilters()"><label for="ssort-recent">Most Recent</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-relevance" value="relevance" onchange="applyStateFilters()"><label for="ssort-relevance">By Relevance</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="ssort-billnumber">By Bill Number</label></div>
                             </div>
                         </div>
                     </div>
@@ -3205,7 +3205,7 @@
             document.querySelectorAll('[id^="state-subject-"]:checked').forEach(cb => cb.checked = false);
             
             // Reset sort
-            const sortIntro = document.getElementById('state-sort-introduced');
+            const sortIntro = document.getElementById('ssort-introduced');
             if (sortIntro) sortIntro.checked = true;
             
             applyStateFilters();
@@ -3784,12 +3784,13 @@
             const labelsG = svg.append('g').attr('pointer-events', 'none');
 
             const updateLabelPositions = (transform) => {
+                const k = transform.k, tx = transform.x, ty = transform.y;
                 labelsG.selectAll('.state-label')
-                    .attr('x', d => transform.apply(path.centroid(d))[0])
-                    .attr('y', d => transform.apply(path.centroid(d))[1]);
+                    .attr('x', d => { const c = path.centroid(d); return c[0] * k + tx; })
+                    .attr('y', d => { const c = path.centroid(d); return c[1] * k + ty; });
                 labelsG.selectAll('.count-label')
-                    .attr('x', d => transform.apply(path.centroid(d))[0])
-                    .attr('y', d => transform.apply(path.centroid(d))[1] + 12);
+                    .attr('x', d => { const c = path.centroid(d); return c[0] * k + tx; })
+                    .attr('y', d => { const c = path.centroid(d); return c[1] * k + ty + 12; });
             };
 
             // Add zoom behavior with translation extent to constrain panning
