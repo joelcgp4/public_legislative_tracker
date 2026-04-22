@@ -2866,8 +2866,10 @@
             const displayTier = primary.user_tier || primary.llm_tier || primary.relevance;
             const hasLLM = !!(primary.llm_tier || companion.llm_tier);
             const hasUserFeedback = !!primary.user_tier;
-            const isFailed = getBillStatusGroup(primary) === 'failed'
-                          || getBillStatusGroup(companion) === 'failed';
+            const primaryFailed   = getBillStatusGroup(primary)   === 'failed';
+            const companionFailed = getBillStatusGroup(companion) === 'failed';
+            const isFailed = primaryFailed && companionFailed;
+            const isMixed  = primaryFailed !== companionFailed; // one passed, one failed
             const reviewClass = hasUserFeedback ? 'user-reviewed' : (hasLLM ? 'llm-reviewed' : '');
 
             function chamberBlock(bill) {
@@ -2893,10 +2895,11 @@
 
             return `
                 <div class="bill-card ${displayTier} ${reviewClass}"
-                    style="${isFailed ? 'opacity:0.6; border-left-color: var(--danger);' : ''}">
+                    style="${isFailed ? 'opacity:0.6; border-left-color: var(--danger);' : isMixed ? 'border-left-color: var(--warning);' : ''}">
                     <div class="bill-header">
                         <span class="bill-number"><strong>${primary.state}</strong>
                             ${isFailed ? '<span style="font-size:0.65rem; font-weight:700; color:var(--danger); margin-left:0.4rem; letter-spacing:0.05em;">FAILED</span>' : ''}
+                            ${isMixed  ? '<span style="font-size:0.65rem; font-weight:700; color:var(--warning); margin-left:0.4rem; letter-spacing:0.05em;">PARTIAL</span>' : ''}
                         </span>
                         <div style="display:flex; align-items:center; gap:0.5rem;">
                             <span class="tag ${displayTier}">${displayTier.toUpperCase()}</span>
@@ -3778,19 +3781,15 @@
                 'Wisconsin': 'WI', 'Wyoming': 'WY'
             };
             
-            // Group for zooming (paths only)
+            // Single group for both paths and labels — zoom handles positioning,
+            // each label gets an inverse scale transform to keep its visual size constant.
             const g = svg.append('g');
-            // Separate group for labels — sits outside zoom so font size never changes
-            const labelsG = svg.append('g').attr('pointer-events', 'none');
 
-            const updateLabelPositions = (transform) => {
-                const k = transform.k, tx = transform.x, ty = transform.y;
-                labelsG.selectAll('.state-label')
-                    .attr('x', d => { const c = path.centroid(d); return c[0] * k + tx; })
-                    .attr('y', d => { const c = path.centroid(d); return c[1] * k + ty; });
-                labelsG.selectAll('.count-label')
-                    .attr('x', d => { const c = path.centroid(d); return c[0] * k + tx; })
-                    .attr('y', d => { const c = path.centroid(d); return c[1] * k + ty + 12; });
+            const updateLabelScale = (k) => {
+                g.selectAll('.state-label, .count-label').attr('transform', function(d) {
+                    const c = path.centroid(d);
+                    return `translate(${c[0]},${c[1]}) scale(${1/k})`;
+                });
             };
 
             // Add zoom behavior with translation extent to constrain panning
@@ -3800,7 +3799,7 @@
                 .extent([[0, 0], [width, height]])
                 .on('zoom', (event) => {
                     g.attr('transform', event.transform);
-                    updateLabelPositions(event.transform);
+                    updateLabelScale(event.transform.k);
                 });
             
             svg.call(zoom);
@@ -3858,40 +3857,46 @@
                     return `${abbr}: ${count} bills`;
                 });
             
-            // Add state labels (in labelsG — outside zoom group so size stays fixed)
-            labelsG.selectAll('.state-label')
+            // State abbreviation labels — positioned via transform, x/y=0 so
+            // inverse scale keeps visual size constant at all zoom levels.
+            g.selectAll('.state-label')
                 .data(states.features)
                 .enter()
                 .append('text')
                 .attr('class', 'state-label')
+                .attr('x', 0).attr('y', 0)
                 .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
                 .attr('font-size', '10px')
                 .attr('font-weight', 'bold')
+                .attr('pointer-events', 'none')
                 .attr('fill', d => {
                     const abbr = stateAbbr[d.properties.name];
-                    const count = stateCounts[abbr] || 0;
-                    return count > 0 ? '#f9fafb' : '#6b7280';
+                    return stateCounts[abbr] > 0 ? '#f9fafb' : '#6b7280';
                 })
+                .attr('transform', d => { const c = path.centroid(d); return `translate(${c[0]},${c[1]})`; })
                 .text(d => stateAbbr[d.properties.name]);
 
-            // Add count labels
-            labelsG.selectAll('.count-label')
+            g.selectAll('.count-label')
                 .data(states.features)
                 .enter()
                 .append('text')
                 .attr('class', 'count-label')
+                .attr('x', 0).attr('y', 12)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '9px')
                 .attr('font-weight', '600')
+                .attr('pointer-events', 'none')
                 .attr('fill', '#10b981')
+                .attr('transform', d => { const c = path.centroid(d); return `translate(${c[0]},${c[1]})`; })
                 .text(d => {
                     const abbr = stateAbbr[d.properties.name];
                     const count = stateCounts[abbr] || 0;
                     return count > 0 ? count : '';
                 });
 
-            // Position labels at initial (unzoomed) centroids
-            updateLabelPositions(d3.zoomIdentity);
+            // Set initial scale (k=1, no adjustment needed but keeps code path consistent)
+            updateLabelScale(1);
             
             // Add reset button (outside the zoomable group)
             const resetBtn = svg.append('g')
