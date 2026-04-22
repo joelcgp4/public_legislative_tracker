@@ -84,18 +84,18 @@
         .menu-overlay {
             position: fixed;
             top: 0;
-            right: -100%;
+            left: -100%;
             width: 320px;
             height: 100vh;
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
-            transition: right 0.3s ease;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+            transition: left 0.3s ease;
             z-index: 200;
             overflow-y: auto;
         }
 
         .menu-overlay.open {
-            right: 0;
+            left: 0;
         }
 
         .menu-header {
@@ -1846,13 +1846,13 @@
 <body>
     <!-- HEADER -->
     <div class="header">
-        <div class="logo" onclick="location.reload()" style="cursor: pointer;">
-            Legislative Tracker
-        </div>
         <div style="display: flex; align-items: center; gap: 1rem;">
-            <div id="lastSearchInfo" style="font-size: 0.75rem; color: var(--text-dim); text-align: right;"></div>
             <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            <div class="logo" onclick="location.reload()" style="cursor: pointer;">
+                Legislative Tracker
+            </div>
         </div>
+        <div id="lastSearchInfo" style="font-size: 0.75rem; color: var(--text-dim); text-align: right;"></div>
     </div>
 
     <!-- MENU OVERLAY -->
@@ -1888,7 +1888,7 @@
                     Starred Bills <span id="starredCount" style="font-size:0.75rem; color:var(--text-dim); margin-left:0.5rem;"></span>
                 </div>
                 <div class="menu-item menu-sub" onclick="switchView('feedbackReview')">
-                    Your Feedback
+                    Manual Feedback
                 </div>
                 <div class="menu-item menu-sub" onclick="switchView('ambiguousReview')">
                     Ambiguous Bills <span id="ambiguousCount" style="font-size:0.75rem; color:var(--tier-ambiguous); margin-left:0.5rem;"></span>
@@ -1940,7 +1940,6 @@
         <!-- STATES VIEW -->
         <div class="view" id="statesView">
             <div class="bills-header">
-                <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
                 <h2 class="section-title">Browse by State</h2>
             </div>
             <div class="state-grid" id="stateGrid"></div>
@@ -2034,12 +2033,12 @@
                         <!-- Sort -->
                         <div class="filter-section">
                             <div class="filter-section-title">Sort By</div>
-                            <select class="filter-select" id="stateSortSelect" onchange="applyStateFilters()" style="width: 100%; padding: 0.75rem;">
-                                <option value="introduced">Last Introduced</option>
-                                <option value="recent">Most Recent</option>
-                                <option value="relevance">By Relevance</option>
-                                <option value="billnumber">By Bill Number</option>
-                            </select>
+                            <div class="filter-group">
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="state-sort-introduced">Last Introduced</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-recent" value="recent" onchange="applyStateFilters()"><label for="state-sort-recent">Most Recent</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-relevance" value="relevance" onchange="applyStateFilters()"><label for="state-sort-relevance">By Relevance</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="state-sort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="state-sort-billnumber">By Bill Number</label></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2084,15 +2083,16 @@
                         <input type="text" class="search-input" id="searchInput" placeholder="Search bills, titles, descriptions..." oninput="applyFilters()" style="width:100%;">
                     </div>
 
-                    <!-- Sort (always visible when open) -->
+                    <!-- Sort -->
                     <div class="filter-section">
-                        <select class="filter-select" id="sortSelect" onchange="applyFilters()" style="width: 100%; padding: 0.75rem;">
-                            <option value="introduced">Sort: Last Introduced</option>
-                            <option value="recent">Sort: Most Recent</option>
-                            <option value="relevance">Sort: By Relevance</option>
-                            <option value="state">Sort: By State</option>
-                            <option value="billnumber">Sort: By Bill Number</option>
-                        </select>
+                        <div class="filter-section-title">Sort By</div>
+                        <div class="filter-group">
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-introduced" value="introduced" onchange="applyFilters()" checked><label for="sort-introduced">Last Introduced</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-recent" value="recent" onchange="applyFilters()"><label for="sort-recent">Most Recent</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-relevance" value="relevance" onchange="applyFilters()"><label for="sort-relevance">By Relevance</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-state" value="state" onchange="applyFilters()"><label for="sort-state">By State</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-billnumber" value="billnumber" onchange="applyFilters()"><label for="sort-billnumber">By Bill Number</label></div>
+                        </div>
                     </div>
 
                     <!-- Relevance Tier -->
@@ -2168,6 +2168,11 @@
                                 <div class="filter-checkbox">
                                     <input type="checkbox" id="filter-companion-only" onchange="applyFilters()">
                                     <label for="filter-companion-only">Companion bills only</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="filter-since-last-search" onchange="applyFilters()">
+                                    <label for="filter-since-last-search">New since last search</label>
+                                    <span class="filter-count" id="count-since-last-search">0</span>
                                 </div>
                             </div>
                         </div>
@@ -2758,6 +2763,7 @@
         
         let allBills = [];
         let currentState = null;
+        let lastCompleteSearch = null;
 
         // US State coordinates for simplified map
         const statePositions = {
@@ -3128,7 +3134,7 @@
                     document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked = false; applyStateFilters(); }}));
             
             // Sort
-            const sort = document.getElementById('stateSortSelect').value;
+            const sort = (document.querySelector('input[name="stateSortSelect"]:checked') || {value:'introduced'}).value;
             if (sort === 'introduced') {
                 // Sort by introduction date (status_date)
                 filtered.sort((a, b) => {
@@ -3199,8 +3205,8 @@
             document.querySelectorAll('[id^="state-subject-"]:checked').forEach(cb => cb.checked = false);
             
             // Reset sort
-            const sortSelect = document.getElementById('stateSortSelect');
-            if (sortSelect) sortSelect.value = 'introduced';
+            const sortIntro = document.getElementById('state-sort-introduced');
+            if (sortIntro) sortIntro.checked = true;
             
             applyStateFilters();
         }
@@ -3698,6 +3704,7 @@
             // Display last complete search info
             const lastSearchEl = document.getElementById('lastSearchInfo');
             if (stats.last_complete_search) {
+                lastCompleteSearch = stats.last_complete_search;
                 const lastSearch = new Date(stats.last_complete_search);
                 const now = new Date();
                 const diffDays = Math.floor((now - lastSearch) / (1000 * 60 * 60 * 24));
@@ -3771,26 +3778,28 @@
                 'Wisconsin': 'WI', 'Wyoming': 'WY'
             };
             
-            // Create a group for zooming
+            // Group for zooming (paths only)
             const g = svg.append('g');
-            
-            // Add state labels that scale inversely with zoom
-            let labels, countLabels;
-            
+            // Separate group for labels — sits outside zoom so font size never changes
+            const labelsG = svg.append('g').attr('pointer-events', 'none');
+
+            const updateLabelPositions = (transform) => {
+                labelsG.selectAll('.state-label')
+                    .attr('x', d => transform.apply(path.centroid(d))[0])
+                    .attr('y', d => transform.apply(path.centroid(d))[1]);
+                labelsG.selectAll('.count-label')
+                    .attr('x', d => transform.apply(path.centroid(d))[0])
+                    .attr('y', d => transform.apply(path.centroid(d))[1] + 12);
+            };
+
             // Add zoom behavior with translation extent to constrain panning
             const zoom = d3.zoom()
-                .scaleExtent([1, 8])  // Min and max zoom levels
-                .translateExtent([[0, 0], [width, height]])  // Constrain panning to map bounds
-                .extent([[0, 0], [width, height]])  // Define the viewport
+                .scaleExtent([1, 8])
+                .translateExtent([[0, 0], [width, height]])
+                .extent([[0, 0], [width, height]])
                 .on('zoom', (event) => {
                     g.attr('transform', event.transform);
-                    // Scale text inversely so it stays the same size
-                    const scale = 1 / event.transform.k;
-                    if (labels) labels.attr('font-size', `${10 * scale}px`);
-                    if (countLabels) {
-                        countLabels.attr('font-size', `${9 * scale}px`)
-                                   .attr('y', d => path.centroid(d)[1] + (12 * scale));
-                    }
+                    updateLabelPositions(event.transform);
                 });
             
             svg.call(zoom);
@@ -3848,14 +3857,12 @@
                     return `${abbr}: ${count} bills`;
                 });
             
-            // Add state labels
-            labels = g.selectAll('.state-label')
+            // Add state labels (in labelsG — outside zoom group so size stays fixed)
+            labelsG.selectAll('.state-label')
                 .data(states.features)
                 .enter()
                 .append('text')
                 .attr('class', 'state-label')
-                .attr('x', d => path.centroid(d)[0])
-                .attr('y', d => path.centroid(d)[1])
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '10px')
                 .attr('font-weight', 'bold')
@@ -3864,27 +3871,26 @@
                     const count = stateCounts[abbr] || 0;
                     return count > 0 ? '#f9fafb' : '#6b7280';
                 })
-                .attr('pointer-events', 'none')
                 .text(d => stateAbbr[d.properties.name]);
-            
+
             // Add count labels
-            countLabels = g.selectAll('.count-label')
+            labelsG.selectAll('.count-label')
                 .data(states.features)
                 .enter()
                 .append('text')
                 .attr('class', 'count-label')
-                .attr('x', d => path.centroid(d)[0])
-                .attr('y', d => path.centroid(d)[1] + 12)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '9px')
                 .attr('font-weight', '600')
                 .attr('fill', '#10b981')
-                .attr('pointer-events', 'none')
                 .text(d => {
                     const abbr = stateAbbr[d.properties.name];
                     const count = stateCounts[abbr] || 0;
                     return count > 0 ? count : '';
                 });
+
+            // Position labels at initial (unzoomed) centroids
+            updateLabelPositions(d3.zoomIdentity);
             
             // Add reset button (outside the zoomable group)
             const resetBtn = svg.append('g')
@@ -4074,6 +4080,16 @@
             const aiReviewedCount = allBills.filter(b => !!b.llm_tier).length;
             const aiEl = document.getElementById('count-ai-reviewed');
             if (aiEl) aiEl.textContent = aiReviewedCount;
+
+            // Count new since last search
+            const sinceEl = document.getElementById('count-since-last-search');
+            if (sinceEl && lastCompleteSearch) {
+                const sinceCount = allBills.filter(b => {
+                    const updated = b.last_updated || b.status_date;
+                    return updated && updated > lastCompleteSearch;
+                }).length;
+                sinceEl.textContent = sinceCount;
+            }
 
             // Count parties
             const partyD = allBills.filter(b => b.sponsor_party === 'D').length;
@@ -4693,7 +4709,8 @@
             document.getElementById('lastUpdatedTo').value = '';
             
             // Reset sort
-            document.getElementById('sortSelect').value = 'introduced';
+            const sortIntroduced = document.getElementById('sort-introduced');
+            if (sortIntroduced) sortIntroduced.checked = true;
             
             applyFilters();
         }
@@ -4784,6 +4801,7 @@
             const search         = document.getElementById('searchInput').value.toLowerCase().trim();
             const aiOnly         = !!document.getElementById('filter-ai-reviewed')?.checked;
             const companionOnly  = !!document.getElementById('filter-companion-only')?.checked;
+            const sinceLastSearch = !!document.getElementById('filter-since-last-search')?.checked;
             const reviewedOnly   = !!document.getElementById('filter-reviewed-only')?.checked;
             const reviewedFrom   = document.getElementById('reviewedFrom')?.value || '';
             const reviewedTo     = document.getElementById('reviewedTo')?.value || '';
@@ -4810,6 +4828,13 @@
                 selectedStatuses, selectedBillTypes
             });
 
+            if (sinceLastSearch && lastCompleteSearch) {
+                filtered = filtered.filter(b => {
+                    const updated = b.last_updated || b.status_date;
+                    return updated && updated > lastCompleteSearch;
+                });
+            }
+
             // ── Build active-filter chips (display only, no re-filtering) ─────
             if (search)
                 activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
@@ -4820,6 +4845,9 @@
             if (companionOnly)
                 activeFilters.push({ type: 'companion', label: 'Companion bills', clear: () => {
                     document.getElementById('filter-companion-only').checked = false; applyFilters(); }});
+            if (sinceLastSearch)
+                activeFilters.push({ type: 'since-last-search', label: 'New since last search', clear: () => {
+                    document.getElementById('filter-since-last-search').checked = false; applyFilters(); }});
             if (selectedStates.length) {
                 const label = selectedStates.length === 1 ? `State: ${selectedStates[0]}` : `States: ${selectedStates.length} selected`;
                 activeFilters.push({ type: 'states', label, clear: clearAllStates });
@@ -4880,7 +4908,7 @@
             }
 
             // Sort - default to most recent
-            const sort = document.getElementById('sortSelect').value;
+            const sort = (document.querySelector('input[name="sortSelect"]:checked') || {value:'introduced'}).value;
             if (sort === 'introduced') {
                 // Sort by introduction date (status_date for status 1)
                 filtered.sort((a, b) => {
@@ -5051,7 +5079,7 @@
             } else if (view === 'allBills') {
                 document.getElementById('allBillsView').classList.add('active');
                 document.querySelectorAll('.menu-item')[2].classList.add('active');
-                if (!skipMenuClose) clearAllFilters(); // clear filters when navigating from menu
+                clearAllFilters();
                 applyFilters();
             } else if (view === 'quickReview') {
                 document.getElementById('quickReviewView').classList.add('active');
@@ -5097,7 +5125,7 @@
 
             document.getElementById('relevance-direct').checked = true;
             document.getElementById('relevance-high').checked = true;
-            document.getElementById('sortSelect').value = 'relevance';
+            document.getElementById('sort-relevance').checked = true;
             applyFilters();
         }
         
