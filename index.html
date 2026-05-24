@@ -3786,10 +3786,9 @@
             const g = svg.append('g');
 
             const updateLabelScale = (k) => {
-                g.selectAll('.state-label, .count-label').attr('transform', function(d) {
-                    const c = path.centroid(d);
-                    return `translate(${c[0]},${c[1]}) scale(${1/k})`;
-                });
+                const t = (d) => { const c = path.centroid(d); return `translate(${c[0]},${c[1]}) scale(${1/k})`; };
+                g.selectAll('text.state-label').attr('transform', t);
+                g.selectAll('text.count-label').attr('transform', t);
             };
 
             // Add zoom behavior with translation extent to constrain panning
