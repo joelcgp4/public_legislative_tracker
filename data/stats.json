@@ -1,12 +1,12 @@
 {
-  "total": 3471,
+  "total": 3466,
   "filtered": 0,
   "by_relevance": {
     "direct": 69,
     "high": 76,
     "low": 546,
     "medium": 79,
-    "minimal": 2701
+    "minimal": 2696
   },
   "by_state": {
     "AK": 14,
@@ -44,7 +44,7 @@
     "NV": 25,
     "NY": 484,
     "OH": 58,
-    "OK": 128,
+    "OK": 123,
     "OR": 19,
     "PA": 119,
     "RI": 86,

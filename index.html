@@ -31,7 +31,7 @@
             --tier-direct: #dc2626;
             --tier-high: #f97316;
             --tier-medium: #eab308;
-            --tier-low: #10b981;
+            --tier-low: #14b8a6;
             --tier-minimal: #6b7280;
             --tier-ambiguous: #8b5cf6;
         }
@@ -630,6 +630,117 @@
             max-height: 2000px;
         }
         
+        /* Filter panel primary grid layout */
+        .filter-primary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: visible;
+        }
+
+        /* Override filter-group max-height inside the primary grid — all items always visible */
+        .filter-primary-grid .filter-group {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .filter-col {
+            padding: 1rem;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .filter-col:last-child {
+            border-right: none;
+        }
+
+        .filter-col-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* More Filters collapsible */
+        .filter-more-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .filter-more-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-more-col-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Card legend bar */
+        .card-legend {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 1rem;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+        }
+
+        .legend-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-group-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            opacity: 0.7;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .legend-swatch {
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-sep {
+            width: 1px;
+            height: 16px;
+            background: rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+
         .filter-expand-btn {
             background: none;
             border: none;
@@ -1009,13 +1120,34 @@
         .review-btn-maybe { border-color: var(--tier-medium); color: var(--tier-medium); }
         .review-btn-relevant { border-color: var(--tier-high); color: var(--tier-high); }
         /* Discard = permanently irrelevant, styled separately from tier buttons */
+        .review-btn-ambiguous { border-color: var(--tier-ambiguous); color: var(--tier-ambiguous); }
+        .review-btn-ambiguous:hover { background: rgba(139,92,246,0.1); transform: translateY(-3px); }
         .review-btn-discard {
             border-color: var(--danger);
             color: var(--danger);
             opacity: 0.75;
         }
         .review-btn-discard:hover { background: rgba(239,68,68,0.1); transform: translateY(-3px); opacity: 1; }
-        
+
+        /* Inline save status strip below action buttons */
+        #reviewSaveStatus {
+            height: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.03em;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            margin-top: 0.35rem;
+        }
+        #reviewSaveStatus.visible {
+            opacity: 1;
+        }
+
         .btn-icon {
             font-size: 2rem;
         }
@@ -1116,6 +1248,10 @@
             font-size: 0.75rem;
             color: var(--text-dim);
             font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .filter-count-zero {
+            opacity: 0.35;
         }
         
         .state-filter-grid {
@@ -1256,7 +1392,7 @@
         }
 
         .bill-card.user-reviewed {
-            border-left-color: var(--tier-ambiguous);
+            border-left-color: var(--accent);
         }
 
         /* Companion card */
@@ -1765,6 +1901,71 @@
             background: #dc2626;
         }
         
+        /* DISMISSED BILLS VIEW */
+        .dismissed-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border-left: 4px solid rgba(255,255,255,0.1);
+            margin-bottom: 0.5rem;
+            transition: background 0.15s;
+        }
+
+        .dismissed-row:hover {
+            background: #2d3748;
+        }
+
+        .dismissed-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dismissed-bill-id {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 0.2rem;
+        }
+
+        .dismissed-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dismissed-timestamp {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+
+        .dismissed-restore-btn {
+            background: none;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .dismissed-restore-btn:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
         /* BILL DETAIL VIEW */
         .bill-detail-view {
             background: var(--bg-card);
@@ -2120,8 +2321,8 @@
                 <div class="menu-item menu-sub" onclick="switchView('feedbackReview')">
                     Manual Feedback
                 </div>
-                <div class="menu-item menu-sub" onclick="switchView('ambiguousReview')">
-                    Ambiguous Bills <span id="ambiguousCount" style="font-size:0.75rem; color:var(--tier-ambiguous); margin-left:0.5rem;"></span>
+                <div class="menu-item menu-sub" onclick="switchView('ambiguousReview')" id="menuAmbiguousItem">
+                    Ambiguous &amp; Needs Review <span id="ambiguousCount" style="font-size:0.75rem; color:var(--tier-ambiguous); margin-left:0.5rem;"></span>
                 </div>
             </div>
             
@@ -2131,6 +2332,9 @@
             <div class="menu-divider"></div>
             <div class="menu-item" onclick="exportData()">
                 Export Data
+            </div>
+            <div class="menu-item" onclick="switchView('dismissedBills')">
+                Dismissed Bills
             </div>
             <div class="menu-item" onclick="switchView('about')">
                 About
@@ -2244,96 +2448,152 @@
                 
                 <!-- Filter Bar -->
                 <div class="filter-bar">
-                    <div class="filter-header">
-                        <div class="filter-title">Filters</div>
-                        <div class="filter-actions">
-                            <button class="filter-toggle-btn" onclick="toggleStateFilters()">
-                                <span id="stateFilterToggleText">Show Filters</span>
-                            </button>
-                            <button class="clear-filters-btn" onclick="clearStateFilters()">Clear All</button>
-                        </div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+                        <button class="filter-toggle-btn" id="stateFilterToggleBtn" onclick="toggleStateFilters()" style="padding:0.5rem 1rem; font-size:0.875rem;">Filters ▾</button>
+                        <button class="clear-filters-btn" onclick="clearStateFilters()" style="display:none;" id="stateClearFiltersBtn">Clear all</button>
                     </div>
-                    
+
                     <div class="filter-content collapsed" id="stateFilterContent">
+
                         <!-- Search -->
-                        <div class="filter-section">
-                            <div class="filter-section-title">Search</div>
-                            <input type="text" class="search-input" id="stateSearchInput" placeholder="Search bills, titles, descriptions..." oninput="applyStateFilters()">
+                        <div class="filter-section" style="padding:0.75rem 1rem;">
+                            <input type="text" class="search-input" id="stateSearchInput" placeholder="Search bills, titles, descriptions..." oninput="applyStateFilters()" style="width:100%;">
                         </div>
-                        
-                        <!-- Relevance -->
-                        <div class="filter-section">
-                            <div class="filter-section-title">Relevance Tier</div>
-                            <div class="filter-group">
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-direct" value="direct" onchange="applyStateFilters()">
-                                    <label for="state-relevance-direct">DIRECT</label>
-                                    <span class="filter-count" id="state-count-relevance-direct">0</span>
+
+                        <!-- Primary 3-col grid: Sort | Tier | Status -->
+                        <div class="filter-primary-grid">
+                            <!-- Sort -->
+                            <div class="filter-col">
+                                <div class="filter-col-title">Sort By</div>
+                                <div class="filter-group">
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="ssort-introduced">Introduction Date</label></div>
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-recent" value="recent" onchange="applyStateFilters()"><label for="ssort-recent">Last Action</label></div>
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-status" value="status" onchange="applyStateFilters()"><label for="ssort-status">Bill Status</label></div>
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-relevance" value="relevance" onchange="applyStateFilters()"><label for="ssort-relevance">By Relevance</label></div>
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="ssort-billnumber">By Bill Number</label></div>
+                                    <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-tracker" value="tracker" onchange="applyStateFilters()"><label for="ssort-tracker">Tracker Updated</label></div>
                                 </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-high" value="high" onchange="applyStateFilters()">
-                                    <label for="state-relevance-high">HIGH</label>
-                                    <span class="filter-count" id="state-count-relevance-high">0</span>
+                            </div>
+
+                            <!-- Relevance Tier -->
+                            <div class="filter-col">
+                                <div class="filter-col-title">Relevance Tier</div>
+                                <div class="filter-group">
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-direct" value="direct" onchange="applyStateFilters()"><label for="state-relevance-direct">DIRECT</label><span class="filter-count" id="state-count-relevance-direct">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-high" value="high" onchange="applyStateFilters()"><label for="state-relevance-high">HIGH</label><span class="filter-count" id="state-count-relevance-high">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-medium" value="medium" onchange="applyStateFilters()"><label for="state-relevance-medium">MEDIUM</label><span class="filter-count" id="state-count-relevance-medium">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-low" value="low" onchange="applyStateFilters()"><label for="state-relevance-low">LOW</label><span class="filter-count" id="state-count-relevance-low">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-minimal" value="minimal" onchange="applyStateFilters()"><label for="state-relevance-minimal">MINIMAL</label><span class="filter-count" id="state-count-relevance-minimal">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-relevance-ambiguous" value="ambiguous" onchange="applyStateFilters()"><label for="state-relevance-ambiguous">AMBIGUOUS</label><span class="filter-count" id="state-count-relevance-ambiguous">0</span></div>
                                 </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-medium" value="medium" onchange="applyStateFilters()">
-                                    <label for="state-relevance-medium">MEDIUM</label>
-                                    <span class="filter-count" id="state-count-relevance-medium">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-low" value="low" onchange="applyStateFilters()">
-                                    <label for="state-relevance-low">LOW</label>
-                                    <span class="filter-count" id="state-count-relevance-low">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-minimal" value="minimal" onchange="applyStateFilters()">
-                                    <label for="state-relevance-minimal">MINIMAL</label>
-                                    <span class="filter-count" id="state-count-relevance-minimal">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="state-relevance-ambiguous" value="ambiguous" onchange="applyStateFilters()">
-                                    <label for="state-relevance-ambiguous">AMBIGUOUS</label>
-                                    <span class="filter-count" id="state-count-relevance-ambiguous">0</span>
+                            </div>
+
+                            <!-- Bill Status -->
+                            <div class="filter-col">
+                                <div class="filter-col-title">Bill Status</div>
+                                <div class="filter-group">
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="state-status-active" onchange="onStateActiveStatusChange()">
+                                        <label for="state-status-active" style="color:var(--accent);">Active <span style="color:var(--text-dim);font-weight:400;">(in-progress)</span></label>
+                                    </div>
+                                    <div class="filter-checkbox" style="padding-left:0.75rem;"><input type="checkbox" id="state-status-1" value="1" onchange="applyStateFilters()"><label for="state-status-1">Introduced</label><span class="filter-count" id="state-count-status-1">0</span></div>
+                                    <div class="filter-checkbox" style="padding-left:0.75rem;"><input type="checkbox" id="state-status-2" value="2" onchange="applyStateFilters()"><label for="state-status-2">Engrossed</label><span class="filter-count" id="state-count-status-2">0</span></div>
+                                    <div class="filter-checkbox" style="padding-left:0.75rem;"><input type="checkbox" id="state-status-3" value="3" onchange="applyStateFilters()"><label for="state-status-3">Enrolled</label><span class="filter-count" id="state-count-status-3">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-status-4" value="4" onchange="applyStateFilters()"><label for="state-status-4">Passed / Enacted</label><span class="filter-count" id="state-count-status-4">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-status-5" value="5" onchange="applyStateFilters()"><label for="state-status-5">Vetoed</label><span class="filter-count" id="state-count-status-5">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-status-6" value="6" onchange="applyStateFilters()"><label for="state-status-6" style="color:var(--danger);">Failed</label><span class="filter-count" id="state-count-status-6">0</span></div>
+                                    <div class="filter-checkbox"><input type="checkbox" id="state-status-unknown" value="unknown" onchange="applyStateFilters()"><label for="state-status-unknown">Unknown</label><span class="filter-count" id="state-count-status-unknown">0</span></div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Tags -->
+
+                        <!-- More Filters -->
                         <div class="filter-section">
-                            <div class="filter-section-title">
-                                <span>Tags</span>
-                                <button class="filter-expand-btn" onclick="toggleFilterExpand('stateTagFilters')">Expand</button>
+                            <div class="filter-section-title" onclick="toggleFilterSection(this)">
+                                <span>More Filters</span>
+                                <span class="section-arrow">▶</span>
                             </div>
-                            <div class="filter-group" id="stateTagFilters"></div>
-                        </div>
-                        
-                        <!-- Subjects -->
-                        <div class="filter-section">
-                            <div class="filter-section-title">
-                                <span>Subjects</span>
-                                <button class="filter-expand-btn" onclick="toggleFilterExpand('stateSubjectFilters')">Expand</button>
+                            <div class="filter-section-body">
+                                <div class="filter-more-grid">
+
+                                    <!-- Col 1: AI Review + Party -->
+                                    <div class="filter-more-col">
+                                        <div class="filter-more-col-title">AI Review</div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-filter-ai-reviewed" onchange="applyStateFilters()"><label for="state-filter-ai-reviewed">AI Reviewed only</label><span class="filter-count" id="state-count-ai-reviewed">0</span></div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-filter-companion-only" onchange="applyStateFilters()"><label for="state-filter-companion-only">Companion bills only</label></div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-filter-since-last-search" onchange="applyStateFilters()"><label for="state-filter-since-last-search">New since last search</label><span class="filter-count" id="state-count-since-last-search">0</span></div>
+
+                                        <div class="filter-more-col-title" style="margin-top:1rem;">Sponsor Party</div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-party-D" value="D" onchange="applyStateFilters()"><label for="state-party-D">Democrat (D)</label><span class="filter-count" id="state-count-party-D">0</span></div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-party-R" value="R" onchange="applyStateFilters()"><label for="state-party-R">Republican (R)</label><span class="filter-count" id="state-count-party-R">0</span></div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-party-I" value="I" onchange="applyStateFilters()"><label for="state-party-I">Independent (I)</label><span class="filter-count" id="state-count-party-I">0</span></div>
+                                    </div>
+
+                                    <!-- Col 2: Bill Type + Manual Review -->
+                                    <div class="filter-more-col">
+                                        <div class="filter-more-col-title">Bill Type</div>
+                                        <div class="filter-group expanded" id="stateTypeFilters"></div>
+
+                                        <div class="filter-more-col-title" style="margin-top:1rem;">Manually Reviewed</div>
+                                        <div class="filter-checkbox"><input type="checkbox" id="state-filter-reviewed-only" onchange="applyStateFilters()"><label for="state-filter-reviewed-only">Has manual review</label></div>
+                                        <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">From:</label>
+                                        <input type="date" class="date-input" id="stateReviewedFrom" onchange="applyStateFilters()">
+                                        <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                        <input type="date" class="date-input" id="stateReviewedTo" onchange="applyStateFilters()">
+                                    </div>
+
+                                    <!-- Col 3: Tags + Subjects + Date Ranges -->
+                                    <div class="filter-more-col">
+                                        <div class="filter-more-col-title">Tags</div>
+                                        <div class="filter-group expanded" id="stateTagFilters"></div>
+
+                                        <div class="filter-more-col-title" style="margin-top:1rem;">Subjects</div>
+                                        <div class="filter-group expanded" id="stateSubjectFilters"></div>
+
+                                        <div class="filter-more-col-title" style="margin-top:1rem;">Status Date Range</div>
+                                        <label style="font-size:0.75rem; color:var(--text-dim);">From:</label>
+                                        <input type="date" class="date-input" id="stateStatusDateFrom" onchange="applyStateFilters()">
+                                        <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                        <input type="date" class="date-input" id="stateStatusDateTo" onchange="applyStateFilters()">
+
+                                        <div class="filter-more-col-title" style="margin-top:1rem;">Last Updated Range</div>
+                                        <label style="font-size:0.75rem; color:var(--text-dim);">From:</label>
+                                        <input type="date" class="date-input" id="stateLastUpdatedFrom" onchange="applyStateFilters()">
+                                        <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                        <input type="date" class="date-input" id="stateLastUpdatedTo" onchange="applyStateFilters()">
+                                    </div>
+
+                                </div>
                             </div>
-                            <div class="filter-group" id="stateSubjectFilters"></div>
                         </div>
-                        
-                        <!-- Sort -->
-                        <div class="filter-section">
-                            <div class="filter-section-title">Sort By</div>
-                            <div class="filter-group">
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="ssort-introduced">Introduction Date</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-recent" value="recent" onchange="applyStateFilters()"><label for="ssort-recent">Last Action</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-status" value="status" onchange="applyStateFilters()"><label for="ssort-status">Bill Status</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-relevance" value="relevance" onchange="applyStateFilters()"><label for="ssort-relevance">By Relevance</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="ssort-billnumber">By Bill Number</label></div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
                 
                 <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
                     Showing <span id="stateBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> bills
                 </div>
-                
+
+                <!-- Card Color Legend -->
+                <div class="card-legend">
+                    <div class="legend-group">
+                        <span class="legend-group-label">Border</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--text-dim);"></span>Unreviewed</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--blue);"></span>AI Reviewed</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--accent);"></span>Human Reviewed</span>
+                    </div>
+                    <span class="legend-sep"></span>
+                    <div class="legend-group">
+                        <span class="legend-group-label">Tier</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-direct);"></span>Direct</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-high);"></span>High</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-medium);"></span>Medium</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-low);"></span>Low</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-minimal);"></span>Minimal</span>
+                        <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-ambiguous);"></span>Ambiguous</span>
+                    </div>
+                </div>
+
                 <div class="bills-grid" id="stateBillsGrid"></div>
             </div>
         </div>
@@ -2365,33 +2625,32 @@
                 </div>
                 
                 <div class="filter-content collapsed" id="filterContent">
-                    <!-- Search (always visible when open) -->
-                    <div class="filter-section">
+
+                    <!-- Search -->
+                    <div class="filter-section" style="padding:0.75rem 1rem;">
                         <input type="text" class="search-input" id="searchInput" placeholder="Search bills, titles, descriptions..." oninput="applyFilters()" style="width:100%;">
                     </div>
 
-                    <!-- Sort -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Sort By</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-introduced" value="introduced" onchange="applyFilters()" checked><label for="sort-introduced">Introduction Date</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-recent" value="recent" onchange="applyFilters()"><label for="sort-recent">Last Action</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-status" value="status" onchange="applyFilters()"><label for="sort-status">Bill Status</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-relevance" value="relevance" onchange="applyFilters()"><label for="sort-relevance">By Relevance</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-state" value="state" onchange="applyFilters()"><label for="sort-state">By State</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-billnumber" value="billnumber" onchange="applyFilters()"><label for="sort-billnumber">By Bill Number</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-tracker" value="tracker" onchange="applyFilters()"><label for="sort-tracker">Tracker Updated</label></div>
+                    <!-- Primary 3-col grid: Sort | Tier | Status -->
+                    <div class="filter-primary-grid">
+                        <!-- Sort -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Sort By</div>
+                            <div class="filter-group" style="max-height:none; overflow:visible;">
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-introduced" value="introduced" onchange="applyFilters()" checked><label for="sort-introduced">Introduction Date</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-recent" value="recent" onchange="applyFilters()"><label for="sort-recent">Last Action</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-status" value="status" onchange="applyFilters()"><label for="sort-status">Bill Status</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-relevance" value="relevance" onchange="applyFilters()"><label for="sort-relevance">By Relevance</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-state" value="state" onchange="applyFilters()"><label for="sort-state">By State</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-billnumber" value="billnumber" onchange="applyFilters()"><label for="sort-billnumber">By Bill Number</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-tracker" value="tracker" onchange="applyFilters()"><label for="sort-tracker">Tracker Updated</label></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Relevance Tier -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Relevance Tier</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
+                        <!-- Relevance Tier -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Relevance Tier</div>
+                            <div class="filter-group" style="max-height:none; overflow:visible;">
                                 <div class="filter-checkbox">
                                     <input type="checkbox" id="relevance-direct" value="direct" onchange="applyFilters()">
                                     <label for="relevance-direct">DIRECT</label>
@@ -2424,9 +2683,56 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Bill Status -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Bill Status</div>
+                            <div class="filter-group" style="max-height:none; overflow:visible;">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-active" onchange="onActiveStatusChange()">
+                                    <label for="status-active" style="color:var(--accent);">Active <span style="color:var(--text-dim);font-weight:400;">(in-progress)</span></label>
+                                    <span class="filter-count" id="count-status-active">0</span>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="status-1" value="1" onchange="applyFilters()">
+                                    <label for="status-1">Introduced</label>
+                                    <span class="filter-count" id="count-status-1">0</span>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="status-2" value="2" onchange="applyFilters()">
+                                    <label for="status-2">Engrossed</label>
+                                    <span class="filter-count" id="count-status-2">0</span>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="status-3" value="3" onchange="applyFilters()">
+                                    <label for="status-3">Enrolled</label>
+                                    <span class="filter-count" id="count-status-3">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-4" value="4" onchange="applyFilters()">
+                                    <label for="status-4">Passed / Enacted</label>
+                                    <span class="filter-count" id="count-status-4">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-5" value="5" onchange="applyFilters()">
+                                    <label for="status-5">Vetoed</label>
+                                    <span class="filter-count" id="count-status-5">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-6" value="6" onchange="applyFilters()">
+                                    <label for="status-6" style="color:var(--danger);">Failed</label>
+                                    <span class="filter-count" id="count-status-6">0</span>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="status-unknown" value="unknown" onchange="applyFilters()">
+                                    <label for="status-unknown">Status Unknown</label>
+                                    <span class="filter-count" id="count-status-unknown">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- States -->
+                    <!-- States (collapsible, full-width) -->
                     <div class="filter-section">
                         <div class="filter-section-title" onclick="toggleFilterSection(this)">
                             <span>States (<span id="stateFilterCount">0</span> selected)</span>
@@ -2441,184 +2747,273 @@
                         </div>
                     </div>
 
-                    <!-- AI Review -->
+                    <!-- More Filters (collapsible) -->
                     <div class="filter-section">
                         <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>AI Review</span>
+                            <span>More Filters</span>
                             <span class="section-arrow">▶</span>
                         </div>
                         <div class="filter-section-body">
-                            <div class="filter-group">
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
-                                    <label for="filter-ai-reviewed">AI Reviewed only</label>
-                                    <span class="filter-count" id="count-ai-reviewed">0</span>
+                            <div class="filter-more-grid">
+
+                                <!-- Col 1: AI Review + Party -->
+                                <div class="filter-more-col">
+                                    <div class="filter-more-col-title">AI Review</div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="filter-ai-reviewed" onchange="applyFilters()">
+                                        <label for="filter-ai-reviewed">AI Reviewed only</label>
+                                        <span class="filter-count" id="count-ai-reviewed">0</span>
+                                    </div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="filter-companion-only" onchange="applyFilters()">
+                                        <label for="filter-companion-only">Companion bills only</label>
+                                    </div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="filter-since-last-search" onchange="applyFilters()">
+                                        <label for="filter-since-last-search">New since last search</label>
+                                        <span class="filter-count" id="count-since-last-search">0</span>
+                                    </div>
+
+                                    <div class="filter-more-col-title" style="margin-top:1rem;">Sponsor Party</div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="party-D" value="D" onchange="applyFilters()">
+                                        <label for="party-D">Democrat (D)</label>
+                                        <span class="filter-count" id="count-party-D">0</span>
+                                    </div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="party-R" value="R" onchange="applyFilters()">
+                                        <label for="party-R">Republican (R)</label>
+                                        <span class="filter-count" id="count-party-R">0</span>
+                                    </div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
+                                        <label for="party-I">Independent (I)</label>
+                                        <span class="filter-count" id="count-party-I">0</span>
+                                    </div>
                                 </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="filter-companion-only" onchange="applyFilters()">
-                                    <label for="filter-companion-only">Companion bills only</label>
+
+                                <!-- Col 2: Bill Type + Manual Review -->
+                                <div class="filter-more-col">
+                                    <div class="filter-more-col-title">Bill Type</div>
+                                    <div class="filter-group expanded" id="billTypeFilters"></div>
+
+                                    <div class="filter-more-col-title" style="margin-top:1rem;">Manually Reviewed</div>
+                                    <div class="filter-checkbox">
+                                        <input type="checkbox" id="filter-reviewed-only" onchange="applyFilters()">
+                                        <label for="filter-reviewed-only">Has manual review</label>
+                                    </div>
+                                    <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">From:</label>
+                                    <input type="date" class="date-input" id="reviewedFrom" onchange="applyFilters()">
+                                    <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                    <input type="date" class="date-input" id="reviewedTo" onchange="applyFilters()">
                                 </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="filter-since-last-search" onchange="applyFilters()">
-                                    <label for="filter-since-last-search">New since last search</label>
-                                    <span class="filter-count" id="count-since-last-search">0</span>
+
+                                <!-- Col 3: Tags + Subjects + Date Ranges -->
+                                <div class="filter-more-col">
+                                    <div class="filter-more-col-title">Tags</div>
+                                    <div class="filter-group expanded" id="tagFilters"></div>
+
+                                    <div class="filter-more-col-title" style="margin-top:1rem;">Subjects</div>
+                                    <div class="filter-group expanded" id="subjectFilters"></div>
+
+                                    <div class="filter-more-col-title" style="margin-top:1rem;">Status Date Range</div>
+                                    <label style="font-size:0.75rem; color:var(--text-dim);">From:</label>
+                                    <input type="date" class="date-input" id="statusDateFrom" onchange="applyFilters()">
+                                    <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                    <input type="date" class="date-input" id="statusDateTo" onchange="applyFilters()">
+
+                                    <div class="filter-more-col-title" style="margin-top:1rem;">Last Updated Range</div>
+                                    <label style="font-size:0.75rem; color:var(--text-dim);">From:</label>
+                                    <input type="date" class="date-input" id="lastUpdatedFrom" onchange="applyFilters()">
+                                    <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">To:</label>
+                                    <input type="date" class="date-input" id="lastUpdatedTo" onchange="applyFilters()">
                                 </div>
+
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tags -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Tags</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group expanded" id="tagFilters"></div>
-                        </div>
-                    </div>
-
-                    <!-- Subjects -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Subjects</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group expanded" id="subjectFilters"></div>
-                        </div>
-                    </div>
-
-                    <!-- Sponsor Party -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Sponsor Party</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="party-D" value="D" onchange="applyFilters()">
-                                    <label for="party-D">Democrat (D)</label>
-                                    <span class="filter-count" id="count-party-D">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="party-R" value="R" onchange="applyFilters()">
-                                    <label for="party-R">Republican (R)</label>
-                                    <span class="filter-count" id="count-party-R">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="party-I" value="I" onchange="applyFilters()">
-                                    <label for="party-I">Independent (I)</label>
-                                    <span class="filter-count" id="count-party-I">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bill Status -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Bill Status</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="status-active" value="active" onchange="applyFilters()">
-                                    <label for="status-active">Active (Introduced / In Progress)</label>
-                                    <span class="filter-count" id="count-status-active">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="status-passed" value="passed" onchange="applyFilters()">
-                                    <label for="status-passed">Passed / Enacted</label>
-                                    <span class="filter-count" id="count-status-passed">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="status-failed" value="failed" onchange="applyFilters()">
-                                    <label for="status-failed" style="color:var(--danger);">Failed / Vetoed</label>
-                                    <span class="filter-count" id="count-status-failed">0</span>
-                                </div>
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="status-unknown" value="unknown" onchange="applyFilters()">
-                                    <label for="status-unknown">Status Unknown</label>
-                                    <span class="filter-count" id="count-status-unknown">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Reviewed Date -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Manually Reviewed</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
-                                <div class="filter-checkbox">
-                                    <input type="checkbox" id="filter-reviewed-only" onchange="applyFilters()">
-                                    <label for="filter-reviewed-only">Has manual review</label>
-                                </div>
-                                <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">Reviewed from:</label>
-                                <input type="date" class="date-input" id="reviewedFrom" onchange="applyFilters()">
-                                <label style="font-size:0.75rem; color:var(--text-dim); margin-top:0.5rem;">To:</label>
-                                <input type="date" class="date-input" id="reviewedTo" onchange="applyFilters()">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bill Type -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Bill Type</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group expanded" id="billTypeFilters"></div>
-                        </div>
-                    </div>
-
-                    <!-- Date Ranges -->
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Status Date Range</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
-                                <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
-                                <input type="date" class="date-input" id="statusDateFrom" onchange="applyFilters()">
-                                <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
-                                <input type="date" class="date-input" id="statusDateTo" onchange="applyFilters()">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="filter-section">
-                        <div class="filter-section-title" onclick="toggleFilterSection(this)">
-                            <span>Last Updated Range</span>
-                            <span class="section-arrow">▶</span>
-                        </div>
-                        <div class="filter-section-body">
-                            <div class="filter-group">
-                                <label style="font-size: 0.75rem; color: var(--text-dim);">From:</label>
-                                <input type="date" class="date-input" id="lastUpdatedFrom" onchange="applyFilters()">
-                                <label style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">To:</label>
-                                <input type="date" class="date-input" id="lastUpdatedTo" onchange="applyFilters()">
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             
+            <!-- Card Color Legend -->
+            <div class="card-legend">
+                <div class="legend-group">
+                    <span class="legend-group-label">Border</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--text-dim);"></span>Unreviewed</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--blue);"></span>AI Reviewed</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--accent);"></span>Human Reviewed</span>
+                </div>
+                <span class="legend-sep"></span>
+                <div class="legend-group">
+                    <span class="legend-group-label">Tier</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-direct);"></span>Direct</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-high);"></span>High</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-medium);"></span>Medium</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-low);"></span>Low</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-minimal);"></span>Minimal</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-ambiguous);"></span>Ambiguous</span>
+                </div>
+            </div>
+
             <div class="bills-grid" id="billsGrid"></div>
         </div>
 
         <!-- QUICK REVIEW (GAME) VIEW -->
         <div class="view" id="quickReviewView">
             <div class="quick-review-container">
-                <div class="quick-review-header">
+
+                <!-- SETUP SCREEN -->
+                <div id="quickReviewSetup">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+                        <div>
+                            <button class="back-btn" style="margin-bottom:0.5rem;" onclick="switchView('dashboard', true)">← Back</button>
+                            <h2 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin:0;">Quick Review</h2>
+                            <p style="font-size:0.8rem; color:var(--text-dim); margin:0.25rem 0 0;">Configure your queue, then start reviewing.</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <div id="qrQueuePreview" style="font-size:2rem; font-weight:700; color:var(--accent); line-height:1;">0</div>
+                            <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">bills in queue</div>
+                        </div>
+                    </div>
+
+                    <!-- Filter grid -->
+                    <div class="filter-primary-grid" style="margin-bottom:1rem;">
+
+                        <!-- Tiers -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Relevance Tier</div>
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-tier-all" onchange="onQRTierAllChange()" checked>
+                                    <label for="qr-tier-all" style="color:var(--text-secondary); font-weight:600;">All Tiers</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-direct" value="direct" onchange="onQRTierChange()">
+                                    <label for="qr-tier-direct">DIRECT</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-high" value="high" onchange="onQRTierChange()">
+                                    <label for="qr-tier-high">HIGH</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-medium" value="medium" onchange="onQRTierChange()">
+                                    <label for="qr-tier-medium">MEDIUM</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-low" value="low" onchange="onQRTierChange()">
+                                    <label for="qr-tier-low">LOW</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-minimal" value="minimal" onchange="onQRTierChange()">
+                                    <label for="qr-tier-minimal">MINIMAL</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-tier-ambiguous" value="ambiguous" onchange="onQRTierChange()">
+                                    <label for="qr-tier-ambiguous">AMBIGUOUS</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Bill Status</div>
+                            <div class="filter-group">
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-status-all" onchange="onQRStatusAllChange()" checked>
+                                    <label for="qr-status-all" style="color:var(--text-secondary); font-weight:600;">All Statuses</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-status-1" value="1" onchange="onQRStatusChange()">
+                                    <label for="qr-status-1">Introduced</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-status-2" value="2" onchange="onQRStatusChange()">
+                                    <label for="qr-status-2">Engrossed</label>
+                                </div>
+                                <div class="filter-checkbox" style="padding-left:0.75rem;">
+                                    <input type="checkbox" id="qr-status-3" value="3" onchange="onQRStatusChange()">
+                                    <label for="qr-status-3">Enrolled</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-status-4" value="4" onchange="onQRStatusChange()">
+                                    <label for="qr-status-4">Passed / Enacted</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-status-5" value="5" onchange="onQRStatusChange()">
+                                    <label for="qr-status-5">Vetoed</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-status-6" value="6" onchange="onQRStatusChange()">
+                                    <label for="qr-status-6" style="color:var(--danger);">Failed</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-status-unknown" value="unknown" onchange="onQRStatusChange()">
+                                    <label for="qr-status-unknown">Unknown</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="filter-col">
+                            <div class="filter-col-title">Options</div>
+                            <div class="filter-group">
+
+                                <div class="filter-more-col-title" style="margin-top:0;">State</div>
+                                <select id="qr-state-filter" onchange="updateQRPreview()" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:0.4rem 0.6rem; border-radius:6px; font-size:0.82rem; font-family:inherit; width:100%;">
+                                    <option value="">All States</option>
+                                </select>
+
+                                <div class="filter-more-col-title" style="margin-top:1rem;">Search</div>
+                                <input type="text" id="qr-search" placeholder="Title, bill number..." oninput="updateQRPreview()" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:0.4rem 0.6rem; border-radius:6px; font-size:0.82rem; font-family:inherit; width:100%; box-sizing:border-box;">
+
+                                <div class="filter-more-col-title" style="margin-top:1rem;">Include</div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-include-reviewed" onchange="updateQRPreview()">
+                                    <label for="qr-include-reviewed">Already-reviewed bills</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="checkbox" id="qr-include-aireviewed" onchange="updateQRPreview()">
+                                    <label for="qr-include-aireviewed">AI-reviewed bills</label>
+                                </div>
+
+                                <div class="filter-more-col-title" style="margin-top:1rem;">Sort Queue By</div>
+                                <div class="filter-checkbox">
+                                    <input type="radio" name="qrSort" id="qr-sort-tier" value="tier" checked onchange="updateQRPreview()">
+                                    <label for="qr-sort-tier">Tier (highest first)</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="radio" name="qrSort" id="qr-sort-recent" value="recent" onchange="updateQRPreview()">
+                                    <label for="qr-sort-recent">Most recent action</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="radio" name="qrSort" id="qr-sort-state" value="state" onchange="updateQRPreview()">
+                                    <label for="qr-sort-state">State</label>
+                                </div>
+                                <div class="filter-checkbox">
+                                    <input type="radio" name="qrSort" id="qr-sort-random" value="random" onchange="updateQRPreview()">
+                                    <label for="qr-sort-random">Random</label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:1rem; margin-top:0.5rem;">
+                        <button id="qrStartBtn" onclick="beginQuickReview()"
+                            style="background:var(--accent); color:var(--bg-dark); border:none; padding:0.7rem 2rem; border-radius:10px; font-size:0.95rem; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s;">
+                            Start Review →
+                        </button>
+                        <button onclick="resetQRFilters()" style="background:none; border:1px solid rgba(255,255,255,0.12); color:var(--text-dim); padding:0.7rem 1.25rem; border-radius:10px; font-size:0.85rem; cursor:pointer; font-family:inherit;">
+                            Reset Filters
+                        </button>
+                        <span id="qrZeroWarning" style="display:none; font-size:0.8rem; color:var(--danger);">No bills match these filters.</span>
+                    </div>
+                </div>
+                <!-- END SETUP SCREEN -->
+
+                <div class="quick-review-header" id="quickReviewHeader" style="display:none;">
                     <button class="back-btn" onclick="exitQuickReview()">← Exit Review Mode</button>
                     <div class="quick-review-progress">
                         <div class="progress-text">
@@ -2728,7 +3123,11 @@
 
                     <!-- Action Buttons (Bottom) -->
                     <div class="review-actions" style="gap:0.5rem;">
-                        <button class="review-btn review-btn-discard" onclick="reviewIrrelevant()" title="Irrelevant — permanently remove from database and exclude from future runs (X)">
+                        <button class="review-btn review-btn-ambiguous" onclick="reviewSendToAmbiguous()" title="Flag for further review — adds to Ambiguous queue for re-evaluation (A)">
+                            <div class="btn-label">AMBIGUOUS</div>
+                            <div class="btn-hint">A</div>
+                        </button>
+                        <button class="review-btn review-btn-discard" onclick="reviewIrrelevant()" title="Irrelevant — dismiss from tracker (X)">
                             <div class="btn-label">IRRELEVANT</div>
                             <div class="btn-hint">X</div>
                         </button>
@@ -2754,10 +3153,13 @@
                         </button>
                     </div>
 
+                    <!-- Save status indicator -->
+                    <div id="reviewSaveStatus"></div>
+
                     <!-- Keyboard Shortcuts Help -->
                     <div class="review-shortcuts">
                         <div style="font-size: 0.8rem; color: var(--text-dim);">
-                            <kbd>X</kbd> irrelevant &nbsp;|&nbsp; <kbd>1</kbd>–<kbd>5</kbd> assign tier &nbsp;|&nbsp; <kbd>←</kbd> back &nbsp;|&nbsp; <kbd>→</kbd> skip &nbsp;|&nbsp; <kbd>S</kbd> star &nbsp;|&nbsp; <kbd>F</kbd> flag &nbsp;|&nbsp; <kbd>Space</kbd> flip &nbsp;|&nbsp; <kbd>Esc</kbd> exit
+                            <kbd>A</kbd> ambiguous &nbsp;|&nbsp; <kbd>X</kbd> irrelevant &nbsp;|&nbsp; <kbd>1</kbd>–<kbd>5</kbd> assign tier &nbsp;|&nbsp; <kbd>←</kbd> back &nbsp;|&nbsp; <kbd>→</kbd> skip &nbsp;|&nbsp; <kbd>S</kbd> star &nbsp;|&nbsp; <kbd>F</kbd> flag &nbsp;|&nbsp; <kbd>Space</kbd> flip &nbsp;|&nbsp; <kbd>Esc</kbd> exit
                         </div>
                     </div>
                 </div>
@@ -2823,20 +3225,19 @@
         <div class="view" id="ambiguousReviewView">
             <div class="bills-header">
                 <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
-                <h2 class="section-title">Ambiguous Bills (<span id="ambiguousReviewCount">0</span>)</h2>
+                <h2 class="section-title">Ambiguous &amp; Needs Review (<span id="ambiguousReviewCount">0</span>)</h2>
             </div>
 
             <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--tier-ambiguous);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--tier-ambiguous);">Manually Flagged for Re-Review</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Three sections appear here</div>
                 <div style="font-size: 0.875rem; color: var(--text-dim);">
-                    These bills were manually flagged for comprehensive re-evaluation. During the next tracker run they will be automatically re-fetched via full bill detail (getBill) and re-scored by the LLM classifier. After each tracker run this queue should be empty — bills shown here are waiting for the next scheduled run.
-                    <br><br>
-                    <strong>Remove from Queue</strong> — cancels the re-review request and removes the bill from this list. The bill remains in the database with its current tier.<br>
-                    <strong>Delete Bill</strong> — permanently removes the bill from the database. It will not be tracked again.
+                    <strong style="color:var(--danger);">Likely Irrelevant</strong> — ambiguous-queued bills whose automated tier is <em>minimal</em>. These are probably safe to dismiss; review and use <em>Dismiss</em> to remove from the tracker, or <em>Remove from Queue</em> to keep.<br><br>
+                    <strong style="color:var(--tier-ambiguous);">Ambiguous queue</strong> — bills manually flagged for re-evaluation. These will be re-fetched and re-scored during the next tracker run. Use <em>Remove from Queue</em> to cancel, or <em>Delete Bill</em> to permanently remove the bill.<br><br>
+                    <strong style="color:var(--accent);">Awaiting AI review</strong> — bills you manually overrode to a higher tier that have not yet been processed by <code>review.py</code>. These disappear automatically once review.py has run.
                 </div>
             </div>
 
-            <div id="ambiguousReviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem;">
+            <div id="ambiguousReviewGrid">
                 <div class="loading"><p>Loading ambiguous bills...</p></div>
             </div>
         </div>
@@ -2847,44 +3248,58 @@
                 <button class="back-btn" onclick="switchView('dashboard', true)">← Back to Dashboard</button>
                 <h2 class="section-title">Feedback Review (<span id="feedbackCount">0</span> bills)</h2>
             </div>
-            
-            <!-- Filter Bar -->
-            <div class="filter-bar">
-                <div class="filter-header">
-                    <div class="filter-title">Filter Feedback</div>
-                    <div class="filter-actions">
-                        <button class="filter-toggle-btn" onclick="toggleFeedbackFilters()">
-                            <span id="feedbackFilterToggleText">Show Filters</span>
-                        </button>
+
+            <!-- Auth Gate -->
+            <div id="feedbackAuthGate" style="display:none; background:var(--bg-card); border-radius:16px; padding:3rem 2rem; text-align:center; max-width:400px; margin:4rem auto; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+                <div style="font-size:1.5rem; margin-bottom:0.75rem;">🔒</div>
+                <div style="font-weight:700; font-size:1rem; color:var(--text-primary); margin-bottom:0.5rem;">Researcher Access</div>
+                <div style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1.5rem;">This view is password-protected.</div>
+                <input type="password" id="feedbackPasswordInput" placeholder="Password"
+                    style="width:100%; padding:0.6rem 1rem; background:var(--bg-dark); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:var(--text-primary); font-size:0.9rem; margin-bottom:0.75rem; box-sizing:border-box;"
+                    onkeydown="if(event.key==='Enter') checkFeedbackPassword()">
+                <div id="feedbackPasswordError" style="display:none; color:var(--danger); font-size:0.8rem; margin-bottom:0.75rem;">Incorrect password.</div>
+                <button onclick="checkFeedbackPassword()" style="background:var(--accent); color:var(--bg-dark); border:none; padding:0.6rem 1.5rem; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:0.9rem;">Unlock</button>
+            </div>
+
+            <!-- Protected content -->
+            <div id="feedbackContent" style="display:none;">
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="filter-header">
+                        <div class="filter-title">Filter Feedback</div>
+                        <div class="filter-actions">
+                            <button class="filter-toggle-btn" onclick="toggleFeedbackFilters()">
+                                <span id="feedbackFilterToggleText">Show Filters</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="filter-content collapsed" id="feedbackFilterContent">
-                    <!-- Feedback Type -->
-                    <!-- Sort -->
-                    <div class="filter-section">
-                        <div class="filter-section-title">Sort By</div>
-                        <div class="filter-group">
-                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-reviewed" value="reviewed" onchange="applyFeedbackFilters()" checked><label for="fsort-reviewed">Last Reviewed</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-action" value="action" onchange="applyFeedbackFilters()"><label for="fsort-action">Last Action</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-tier" value="tier" onchange="applyFeedbackFilters()"><label for="fsort-tier">By Tier</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-state" value="state" onchange="applyFeedbackFilters()"><label for="fsort-state">By State</label></div>
+
+                    <div class="filter-content collapsed" id="feedbackFilterContent">
+                        <!-- Sort -->
+                        <div class="filter-section">
+                            <div class="filter-section-title">Sort By</div>
+                            <div class="filter-group">
+                                <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-reviewed" value="reviewed" onchange="applyFeedbackFilters()" checked><label for="fsort-reviewed">Last Reviewed</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-action" value="action" onchange="applyFeedbackFilters()"><label for="fsort-action">Last Action</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-tier" value="tier" onchange="applyFeedbackFilters()"><label for="fsort-tier">By Tier</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-state" value="state" onchange="applyFeedbackFilters()"><label for="fsort-state">By State</label></div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
+                    Showing <span id="feedbackBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> bills with feedback
+                </div>
+
+                <div class="bills-grid" id="feedbackBillsGrid"></div>
             </div>
-            
-            <div style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.875rem;">
-                Showing <span id="feedbackBillCount" style="font-weight: 600; color: var(--text-primary);">0</span> bills with feedback
-            </div>
-            
-            <div class="bills-grid" id="feedbackBillsGrid"></div>
         </div>
 
         <!-- BILL DETAIL VIEW -->
         <div class="view" id="billDetailView">
             <div class="bill-detail-view">
-                <button class="back-btn" onclick="switchView('allBills', true)" style="margin-bottom: 1.5rem;">← Back to All Bills</button>
+                <button class="back-btn" id="billDetailBackBtn" onclick="goBack()" style="margin-bottom: 1.5rem;">← Back</button>
                 <div id="billDetailContent"></div>
             </div>
         </div>
@@ -3013,6 +3428,49 @@
             </article>
         </div>
 
+        <!-- DISMISSED BILLS VIEW -->
+        <div class="view" id="dismissedBillsView">
+            <div class="bills-header">
+                <button class="back-btn" onclick="goBack()">← Back</button>
+                <h2 class="section-title">Dismissed Bills <span id="dismissedCount" style="font-size:1rem; color:var(--text-dim); font-weight:400;"></span></h2>
+            </div>
+
+            <!-- Password gate overlay -->
+            <div id="dismissedAuthGate" style="display:none; background:var(--bg-card); border-radius:16px; padding:3rem 2rem; text-align:center; max-width:400px; margin:4rem auto; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
+                <div style="font-size:1.5rem; margin-bottom:0.5rem;">🔒</div>
+                <h3 style="color:var(--text-primary); margin-bottom:0.5rem;">Admin Access Required</h3>
+                <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1.5rem;">Enter the admin password to view dismissed bills.</p>
+                <input type="password" id="dismissedPasswordInput" placeholder="Password" style="width:100%; padding:0.6rem 1rem; background:var(--bg-dark); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:var(--text-primary); font-size:0.9rem; margin-bottom:0.75rem; box-sizing:border-box;" onkeydown="if(event.key==='Enter') checkDismissedPassword()">
+                <div id="dismissedPasswordError" style="color:var(--danger); font-size:0.8rem; margin-bottom:0.75rem; display:none;">Incorrect password. Try again.</div>
+                <button onclick="checkDismissedPassword()" style="background:var(--accent); color:var(--bg-dark); border:none; padding:0.6rem 1.5rem; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:0.9rem;">Unlock</button>
+            </div>
+
+            <!-- Authenticated content -->
+            <div id="dismissedContent" style="display:none;">
+                <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1.5rem;">
+                    Bills dismissed from the tracker are logged here. They remain in the database and will not be re-promoted by the scraper.
+                    Use <strong style="color:var(--text-secondary);">Restore</strong> to return a bill to the active tracker with its automated tier.
+                </p>
+
+                <!-- Filters row -->
+                <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+                    <input type="text" class="search-input" id="dismissedSearch" placeholder="Search dismissed bills..." oninput="renderDismissedBills()" style="flex:1; min-width:200px; max-width:360px;">
+                    <select id="dismissedStateFilter" onchange="renderDismissedBills()" style="background:var(--bg-dark); border:1px solid rgba(255,255,255,0.15); color:var(--text-secondary); padding:0.5rem 0.75rem; border-radius:6px; font-size:0.85rem; font-family:inherit;">
+                        <option value="">All States</option>
+                    </select>
+                    <select id="dismissedSortSelect" onchange="renderDismissedBills()" style="background:var(--bg-dark); border:1px solid rgba(255,255,255,0.15); color:var(--text-secondary); padding:0.5rem 0.75rem; border-radius:6px; font-size:0.85rem; font-family:inherit;">
+                        <option value="date-desc">Dismissed: Newest First</option>
+                        <option value="date-asc">Dismissed: Oldest First</option>
+                        <option value="state">By State</option>
+                        <option value="tier">By Auto Tier</option>
+                    </select>
+                </div>
+
+                <!-- Bills list -->
+                <div id="dismissedList"></div>
+            </div>
+        </div>
+
         <!-- ANALYTICS VIEW -->
         <div class="view" id="analyticsView">
             <div class="bills-header">
@@ -3090,6 +3548,7 @@
         });
         
         let allBills = [];
+        let _dismissedBills = [];    // bills with user_tier='none', kept for in-session restore
         let currentState = null;
         let lastCompleteSearch = null;
 
@@ -3436,91 +3895,136 @@
             document.getElementById('state-count-relevance-low').textContent = lowCount;
             document.getElementById('state-count-relevance-minimal').textContent = minimalCount;
             document.getElementById('state-count-relevance-ambiguous').textContent = ambiguousCount;
+
+            // Bill status counts
+            ['1','2','3','4','5','6','unknown'].forEach(v => {
+                const el = document.getElementById(`state-count-status-${v}`);
+                if (el) el.textContent = stateBills.filter(b => (b.status ? String(b.status) : 'unknown') === v).length;
+            });
+
+            // Party counts
+            ['D','R','I'].forEach(p => {
+                const el = document.getElementById(`state-count-party-${p}`);
+                if (el) el.textContent = stateBills.filter(b => b.sponsor_party === p).length;
+            });
+
+            // AI-reviewed count
+            const aiEl = document.getElementById('state-count-ai-reviewed');
+            if (aiEl) aiEl.textContent = stateBills.filter(b => !!b.llm_tier).length;
+
+            // Bill types
+            const typeContainer = document.getElementById('stateTypeFilters');
+            if (typeContainer) {
+                const billTypeNames = {'B':'Bill','R':'Resolution','CR':'Concurrent Resolution','JR':'Joint Resolution','JRCA':'Joint Resolution Constitutional Amendment'};
+                const allTypes = [...new Set(stateBills.map(b => b.bill_type).filter(Boolean))].sort();
+                typeContainer.innerHTML = allTypes.map(type => {
+                    const count = stateBills.filter(b => b.bill_type === type).length;
+                    return `<div class="filter-checkbox"><input type="checkbox" id="state-type-${type}" value="${type}" onchange="applyStateFilters()"><label for="state-type-${type}">${billTypeNames[type]||type}</label><span class="filter-count">${count}</span></div>`;
+                }).join('');
+            }
         }
         
         function toggleStateFilters() {
             const content = document.getElementById('stateFilterContent');
-            const toggleText = document.getElementById('stateFilterToggleText');
+            const btn = document.getElementById('stateFilterToggleBtn');
             content.classList.toggle('collapsed');
-            toggleText.textContent = content.classList.contains('collapsed') ? 'Show Filters' : 'Hide Filters';
+            const collapsed = content.classList.contains('collapsed');
+            if (btn) {
+                btn.textContent = collapsed ? 'Filters ▾' : 'Filters ▴';
+                btn.classList.toggle('active', !collapsed);
+            }
         }
         
+        function onStateActiveStatusChange() {
+            const checked = document.getElementById('state-status-active').checked;
+            ['state-status-1','state-status-2','state-status-3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = checked;
+            });
+            applyStateFilters();
+        }
+
         function applyStateFilters() {
             if (!currentState) return;
-            
+
             let filtered = allBills.filter(b => b.state === currentState);
             const activeFilters = [];
-            
-            // Read controls
-            const search         = document.getElementById('stateSearchInput').value.toLowerCase().trim();
-            const selectedRelevance = ['direct','high','medium','low','minimal','ambiguous']
-                .filter(t => document.getElementById(`state-relevance-${t}`)?.checked);
-            const selectedTags     = Array.from(document.querySelectorAll('[id^="state-tag-"]:checked')).map(cb => cb.value);
-            const selectedSubjects = Array.from(document.querySelectorAll('[id^="state-subject-"]:checked')).map(cb => cb.value);
 
-            // Delegate filtering to shared helper
+            // Read all controls
+            const search            = document.getElementById('stateSearchInput').value.toLowerCase().trim();
+            const selectedTiers     = ['direct','high','medium','low','minimal','ambiguous']
+                                        .filter(t => document.getElementById(`state-relevance-${t}`)?.checked);
+            const selectedStatuses  = ['1','2','3','4','5','6','unknown']
+                                        .filter(v => document.getElementById(`state-status-${v}`)?.checked);
+            const selectedTags      = Array.from(document.querySelectorAll('[id^="state-tag-"]:checked')).map(cb => cb.value);
+            const selectedSubjects  = Array.from(document.querySelectorAll('[id^="state-subject-"]:checked')).map(cb => cb.value);
+            const selectedBillTypes = Array.from(document.querySelectorAll('[id^="state-type-"]:checked')).map(cb => cb.value);
+            const selectedParties   = ['D','R','I'].filter(p => document.getElementById(`state-party-${p}`)?.checked);
+            const aiOnly            = document.getElementById('state-filter-ai-reviewed')?.checked;
+            const companionOnly     = document.getElementById('state-filter-companion-only')?.checked;
+            const reviewedOnly      = document.getElementById('state-filter-reviewed-only')?.checked;
+            const reviewedFrom      = document.getElementById('stateReviewedFrom')?.value || '';
+            const reviewedTo        = document.getElementById('stateReviewedTo')?.value || '';
+            const statusFrom        = document.getElementById('stateStatusDateFrom')?.value || '';
+            const statusTo          = document.getElementById('stateStatusDateTo')?.value || '';
+            const updatedFrom       = document.getElementById('stateLastUpdatedFrom')?.value || '';
+            const updatedTo         = document.getElementById('stateLastUpdatedTo')?.value || '';
+            const sinceLastSearch   = document.getElementById('state-filter-since-last-search')?.checked;
+
+            // Delegate to shared helper
             filtered = applyBillFilters(filtered, {
-                search,
-                selectedTiers: selectedRelevance,
-                selectedTags,
-                selectedSubjects,
+                search, selectedTiers, selectedStatuses, selectedTags, selectedSubjects,
+                selectedBillTypes, selectedParties, aiOnly, companionOnly, reviewedOnly,
+                reviewedFrom, reviewedTo, statusFrom, statusTo, updatedFrom, updatedTo,
             });
 
-            // Build chips
-            if (search)
-                activeFilters.push({ type: 'search', label: `Search: "${search}"`, clear: () => {
-                    document.getElementById('stateSearchInput').value = ''; applyStateFilters(); }});
-            if (selectedRelevance.length && selectedRelevance.length < 7)
-                selectedRelevance.forEach(tier =>
-                    activeFilters.push({ type: 'relevance', label: tier.toUpperCase(), clear: () => {
-                        document.getElementById(`state-relevance-${tier}`).checked = false; applyStateFilters(); }}));
-            selectedTags.forEach(tag => {
-                const displayName = ({'ai-policy':'AI Policy'})[tag] || tag.split('-').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
-                activeFilters.push({ type: 'tag', label: displayName, clear: () => {
-                    document.getElementById(`state-tag-${tag}`).checked = false; applyStateFilters(); }});
-            });
-            selectedSubjects.forEach(subject =>
-                activeFilters.push({ type: 'subject', label: `Subject: ${subject}`, clear: () => {
-                    document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked = false; applyStateFilters(); }}));
-            
-            // Sort
-            const bestDateS = b => new Date(b.last_action_date || b.status_date || b.last_updated || 0);
-            const statusPriorityS = {'3':0,'4':1,'2':2,'1':3,'5':4,'6':5};
-            const tierOrderS = { 'direct':0,'high':1,'medium':2,'low':3,'minimal':4,'ambiguous':5,'none':6 };
-
-            const sort = (document.querySelector('input[name="stateSortSelect"]:checked') || {value:'introduced'}).value;
-            if (sort === 'introduced') {
-                filtered.sort((a, b) => {
-                    const dA = a.status_date ? new Date(a.status_date) : new Date(0);
-                    const dB = b.status_date ? new Date(b.status_date) : new Date(0);
-                    return dB - dA;
-                });
-            } else if (sort === 'recent') {
-                filtered.sort((a, b) => bestDateS(b) - bestDateS(a));
-            } else if (sort === 'status') {
-                filtered.sort((a, b) => {
-                    const pA = statusPriorityS[String(a.status)] ?? 6;
-                    const pB = statusPriorityS[String(b.status)] ?? 6;
-                    if (pA !== pB) return pA - pB;
-                    return bestDateS(b) - bestDateS(a);
-                });
-            } else if (sort === 'relevance') {
-                filtered.sort((a, b) => {
-                    const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
-                    const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
-                    const oA = tierOrderS[tierA] ?? 999;
-                    const oB = tierOrderS[tierB] ?? 999;
-                    if (oA !== oB) return oA - oB;
-                    return bestDateS(b) - bestDateS(a);
-                });
-            } else if (sort === 'billnumber') {
-                filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+            if (sinceLastSearch && lastCompleteSearch) {
+                filtered = filtered.filter(b =>
+                    b.last_updated && new Date(b.last_updated) > new Date(lastCompleteSearch));
             }
 
-            // Render active filters
+            // Build active-filter chips
+            if (search)
+                activeFilters.push({ type:'search', label:`Search: "${search}"`, clear:() => { document.getElementById('stateSearchInput').value=''; applyStateFilters(); }});
+            selectedTiers.forEach(tier =>
+                activeFilters.push({ type:'relevance', label:tier.toUpperCase(), clear:() => { document.getElementById(`state-relevance-${tier}`).checked=false; applyStateFilters(); }}));
+            selectedStatuses.forEach(s => {
+                const labels = {'1':'Introduced','2':'Engrossed','3':'Enrolled','4':'Passed','5':'Vetoed','6':'Failed','unknown':'Unknown'};
+                activeFilters.push({ type:'status', label:`Status: ${labels[s]||s}`, clear:() => { document.getElementById(`state-status-${s}`).checked=false; applyStateFilters(); }});
+            });
+            selectedParties.forEach(p =>
+                activeFilters.push({ type:'party', label:`Party: ${p}`, clear:() => { document.getElementById(`state-party-${p}`).checked=false; applyStateFilters(); }}));
+            if (aiOnly)         activeFilters.push({ type:'ai', label:'AI Reviewed', clear:() => { document.getElementById('state-filter-ai-reviewed').checked=false; applyStateFilters(); }});
+            if (companionOnly)  activeFilters.push({ type:'companion', label:'Companion Bills', clear:() => { document.getElementById('state-filter-companion-only').checked=false; applyStateFilters(); }});
+            if (reviewedOnly)   activeFilters.push({ type:'reviewed', label:'Has Manual Review', clear:() => { document.getElementById('state-filter-reviewed-only').checked=false; applyStateFilters(); }});
+            selectedTags.forEach(tag => {
+                const displayName = tag.split('-').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+                activeFilters.push({ type:'tag', label:displayName, clear:() => { document.getElementById(`state-tag-${tag}`).checked=false; applyStateFilters(); }});
+            });
+            selectedSubjects.forEach(subject =>
+                activeFilters.push({ type:'subject', label:`Subject: ${subject}`, clear:() => { document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked=false; applyStateFilters(); }}));
+
+            // Sort
+            const bestDateS    = b => new Date(b.last_action_date || b.status_date || b.last_updated || 0);
+            const statusPriorS = {'3':0,'4':1,'2':2,'1':3,'5':4,'6':5};
+            const tierOrderS   = {direct:0,high:1,medium:2,low:3,minimal:4,ambiguous:5,none:6};
+            const sort = (document.querySelector('input[name="stateSortSelect"]:checked') || {value:'introduced'}).value;
+
+            if      (sort === 'introduced') filtered.sort((a,b) => new Date(b.status_date||0) - new Date(a.status_date||0));
+            else if (sort === 'recent')     filtered.sort((a,b) => bestDateS(b) - bestDateS(a));
+            else if (sort === 'tracker')    filtered.sort((a,b) => new Date(b.last_updated||0) - new Date(a.last_updated||0));
+            else if (sort === 'status')     filtered.sort((a,b) => { const pA=statusPriorS[String(a.status)]??6, pB=statusPriorS[String(b.status)]??6; return pA!==pB?pA-pB:bestDateS(b)-bestDateS(a); });
+            else if (sort === 'relevance')  filtered.sort((a,b) => { const oA=tierOrderS[a.user_tier||a.llm_tier||a.relevance]??99, oB=tierOrderS[b.user_tier||b.llm_tier||b.relevance]??99; return oA!==oB?oA-oB:bestDateS(b)-bestDateS(a); });
+            else if (sort === 'billnumber') filtered.sort((a,b) => (a.bill_number||'').localeCompare(b.bill_number||''));
+
+            // Show/hide Clear button
+            const hasFilters = search || selectedTiers.length || selectedStatuses.length || selectedParties.length ||
+                aiOnly || companionOnly || reviewedOnly || selectedTags.length || selectedSubjects.length ||
+                selectedBillTypes.length || reviewedFrom || reviewedTo || statusFrom || statusTo || updatedFrom || updatedTo;
+            const clearBtn = document.getElementById('stateClearFiltersBtn');
+            if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
+
             renderStateActiveFilters(activeFilters);
-            
-            // Update count and render
             document.getElementById('stateBillCount').textContent = filtered.length;
             document.getElementById('stateBillsGrid').innerHTML = renderBillList(filtered);
         }
@@ -3547,26 +4051,24 @@
         }
         
         function clearStateFilters() {
-            // Clear search
-            const searchInput = document.getElementById('stateSearchInput');
-            if (searchInput) searchInput.value = '';
-            
-            // Clear relevance
-            ['direct', 'high', 'medium', 'low', 'minimal', 'ambiguous'].forEach(tier => {
-                const checkbox = document.getElementById(`state-relevance-${tier}`);
-                if (checkbox) checkbox.checked = false;
-            });
-            
-            // Clear all tags
-            document.querySelectorAll('[id^="state-tag-"]:checked').forEach(cb => cb.checked = false);
-            
-            // Clear all subjects
-            document.querySelectorAll('[id^="state-subject-"]:checked').forEach(cb => cb.checked = false);
-            
-            // Reset sort
-            const sortIntro = document.getElementById('ssort-introduced');
+            const g = id => document.getElementById(id);
+            const set = (id, val) => { const el = g(id); if (el) el.value = val; };
+            const uncheck = id => { const el = g(id); if (el) el.checked = false; };
+
+            if (g('stateSearchInput')) g('stateSearchInput').value = '';
+            ['direct','high','medium','low','minimal','ambiguous'].forEach(t => uncheck(`state-relevance-${t}`));
+            ['1','2','3','4','5','6','unknown'].forEach(v => uncheck(`state-status-${v}`));
+            uncheck('state-status-active');
+            ['D','R','I'].forEach(p => uncheck(`state-party-${p}`));
+            ['state-filter-ai-reviewed','state-filter-companion-only',
+             'state-filter-since-last-search','state-filter-reviewed-only'].forEach(uncheck);
+            document.querySelectorAll('[id^="state-tag-"]:checked,[id^="state-subject-"]:checked,[id^="state-type-"]:checked')
+                .forEach(cb => cb.checked = false);
+            ['stateReviewedFrom','stateReviewedTo','stateStatusDateFrom','stateStatusDateTo',
+             'stateLastUpdatedFrom','stateLastUpdatedTo'].forEach(id => set(id, ''));
+            const sortIntro = g('ssort-introduced');
             if (sortIntro) sortIntro.checked = true;
-            
+
             applyStateFilters();
         }
 
@@ -4026,7 +4528,9 @@
                 const ambiguousData = await ambiguousResponse.json();
 
                 // Separate active bills (none/ambiguous no longer appear after auto-review)
-                allBills = allBillsData.filter(b => b.relevance !== 'none');
+                // Separate dismissed (user_tier='none') from active bills
+                _dismissedBills = allBillsData.filter(b => b.relevance !== 'none' && b.user_tier === 'none');
+                allBills = allBillsData.filter(b => b.relevance !== 'none' && b.user_tier !== 'none');
 
                 // Seed ambiguous queue count for menu badge
                 _ambiguousQueueCount = ambiguousData.length;
@@ -4500,16 +5004,23 @@
             document.getElementById('count-party-R').textContent = partyR;
             document.getElementById('count-party-I').textContent = partyI;
             
-            // Count bill statuses
-            const statusGroups = { active: 0, passed: 0, failed: 0, unknown: 0 };
+            // Count bill statuses by individual LegiScan code
+            const statusCodeCounts = {};
+            let statusUnknownCount = 0;
             allBills.forEach(b => {
-                const g = getBillStatusGroup(b);
-                statusGroups[g] = (statusGroups[g] || 0) + 1;
+                const s = b.status ? String(b.status) : null;
+                if (s) statusCodeCounts[s] = (statusCodeCounts[s] || 0) + 1;
+                else statusUnknownCount++;
             });
-            Object.entries(statusGroups).forEach(([k, v]) => {
-                const el = document.getElementById(`count-status-${k}`);
-                if (el) el.textContent = v;
+            ['1','2','3','4','5','6'].forEach(code => {
+                const el = document.getElementById(`count-status-${code}`);
+                if (el) el.textContent = statusCodeCounts[code] || 0;
             });
+            const activeCount = (statusCodeCounts['1'] || 0) + (statusCodeCounts['2'] || 0) + (statusCodeCounts['3'] || 0);
+            const activeEl = document.getElementById('count-status-active');
+            if (activeEl) activeEl.textContent = activeCount;
+            const unknownEl = document.getElementById('count-status-unknown');
+            if (unknownEl) unknownEl.textContent = statusUnknownCount;
 
             // Count bill types
             const allBillTypes = new Set();
@@ -4551,20 +5062,162 @@
         let reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
         let reviewCurrentBill = null;
 
-        function startQuickReview() {
-            // Queue: auto-only bills (no llm_tier, no user_tier), sorted by tier then date
-            const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5 };
-            reviewQueue = allBills
-                .filter(b => !b.llm_tier && !b.user_tier)
-                .sort((a, b) => {
-                    const orderA = tierOrder[a.relevance] !== undefined ? tierOrder[a.relevance] : 99;
-                    const orderB = tierOrder[b.relevance] !== undefined ? tierOrder[b.relevance] : 99;
-                    if (orderA !== orderB) return orderA - orderB;
-                    return new Date(b.last_updated) - new Date(a.last_updated);
-                });
+        // ── QUICK REVIEW SETUP ─────────────────────────────────────────────────
 
+        function startQuickReview() {
+            // Show setup screen, hide review UI
+            document.getElementById('quickReviewSetup').style.display = 'block';
+            document.getElementById('quickReviewHeader').style.display = 'none';
+            document.getElementById('quickReviewMain').style.display = 'none';
+            document.getElementById('reviewComplete').style.display = 'none';
+
+            // Populate state dropdown
+            const stateSelect = document.getElementById('qr-state-filter');
+            const states = [...new Set(allBills.map(b => b.state))].sort();
+            stateSelect.innerHTML = '<option value="">All States</option>' +
+                states.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            updateQRPreview();
+        }
+
+        function getQRFilteredBills() {
+            const tierAll = document.getElementById('qr-tier-all')?.checked;
+            const selectedTiers = tierAll ? [] : ['direct','high','medium','low','minimal','ambiguous']
+                .filter(t => document.getElementById(`qr-tier-${t}`)?.checked);
+
+            const statusAll = document.getElementById('qr-status-all')?.checked;
+            const selectedStatuses = statusAll ? [] :
+                ['1','2','3','4','5','6','unknown'].filter(v =>
+                    document.getElementById(`qr-status-${v === 'unknown' ? 'unknown' : v}`)?.checked);
+
+            const stateFilter = document.getElementById('qr-state-filter')?.value || '';
+            const search = (document.getElementById('qr-search')?.value || '').toLowerCase().trim();
+            const includeReviewed = document.getElementById('qr-include-reviewed')?.checked;
+            const includeAI = document.getElementById('qr-include-aireviewed')?.checked;
+
+            return allBills.filter(b => {
+                // Review status gating
+                if (!includeReviewed && b.user_tier) return false;
+                if (!includeAI && b.llm_tier) return false;
+
+                // Tier
+                if (!tierAll && selectedTiers.length) {
+                    const t = b.user_tier || b.llm_tier || b.relevance;
+                    if (!selectedTiers.includes(t)) return false;
+                }
+
+                // Status
+                if (!statusAll && selectedStatuses.length) {
+                    const s = b.status ? String(b.status) : 'unknown';
+                    if (!selectedStatuses.includes(s)) return false;
+                }
+
+                // State
+                if (stateFilter && b.state !== stateFilter) return false;
+
+                // Search
+                if (search) {
+                    const hay = `${b.state} ${b.bill_number} ${b.title || ''}`.toLowerCase();
+                    if (!hay.includes(search)) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function updateQRPreview() {
+            const matches = getQRFilteredBills();
+            const previewEl = document.getElementById('qrQueuePreview');
+            const warnEl = document.getElementById('qrZeroWarning');
+            const startBtn = document.getElementById('qrStartBtn');
+            if (previewEl) previewEl.textContent = matches.length;
+            if (warnEl) warnEl.style.display = matches.length === 0 ? 'inline' : 'none';
+            if (startBtn) startBtn.disabled = matches.length === 0;
+        }
+
+        function onQRTierAllChange() {
+            const all = document.getElementById('qr-tier-all').checked;
+            ['direct','high','medium','low','minimal','ambiguous'].forEach(t => {
+                const el = document.getElementById(`qr-tier-${t}`);
+                if (el) el.checked = false;
+            });
+            updateQRPreview();
+        }
+
+        function onQRTierChange() {
+            const anyChecked = ['direct','high','medium','low','minimal','ambiguous']
+                .some(t => document.getElementById(`qr-tier-${t}`)?.checked);
+            const allEl = document.getElementById('qr-tier-all');
+            if (allEl) allEl.checked = !anyChecked;
+            updateQRPreview();
+        }
+
+        function onQRStatusAllChange() {
+            const all = document.getElementById('qr-status-all').checked;
+            ['1','2','3','4','5','6','unknown'].forEach(v => {
+                const el = document.getElementById(`qr-status-${v}`);
+                if (el) el.checked = false;
+            });
+            updateQRPreview();
+        }
+
+        function onQRStatusChange() {
+            const anyChecked = ['1','2','3','4','5','6','unknown']
+                .some(v => document.getElementById(`qr-status-${v}`)?.checked);
+            const allEl = document.getElementById('qr-status-all');
+            if (allEl) allEl.checked = !anyChecked;
+            updateQRPreview();
+        }
+
+        function resetQRFilters() {
+            document.getElementById('qr-tier-all').checked = true;
+            ['direct','high','medium','low','minimal','ambiguous'].forEach(t => {
+                const el = document.getElementById(`qr-tier-${t}`);
+                if (el) el.checked = false;
+            });
+            document.getElementById('qr-status-all').checked = true;
+            ['1','2','3','4','5','6','unknown'].forEach(v => {
+                const el = document.getElementById(`qr-status-${v}`);
+                if (el) el.checked = false;
+            });
+            document.getElementById('qr-state-filter').value = '';
+            document.getElementById('qr-search').value = '';
+            document.getElementById('qr-include-reviewed').checked = false;
+            document.getElementById('qr-include-aireviewed').checked = false;
+            document.getElementById('qr-sort-tier').checked = true;
+            updateQRPreview();
+        }
+
+        function beginQuickReview() {
+            const tierOrder = { direct:0, high:1, medium:2, low:3, minimal:4, ambiguous:5 };
+            const sort = document.querySelector('input[name="qrSort"]:checked')?.value || 'tier';
+
+            let bills = getQRFilteredBills();
+
+            if (sort === 'tier') {
+                bills.sort((a, b) => {
+                    const ta = tierOrder[a.user_tier || a.llm_tier || a.relevance] ?? 99;
+                    const tb = tierOrder[b.user_tier || b.llm_tier || b.relevance] ?? 99;
+                    return ta !== tb ? ta - tb : new Date(b.last_updated||0) - new Date(a.last_updated||0);
+                });
+            } else if (sort === 'recent') {
+                bills.sort((a, b) => new Date(b.last_action_date || b.last_updated || 0) - new Date(a.last_action_date || a.last_updated || 0));
+            } else if (sort === 'state') {
+                bills.sort((a, b) => a.state.localeCompare(b.state) || (a.bill_number||'').localeCompare(b.bill_number||''));
+            } else if (sort === 'random') {
+                for (let i = bills.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [bills[i], bills[j]] = [bills[j], bills[i]];
+                }
+            }
+
+            reviewQueue = bills;
             reviewIndex = 0;
             reviewStats = { relevant: 0, maybe: 0, irrelevant: 0 };
+
+            // Hide setup, show review UI
+            document.getElementById('quickReviewSetup').style.display = 'none';
+            document.getElementById('quickReviewHeader').style.display = 'flex';
 
             if (reviewQueue.length === 0) {
                 document.getElementById('quickReviewMain').style.display = 'none';
@@ -4585,6 +5238,8 @@
             loadReviewCard(reviewQueue[0]);
             document.addEventListener('keydown', handleReviewKey);
         }
+
+        // ── END QUICK REVIEW SETUP ─────────────────────────────────────────────
 
         function loadReviewCard(bill) {
             reviewCurrentBill = bill;
@@ -4656,6 +5311,16 @@
             }
         }
 
+        let _reviewSaveTimer = null;
+        function showReviewSaveStatus(msg, color) {
+            const el = document.getElementById('reviewSaveStatus');
+            if (!el) return;
+            el.innerHTML = `<span style="color:${color || 'var(--accent)'};">${msg}</span>`;
+            if (_reviewSaveTimer) clearTimeout(_reviewSaveTimer);
+            el.classList.add('visible');
+            _reviewSaveTimer = setTimeout(() => el.classList.remove('visible'), 2200);
+        }
+
         async function reviewBill(tier) {
             if (!reviewCurrentBill) return;
 
@@ -4668,6 +5333,7 @@
             reviewStats[statKey]++;
 
             // Save feedback
+            let saved = false;
             try {
                 await fetch('/api/feedback/submit', {
                     method: 'POST',
@@ -4682,9 +5348,13 @@
                 });
                 bill.user_tier = tier;
                 bill.reviewed_at = new Date().toISOString();
+                saved = true;
             } catch(e) {
                 // Continue even if save fails
             }
+
+            const tierColors = { direct: 'var(--tier-direct)', high: 'var(--tier-high)', medium: 'var(--tier-medium)', low: 'var(--tier-low)', minimal: 'var(--tier-minimal)' };
+            showReviewSaveStatus(saved ? `✓ Saved · ${tier}` : '⚠ Save failed', saved ? (tierColors[tier] || 'var(--accent)') : 'var(--danger)');
 
             // Advance queue
             reviewIndex++;
@@ -4707,7 +5377,17 @@
         function exitQuickReview() {
             document.removeEventListener('keydown', handleReviewKey);
             reviewCurrentBill = null;
-            switchView('dashboard', true);
+            // Return to setup screen if still in the quick review view
+            const qrView = document.getElementById('quickReviewView');
+            if (qrView && qrView.classList.contains('active')) {
+                document.getElementById('quickReviewSetup').style.display = 'block';
+                document.getElementById('quickReviewHeader').style.display = 'none';
+                document.getElementById('quickReviewMain').style.display = 'none';
+                document.getElementById('reviewComplete').style.display = 'none';
+                updateQRPreview();
+            } else {
+                switchView('dashboard', true);
+            }
         }
 
         async function reviewIrrelevant() {
@@ -4716,20 +5396,37 @@
             if (!reviewCurrentBill) return;
             const bill = reviewCurrentBill;
 
-            // Permanently delete bill and add to ambiguous_dismissed so tracker never re-flags it
+            // Use the same soft-dismiss path as submitFeedback('reject'):
+            // set user_tier='none' in user_feedback — bill stays in DB but is hidden from tracker.
+            let saved = false;
             try {
-                const resp = await fetch(`/api/ambiguous/${bill.bill_id}/dismiss`, { method: 'POST' });
+                const resp = await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bill_id: bill.bill_id,
+                        feedback_type: 'reject',
+                        user_score: null,
+                        user_tier: 'none',
+                        notes: 'Dismissed from Quick Review'
+                    })
+                });
                 const result = await resp.json();
-                if (!result.success) {
-                    console.warn('Could not dismiss bill:', result.error);
-                }
+                saved = result.success;
+                if (!saved) console.warn('Could not dismiss bill:', result.error);
             } catch(e) {
                 console.warn('Dismiss request failed:', e);
             }
 
-            // Remove from allBills cache
-            const idx = allBills.findIndex(b => b.bill_id === bill.bill_id);
-            if (idx !== -1) allBills.splice(idx, 1);
+            if (saved) {
+                // Move bill from active tracker to dismissed log
+                bill.user_tier = 'none';
+                bill.dismissed_at = new Date().toISOString();
+                _dismissedBills.push(bill);
+                allBills = allBills.filter(b => b.bill_id !== bill.bill_id);
+            }
+
+            showReviewSaveStatus(saved ? '✕ Dismissed' : '⚠ Save failed', saved ? 'var(--danger)' : 'var(--danger)');
 
             // Remove from reviewQueue at current position and update total count
             reviewQueue.splice(reviewIndex, 1);
@@ -4747,11 +5444,40 @@
             }
         }
 
+        async function reviewSendToAmbiguous() {
+            if (!reviewCurrentBill) return;
+            const bill = reviewCurrentBill;
+
+            let saved = false;
+            try {
+                const resp = await fetch(`/api/ambiguous/${bill.bill_id}/promote`, { method: 'POST' });
+                const result = await resp.json();
+                saved = result.success;
+                if (!saved) console.warn('Could not flag bill as ambiguous:', result.error);
+            } catch(e) {
+                console.warn('Ambiguous promote failed:', e);
+            }
+
+            showReviewSaveStatus(saved ? '→ Sent to Ambiguous Queue' : '⚠ Save failed', saved ? 'var(--tier-ambiguous)' : 'var(--danger)');
+
+            // Advance the queue (skip this card — do not count as irrelevant)
+            reviewQueue.splice(reviewIndex, 1);
+            document.getElementById('totalReviewCount').textContent = reviewQueue.length;
+            updateReviewProgress();
+
+            if (reviewQueue.length === 0 || reviewIndex >= reviewQueue.length) {
+                finishReview();
+            } else {
+                animateCardTransition('forward', () => loadReviewCard(reviewQueue[reviewIndex]));
+            }
+        }
+
         function handleReviewKey(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             const tierKeys = { '1': 'minimal', '2': 'low', '3': 'medium', '4': 'high', '5': 'direct' };
             if (tierKeys[e.key]) { e.preventDefault(); reviewBill(tierKeys[e.key]); return; }
             switch(e.key) {
+                case 'a': case 'A': e.preventDefault(); reviewSendToAmbiguous(); break;
                 case 'x': case 'X': e.preventDefault(); reviewIrrelevant(); break;
                 case 'ArrowLeft':  e.preventDefault(); reviewBack(); break;
                 case 'ArrowRight': e.preventDefault(); reviewSkip(); break;
@@ -5161,8 +5887,12 @@
                 filtered = filtered.filter(b => b.subjects && selectedSubjects.some(s => b.subjects.includes(s)));
             if (selectedParties?.length)
                 filtered = filtered.filter(b => selectedParties.includes(b.sponsor_party));
-            if (selectedStatuses?.length && selectedStatuses.length < 4)
-                filtered = filtered.filter(b => selectedStatuses.includes(getBillStatusGroup(b)));
+            if (selectedStatuses?.length) {
+                filtered = filtered.filter(b => {
+                    const s = b.status ? String(b.status) : 'unknown';
+                    return selectedStatuses.includes(s);
+                });
+            }
             if (selectedBillTypes?.length)
                 filtered = filtered.filter(b => selectedBillTypes.includes(b.bill_type));
             if (reviewedOnly) filtered = filtered.filter(b => b.reviewed_at);
@@ -5185,6 +5915,98 @@
                     return true;
                 });
             return filtered;
+        }
+
+        // ── INTERDEPENDENT FILTER COUNTS ──────────────────────────────────────
+        // For each filter group, counts reflect bills matching that option
+        // given all OTHER currently-active filters. Zero-count options are dimmed.
+
+        function _setCount(id, count) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = count;
+            // dim the whole .filter-checkbox row when count is 0
+            const row = el.closest('.filter-checkbox');
+            if (row) row.classList.toggle('filter-count-zero', count === 0);
+        }
+
+        function updateFilterCountsDynamic(opts, sinceLastSearch) {
+            // TIER — base excludes tier filter so counts show cross-filter availability
+            const tierBase = applyBillFilters(allBills, { ...opts, selectedTiers: [] });
+            ['direct','high','medium','low','minimal','ambiguous'].forEach(t => {
+                _setCount(`count-relevance-${t}`,
+                    tierBase.filter(b => (b.user_tier || b.llm_tier || b.relevance) === t).length);
+            });
+
+            // PARTY
+            const partyBase = applyBillFilters(allBills, { ...opts, selectedParties: [] });
+            ['D','R','I'].forEach(p =>
+                _setCount(`count-party-${p}`, partyBase.filter(b => b.sponsor_party === p).length));
+
+            // STATUS (individual codes + Active convenience count)
+            const statusBase = applyBillFilters(allBills, { ...opts, selectedStatuses: [] });
+            ['1','2','3','4','5','6','unknown'].forEach(v =>
+                _setCount(`count-status-${v}`,
+                    statusBase.filter(b => (b.status ? String(b.status) : 'unknown') === v).length));
+            _setCount('count-status-active',
+                statusBase.filter(b => ['1','2','3'].includes(b.status ? String(b.status) : '')).length);
+
+            // AI REVIEWED
+            const aiBase = applyBillFilters(allBills, { ...opts, aiOnly: false });
+            _setCount('count-ai-reviewed', aiBase.filter(b => !!b.llm_tier).length);
+
+            // NEW SINCE LAST SEARCH — base is the full filtered set (sinceLastSearch excluded)
+            const sinceBase = applyBillFilters(allBills, opts);
+            const sinceCount = lastCompleteSearch
+                ? sinceBase.filter(b => {
+                    const u = b.last_updated || b.status_date;
+                    return u && u > lastCompleteSearch;
+                  }).length
+                : 0;
+            _setCount('count-since-last-search', sinceCount);
+
+            // TAGS
+            const tagBase = applyBillFilters(allBills, { ...opts, selectedTags: [] });
+            document.querySelectorAll('[id^="count-tag-"]').forEach(el => {
+                const tag = el.id.slice('count-tag-'.length);
+                const count = tagBase.filter(b => b.tags && b.tags.includes(tag)).length;
+                el.textContent = count;
+                const row = el.closest('.filter-checkbox');
+                if (row) row.classList.toggle('filter-count-zero', count === 0);
+            });
+
+            // SUBJECTS
+            const subjectBase = applyBillFilters(allBills, { ...opts, selectedSubjects: [] });
+            document.querySelectorAll('[id^="count-subject-"]').forEach(el => {
+                const sanitized = el.id.slice('count-subject-'.length);
+                const checkbox = document.getElementById(`subject-${sanitized}`);
+                if (!checkbox) return;
+                const count = subjectBase.filter(b =>
+                    b.subjects && b.subjects.includes(checkbox.value)).length;
+                el.textContent = count;
+                const row = el.closest('.filter-checkbox');
+                if (row) row.classList.toggle('filter-count-zero', count === 0);
+            });
+
+            // BILL TYPE
+            const typeBase = applyBillFilters(allBills, { ...opts, selectedBillTypes: [] });
+            document.querySelectorAll('[id^="count-billtype-"]').forEach(el => {
+                const type = el.id.slice('count-billtype-'.length);
+                const count = typeBase.filter(b => b.bill_type === type).length;
+                el.textContent = count;
+                const row = el.closest('.filter-checkbox');
+                if (row) row.classList.toggle('filter-count-zero', count === 0);
+            });
+        }
+        // ── END INTERDEPENDENT FILTER COUNTS ──────────────────────────────────
+
+        function onActiveStatusChange() {
+            const checked = document.getElementById('status-active').checked;
+            ['status-1','status-2','status-3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = checked;
+            });
+            applyFilters();
         }
 
         function getBillStatusGroup(bill) {
@@ -5211,12 +6033,12 @@
             const updatedFrom    = document.getElementById('lastUpdatedFrom').value;
             const updatedTo      = document.getElementById('lastUpdatedTo').value;
             const selectedStates = Array.from(document.querySelectorAll('[id^="state-"]:checked')).map(cb => cb.value);
-            const selectedRelevance = ['direct','high','medium','low','minimal']
+            const selectedRelevance = ['direct','high','medium','low','minimal','ambiguous']
                 .filter(t => document.getElementById(`relevance-${t}`)?.checked);
             const selectedTags     = Array.from(document.querySelectorAll('[id^="tag-"]:checked')).map(cb => cb.value);
             const selectedSubjects = Array.from(document.querySelectorAll('[id^="subject-"]:checked')).map(cb => cb.value);
             const selectedParties  = ['D','R','I'].filter(p => document.getElementById(`party-${p}`)?.checked);
-            const selectedStatuses = ['active','passed','failed','unknown']
+            const selectedStatuses = ['1','2','3','4','5','6','unknown']
                 .filter(s => document.getElementById(`status-${s}`)?.checked);
             const selectedBillTypes = Array.from(document.querySelectorAll('[id^="billtype-"]:checked')).map(cb => cb.value);
 
@@ -5269,10 +6091,10 @@
             selectedParties.forEach(party =>
                 activeFilters.push({ type: 'party', label: `Party: ${partyNames[party]}`, clear: () => {
                     document.getElementById(`party-${party}`).checked = false; applyFilters(); }}));
-            const statusLabels = { active:'Active', passed:'Passed', failed:'Failed', unknown:'Unknown' };
-            if (selectedStatuses.length && selectedStatuses.length < 4)
+            const statusLabels = { '1':'Introduced','2':'Engrossed','3':'Enrolled','4':'Passed','5':'Vetoed','6':'Failed','unknown':'Unknown' };
+            if (selectedStatuses.length)
                 selectedStatuses.forEach(s =>
-                    activeFilters.push({ type: 'status', label: `Status: ${statusLabels[s]}`, clear: () => {
+                    activeFilters.push({ type: 'status', label: `Status: ${statusLabels[s] || s}`, clear: () => {
                         document.getElementById(`status-${s}`).checked = false; applyFilters(); }}));
             if (reviewedOnly)
                 activeFilters.push({ type: 'reviewed', label: 'Has manual review', clear: () => {
@@ -5363,6 +6185,16 @@
             document.getElementById('billCount').textContent = filtered.length;
             const inlineCount = document.getElementById('billCountInline');
             if (inlineCount) inlineCount.textContent = filtered.length;
+
+            // Update interdependent filter counts
+            updateFilterCountsDynamic({
+                search, aiOnly, companionOnly, reviewedOnly, reviewedFrom, reviewedTo,
+                statusFrom, statusTo, updatedFrom, updatedTo,
+                selectedStates, selectedTiers: selectedRelevance,
+                selectedTags, selectedSubjects, selectedParties,
+                selectedStatuses, selectedBillTypes
+            }, sinceLastSearch);
+
             renderBills(filtered);
             updateClearBtn();
         }
@@ -5477,6 +6309,13 @@
 
 
         function switchView(view, skipMenuClose) {
+            // Push current view to nav stack before switching (cap at 20)
+            if (_currentViewId && _currentViewId !== view) {
+                _navStack.push(_currentViewId);
+                if (_navStack.length > 20) _navStack.shift();
+            }
+            _currentViewId = view;
+
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
             
@@ -5502,7 +6341,7 @@
             } else if (view === 'feedbackReview') {
                 document.getElementById('feedbackReviewView').classList.add('active');
                 document.querySelectorAll('.menu-item')[3].classList.add('active');
-                applyFeedbackFilters();
+                openFeedbackView();
             } else if (view === 'ambiguousReview') {
                 document.getElementById('ambiguousReviewView').classList.add('active');
                 loadAmbiguousReview();
@@ -5518,6 +6357,9 @@
                 loadFlaggedBills();
             } else if (view === 'about') {
                 document.getElementById('aboutView').classList.add('active');
+            } else if (view === 'dismissedBills') {
+                document.getElementById('dismissedBillsView').classList.add('active');
+                openDismissedView();
             } else if (view === 'billDetail') {
                 document.getElementById('billDetailView').classList.add('active');
             }
@@ -5784,8 +6626,8 @@
                         <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'confirm')">
                             Confirm Automated Tier
                         </button>
-                        <button class="feedback-btn feedback-btn-secondary" onclick="submitFeedback(${bill.bill_id}, 'reject')">
-                            Mark as Irrelevant
+                        <button class="feedback-btn feedback-btn-danger" onclick="if(confirm('Dismiss this bill from the tracker? It will be logged but hidden from all views. You can restore it by clearing the override in the database.')) submitFeedback(${bill.bill_id}, 'reject')">
+                            Dismiss from Tracker
                         </button>
                         ${bill.user_tier ? `
                             <button class="feedback-btn feedback-btn-danger" onclick="clearFeedback(${bill.bill_id})">
@@ -5800,15 +6642,19 @@
                     <button class="action-btn action-btn-primary" onclick="window.open('${bill.url}', '_blank')">
                         View Complete Details on LegiScan →
                     </button>
-                    <button class="action-btn action-btn-secondary" onclick="switchView('allBills', true)">
-                        ← Back to All Bills
+                    <button class="action-btn action-btn-secondary" onclick="goBack()">
+                        ${_getBackLabel()}
                     </button>
                 </div>
             `;
             
+            // Update static back button label to match actual previous view
+            const staticBack = document.getElementById('billDetailBackBtn');
+            if (staticBack) staticBack.textContent = _getBackLabel();
+
             switchView('billDetail', true);
         }
-        
+
         // Feedback functions
         async function submitFeedback(billId, feedbackType) {
             alert('Read-only view. Run the tracker locally to make changes.');
@@ -5836,8 +6682,8 @@
                 notes = 'Confirmed automated tier';
 
             } else if (feedbackType === 'reject') {
-                userTier = 'minimal';
-                notes = 'Marked as irrelevant';
+                userTier = 'none';
+                notes = 'Dismissed from tracker';
             }
             
             try {
@@ -5858,12 +6704,19 @@
                 if (result.success) {
                     bill.user_tier = userTier;
                     bill.feedback_notes = notes;
-                    
-                    // Refresh the detail view
-                    showBillDetail(billId);
-                    
-                    // Show success message
-                    alert('Feedback saved successfully!');
+
+                    if (userTier === 'none') {
+                        // Dismissed — log with timestamp and remove from active tracker
+                        bill.dismissed_at = new Date().toISOString();
+                        _dismissedBills.push(bill);
+                        allBills = allBills.filter(b => b.bill_id !== billId);
+                        goBack();
+                    } else {
+                        // Refresh the detail view
+                        showBillDetail(billId);
+                        // Show success message
+                        alert('Feedback saved successfully!');
+                    }
                 } else {
                     alert('Error saving feedback: ' + result.error);
                 }
@@ -5905,6 +6758,251 @@
             }
         }
 
+        // ── Navigation history stack ──────────────────────────────────────────
+        let _navStack = [];       // previous view names
+        let _currentViewId = 'dashboard';
+
+        function goBack() {
+            if (!_navStack.length) return;
+            const prev = _navStack.pop();
+            _currentViewId = prev;
+
+            // Activate the previous view WITHOUT clearing filters
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+            if (prev === 'dashboard') {
+                document.getElementById('dashboardView').classList.add('active');
+                document.querySelectorAll('.menu-item')[0].classList.add('active');
+            } else if (prev === 'states') {
+                document.getElementById('statesView').classList.add('active');
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
+            } else if (prev === 'allBills') {
+                document.getElementById('allBillsView').classList.add('active');
+                document.querySelectorAll('.menu-item')[2].classList.add('active');
+                applyFilters(); // re-render with existing filters — do NOT clear
+            } else if (prev === 'feedbackReview') {
+                document.getElementById('feedbackReviewView').classList.add('active');
+                document.querySelectorAll('.menu-item')[3].classList.add('active');
+                applyFeedbackFilters();
+            } else if (prev === 'ambiguousReview') {
+                document.getElementById('ambiguousReviewView').classList.add('active');
+                loadAmbiguousReview();
+            } else if (prev === 'analytics') {
+                document.getElementById('analyticsView').classList.add('active');
+                document.querySelectorAll('.menu-item')[5].classList.add('active');
+            } else if (prev === 'starredBills') {
+                document.getElementById('starredBillsView').classList.add('active');
+                loadStarredBills();
+            } else if (prev === 'flaggedBills') {
+                document.getElementById('flaggedBillsView').classList.add('active');
+                loadFlaggedBills();
+            } else if (prev === 'about') {
+                document.getElementById('aboutView').classList.add('active');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function _getBackLabel() {
+            const prev = _navStack[_navStack.length - 1];
+            const labels = {
+                dashboard: 'Dashboard', allBills: 'All Bills', states: 'States',
+                feedbackReview: 'Feedback', starredBills: 'Starred Bills',
+                flaggedBills: 'Flagged Bills', ambiguousReview: 'Review Queue',
+                analytics: 'Analytics', about: 'About',
+            };
+            return prev ? `← Back to ${labels[prev] || 'Previous'}` : '← Back';
+        }
+
+        // ── DISMISSED BILLS VIEW ───────────────────────────────────────────────
+
+        const DISMISSED_PASSWORD = 'gtresearch';
+        const FEEDBACK_PASSWORD  = 'gtresearch';   // same credential, separate session key
+        let _dismissedData = [];   // cached from /api/dismissed (authoritative on page load)
+
+        function openFeedbackView() {
+            const authed = sessionStorage.getItem('feedbackAuth') === '1';
+            document.getElementById('feedbackAuthGate').style.display = authed ? 'none' : 'block';
+            document.getElementById('feedbackContent').style.display  = authed ? 'block' : 'none';
+            if (authed) applyFeedbackFilters();
+        }
+
+        function checkFeedbackPassword() {
+            const input = document.getElementById('feedbackPasswordInput');
+            const err   = document.getElementById('feedbackPasswordError');
+            if (input.value === FEEDBACK_PASSWORD) {
+                sessionStorage.setItem('feedbackAuth', '1');
+                input.value = '';
+                err.style.display = 'none';
+                document.getElementById('feedbackAuthGate').style.display = 'none';
+                document.getElementById('feedbackContent').style.display  = 'block';
+                applyFeedbackFilters();
+            } else {
+                err.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function openDismissedView() {
+            const authed = sessionStorage.getItem('dismissedAuth') === '1';
+            document.getElementById('dismissedAuthGate').style.display = authed ? 'none' : 'block';
+            document.getElementById('dismissedContent').style.display = authed ? 'block' : 'none';
+            if (authed) loadDismissedBills();
+        }
+
+        function checkDismissedPassword() {
+            const input = document.getElementById('dismissedPasswordInput');
+            const err = document.getElementById('dismissedPasswordError');
+            if (input.value === DISMISSED_PASSWORD) {
+                sessionStorage.setItem('dismissedAuth', '1');
+                input.value = '';
+                err.style.display = 'none';
+                document.getElementById('dismissedAuthGate').style.display = 'none';
+                document.getElementById('dismissedContent').style.display = 'block';
+                loadDismissedBills();
+            } else {
+                err.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        async function loadDismissedBills() {
+            const listEl = document.getElementById('dismissedList');
+            listEl.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;padding:1rem 0;">Loading...</div>';
+            try {
+                const resp = await fetch('/api/dismissed');
+                _dismissedData = await resp.json();
+
+                // Merge any in-session dismissals not yet in DB (dismissed this session)
+                _dismissedBills.forEach(b => {
+                    if (!_dismissedData.find(d => d.bill_id === b.bill_id)) {
+                        _dismissedData.unshift({
+                            bill_id: b.bill_id,
+                            state: b.state,
+                            bill_number: b.bill_number,
+                            title: b.title,
+                            relevance: b.relevance,
+                            llm_tier: b.llm_tier || null,
+                            dismissed_at: b.dismissed_at || new Date().toISOString(),
+                            dismiss_notes: b.feedback_notes || ''
+                        });
+                    }
+                });
+
+                // Populate state filter dropdown
+                const stateSelect = document.getElementById('dismissedStateFilter');
+                const states = [...new Set(_dismissedData.map(b => b.state))].sort();
+                const currentState = stateSelect.value;
+                stateSelect.innerHTML = '<option value="">All States</option>' +
+                    states.map(s => `<option value="${s}" ${s === currentState ? 'selected' : ''}>${s}</option>`).join('');
+
+                document.getElementById('dismissedCount').textContent =
+                    `(${_dismissedData.length} bill${_dismissedData.length !== 1 ? 's' : ''})`;
+
+                renderDismissedBills();
+            } catch (e) {
+                listEl.innerHTML = '<div style="color:var(--danger);font-size:0.85rem;padding:1rem 0;">Failed to load dismissed bills.</div>';
+            }
+        }
+
+        function renderDismissedBills() {
+            const listEl = document.getElementById('dismissedList');
+            const search = (document.getElementById('dismissedSearch')?.value || '').toLowerCase().trim();
+            const stateFilter = document.getElementById('dismissedStateFilter')?.value || '';
+            const sort = document.getElementById('dismissedSortSelect')?.value || 'date-desc';
+            const tierOrder = { direct:0, high:1, medium:2, low:3, minimal:4, ambiguous:5 };
+
+            let data = _dismissedData.filter(b => {
+                if (stateFilter && b.state !== stateFilter) return false;
+                if (search) {
+                    const hay = `${b.state} ${b.bill_number} ${b.title || ''} ${b.dismiss_notes || ''}`.toLowerCase();
+                    if (!hay.includes(search)) return false;
+                }
+                return true;
+            });
+
+            data = [...data].sort((a, b) => {
+                if (sort === 'date-desc') return new Date(b.dismissed_at||0) - new Date(a.dismissed_at||0);
+                if (sort === 'date-asc')  return new Date(a.dismissed_at||0) - new Date(b.dismissed_at||0);
+                if (sort === 'state')     return (a.state||'').localeCompare(b.state||'');
+                if (sort === 'tier') {
+                    const ta = tierOrder[a.llm_tier || a.relevance] ?? 99;
+                    const tb = tierOrder[b.llm_tier || b.relevance] ?? 99;
+                    return ta - tb;
+                }
+                return 0;
+            });
+
+            if (!data.length) {
+                listEl.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem;padding:1.5rem 0;text-align:center;">No dismissed bills match your filters.</div>';
+                return;
+            }
+
+            const tierColors = {
+                direct:'var(--tier-direct)', high:'var(--tier-high)', medium:'var(--tier-medium)',
+                low:'var(--tier-low)', minimal:'var(--tier-minimal)', ambiguous:'var(--tier-ambiguous)'
+            };
+
+            listEl.innerHTML = data.map(b => {
+                const effectiveTier = b.llm_tier || b.relevance || 'unknown';
+                const tierColor = tierColors[effectiveTier] || 'var(--text-dim)';
+                const dismissedDate = b.dismissed_at
+                    ? new Date(b.dismissed_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+                    : 'Unknown date';
+                const dismissedTime = b.dismissed_at
+                    ? new Date(b.dismissed_at).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' })
+                    : '';
+                return `
+                    <div class="dismissed-row">
+                        <div class="dismissed-meta">
+                            <div class="dismissed-bill-id">
+                                <span style="font-weight:700; color:${tierColor}; text-transform:uppercase; font-size:0.65rem; margin-right:0.5rem;">${effectiveTier}</span>
+                                ${b.state} ${b.bill_number || ''}
+                                ${b.dismiss_notes ? `<span style="color:var(--text-dim); font-size:0.65rem; margin-left:0.5rem;">— ${b.dismiss_notes}</span>` : ''}
+                            </div>
+                            <div class="dismissed-title">${b.title || '(no title)'}</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;flex-shrink:0;">
+                            <div class="dismissed-timestamp">
+                                Dismissed ${dismissedDate}${dismissedTime ? ' · ' + dismissedTime : ''}
+                            </div>
+                            <button class="dismissed-restore-btn" onclick="restoreBill(${b.bill_id})">Restore</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function restoreBill(billId) {
+            if (!confirm('Restore this bill to the active tracker? It will return with its automated tier.')) return;
+            try {
+                const resp = await fetch(`/api/feedback/delete/${billId}`, { method: 'DELETE' });
+                const result = await resp.json();
+                if (result.success) {
+                    // Move from dismissed to active in session arrays
+                    const bill = _dismissedBills.find(b => b.bill_id === billId);
+                    if (bill) {
+                        bill.user_tier = null;
+                        allBills.push(bill);
+                        _dismissedBills = _dismissedBills.filter(b => b.bill_id !== billId);
+                    }
+                    // Remove from cached dismissed data
+                    _dismissedData = _dismissedData.filter(b => b.bill_id !== billId);
+                    document.getElementById('dismissedCount').textContent =
+                        `(${_dismissedData.length} bill${_dismissedData.length !== 1 ? 's' : ''})`;
+                    renderDismissedBills();
+                } else {
+                    alert('Error restoring bill: ' + (result.error || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Network error restoring bill.');
+            }
+        }
+
+        // ── END DISMISSED BILLS VIEW ───────────────────────────────────────────
+
         let _ambiguousQueueCount = 0;  // cached count for menu badge
 
         async function loadAmbiguousReview() {
@@ -5932,41 +7030,95 @@
             bills.forEach(b => { window._ambiguousCache[b.bill_id] = b; });
 
             const grid = document.getElementById('ambiguousReviewGrid');
-            grid.innerHTML = bills.map(bill => {
+
+            // Split into three buckets
+            const likelyIrrelevant = bills.filter(b => b.source === 'ambiguous_queue' && (b.relevance === 'minimal' || b.relevance === 'none'));
+            const ambiguousQueue   = bills.filter(b => b.source === 'ambiguous_queue' && b.relevance !== 'minimal' && b.relevance !== 'none');
+            const needsReview      = bills.filter(b => b.source === 'needs_review');
+
+            function renderCard(bill) {
+                const isNeedsReview = bill.source === 'needs_review';
                 const promotedDate = bill.promoted_at
                     ? new Date(bill.promoted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                     : 'Unknown date';
-                const currentTier = bill.relevance || 'unknown';
-                const tierColor = `var(--tier-${currentTier}, var(--text-dim))`;
-                const titleFull = bill.title || 'No title available';
-                const titlePreview = titleFull.length > 80 ? titleFull.substring(0, 80) + '…' : titleFull;
+
+                if (isNeedsReview) {
+                    const effectiveTier = bill.user_tier || bill.relevance || 'unknown';
+                    const tierColor = `var(--tier-${effectiveTier}, var(--text-dim))`;
+                    const titlePreview = (bill.title || '').length > 80 ? bill.title.substring(0, 80) + '…' : (bill.title || 'No title');
+                    return `
+                    <div class="bill-card" id="ambiguous-card-${bill.bill_id}"
+                         style="border: 2px solid var(--accent); cursor:pointer;"
+                         onclick="showBillDetail(${bill.bill_id})">
+                        <div class="bill-header">
+                            <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                            <span class="tier-indicator auto" style="border-color:${tierColor};color:${tierColor};">${effectiveTier.toUpperCase()}</span>
+                        </div>
+                        <h3 class="bill-title" style="margin-bottom:0.5rem;">${titlePreview}</h3>
+                        <div style="font-size:0.75rem; color:var(--accent); margin-bottom:0.75rem;">
+                            Manually overridden ${promotedDate} · AI review pending
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-dim); padding:0.5rem; background:rgba(255,255,255,0.03); border-radius:6px;">
+                            Run <code style="color:var(--accent);">review.py</code> to add AI classification. The manual override is already saved.
+                        </div>
+                    </div>`;
+                } else {
+                    const isLikelyIrrelevant = bill.relevance === 'minimal' || bill.relevance === 'none';
+                    const currentTier = bill.relevance || 'unknown';
+                    const tierColor = `var(--tier-${currentTier}, var(--text-dim))`;
+                    const titlePreview = (bill.title || '').length > 80 ? bill.title.substring(0, 80) + '…' : (bill.title || 'No title');
+                    const borderColor = isLikelyIrrelevant ? 'var(--danger)' : 'var(--tier-ambiguous)';
+                    const flagLabel = isLikelyIrrelevant ? `Flagged ${promotedDate} · Minimal tier — likely irrelevant` : `Flagged ${promotedDate} · Click to expand`;
+                    const flagColor = isLikelyIrrelevant ? 'var(--danger)' : 'var(--tier-ambiguous)';
+                    return `
+                    <div class="bill-card" id="ambiguous-card-${bill.bill_id}"
+                         style="border: 2px solid ${borderColor}; cursor:pointer;"
+                         onclick="showAmbiguousDetail(${bill.bill_id})">
+                        <div class="bill-header">
+                            <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
+                            <span class="tier-indicator auto" style="border-color:${tierColor};color:${tierColor};">${currentTier.toUpperCase()}</span>
+                        </div>
+                        <h3 class="bill-title" style="margin-bottom:0.5rem;">${titlePreview}</h3>
+                        <div style="font-size:0.75rem; color:${flagColor}; margin-bottom:0.75rem;">
+                            ${flagLabel}
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                            <button class="action-btn"
+                                    onclick="event.stopPropagation(); cancelAmbiguous(${bill.bill_id})"
+                                    style="padding:0.5rem; font-size:0.85rem; border-color:var(--text-dim); color:var(--text-dim);">
+                                Remove from Queue
+                            </button>
+                            <button class="action-btn action-btn-danger"
+                                    onclick="event.stopPropagation(); dismissAmbiguous(${bill.bill_id})"
+                                    style="padding:0.5rem; font-size:0.85rem;">
+                                ${isLikelyIrrelevant ? 'Dismiss' : 'Delete Bill'}
+                            </button>
+                        </div>
+                    </div>`;
+                }
+            }
+
+            function sectionHTML(title, color, bills) {
+                if (bills.length === 0) return '';
                 return `
-                <div class="bill-card" id="ambiguous-card-${bill.bill_id}"
-                     style="border: 2px solid var(--tier-ambiguous); cursor:pointer;"
-                     onclick="showAmbiguousDetail(${bill.bill_id})">
-                    <div class="bill-header">
-                        <span class="bill-number"><strong>${bill.state}</strong> ${bill.bill_number}</span>
-                        <span class="tier-indicator auto" style="border-color:${tierColor};color:${tierColor};">${currentTier.toUpperCase()}</span>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:${color}; margin-bottom:0.75rem; padding-bottom:0.4rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                        ${title} <span style="font-weight:400; opacity:0.7;">(${bills.length})</span>
                     </div>
-                    <h3 class="bill-title" style="margin-bottom:0.5rem;">${titlePreview}</h3>
-                    <div style="font-size:0.75rem; color:var(--tier-ambiguous); margin-bottom:0.75rem;">
-                        Flagged ${promotedDate} · Click to expand
+                    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:1rem;">
+                        ${bills.map(renderCard).join('')}
                     </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
-                        <button class="action-btn"
-                                onclick="event.stopPropagation(); cancelAmbiguous(${bill.bill_id})"
-                                style="padding:0.5rem; font-size:0.85rem; border-color:var(--text-dim); color:var(--text-dim);">
-                            Remove from Queue
-                        </button>
-                        <button class="action-btn action-btn-danger"
-                                onclick="event.stopPropagation(); dismissAmbiguous(${bill.bill_id})"
-                                style="padding:0.5rem; font-size:0.85rem;">
-                            Delete Bill
-                        </button>
-                    </div>
-                </div>
-            `;
-            }).join('');
+                </div>`;
+            }
+
+            grid.innerHTML =
+                sectionHTML('Likely Irrelevant', 'var(--danger)', likelyIrrelevant) +
+                sectionHTML('Ambiguous Queue', 'var(--tier-ambiguous)', ambiguousQueue) +
+                sectionHTML('Awaiting AI Review', 'var(--accent)', needsReview);
+
+            if (grid.innerHTML.trim() === '') {
+                grid.innerHTML = '<div class="loading"><p>No bills pending re-review. Queue is empty.</p></div>';
+            }
         }
 
         function showAmbiguousDetail(billId) {
@@ -6310,5 +7462,7 @@
         </div>
     </div>
 </div>
+
+<!-- Quick Review: saved confirmation toast -->
 </body>
 </html>
