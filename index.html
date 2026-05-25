@@ -200,35 +200,40 @@
         /* DASHBOARD */
         .hero-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
             margin-bottom: 2rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, var(--bg-card) 0%, #2d3748 100%);
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            background: transparent;
+            padding: 1.5rem 2rem;
+            border-radius: 0;
+            box-shadow: none;
+            transition: background 0.2s;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: none;
+            border-right: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .stat-card:last-child {
+            border-right: none;
         }
 
         .stat-card:not(.no-click):hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
-            border-color: var(--accent);
+            background: rgba(255,255,255,0.04);
         }
-        
+
         .stat-card.no-click {
             cursor: default;
         }
-        
+
         .stat-card.no-click:hover {
-            transform: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border-color: transparent;
+            background: transparent;
         }
 
         .stat-label {
@@ -242,10 +247,102 @@
 
         .stat-value {
             font-family: 'IBM Plex Sans', sans-serif;
-            font-size: 3rem;
+            font-size: 2.25rem;
             font-weight: 700;
             color: var(--accent);
             line-height: 1;
+        }
+
+        .stat-sublabel {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 0.35rem;
+            font-weight: 400;
+        }
+
+        .landing-blurb {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.75rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-top: 3px solid var(--accent);
+        }
+
+        .landing-blurb p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .landing-blurb a {
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .landing-blurb a:hover {
+            text-decoration: underline;
+        }
+
+        .landing-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 2rem;
+            background: rgba(255,255,255,0.03);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            border-radius: 0 0 16px 16px;
+        }
+
+        .landing-meta span {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .landing-activity {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .landing-activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .landing-activity-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+
+        .landing-activity-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 4px;
+        }
+
+        .landing-activity-row:last-child {
+            border-bottom: none;
+        }
+
+        .landing-activity-row:hover {
+            background: rgba(255,255,255,0.04);
         }
 
         /* MAP */
@@ -1820,6 +1917,139 @@
             margin-bottom: 1rem;
         }
 
+        /* ABOUT PAGE — editorial article layout */
+        .about-back {
+            margin-bottom: 2rem;
+        }
+
+        .about-back-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.9rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+
+        .about-back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .about-article {
+            max-width: 660px;
+            margin: 0 auto;
+            padding: 0 0 5rem;
+        }
+
+        .about-hero {
+            margin-bottom: 2.5rem;
+        }
+
+        .about-hero-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .about-hero-title {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .about-hero-sub {
+            font-size: 1rem;
+            line-height: 1.75;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-hero-rule {
+            height: 1px;
+            background: linear-gradient(to right, var(--accent) 0%, rgba(255,255,255,0.06) 60%, transparent 100%);
+        }
+
+        .about-section {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .about-section:last-child {
+            border-bottom: none;
+        }
+
+        .about-section-heading {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .about-section-heading::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 0.85em;
+            background: var(--accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .about-section p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.925rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .about-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .about-tier-grid {
+            display: grid;
+            gap: 0.6rem;
+            margin: 1.25rem 0;
+        }
+
+        .about-tier-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+        }
+
+        .about-tier-row .tag {
+            min-width: 88px;
+            text-align: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .about-tier-desc {
+            font-size: 0.875rem;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
         /* LOADING */
         .loading {
             text-align: center;
@@ -1912,28 +2142,84 @@
     <div class="container">
         <!-- DASHBOARD VIEW -->
         <div class="view active" id="dashboardView">
-            <!-- Hero Stats -->
-            <div class="hero-stats">
-                <div class="stat-card" onclick="switchView('allBills', true)">
-                    <div class="stat-label">Total Bills</div>
-                    <div class="stat-value" id="totalBills">0</div>
-                </div>
-                <div class="stat-card" onclick="switchToTopPriority()">
-                    <div class="stat-label">Top Priority</div>
-                    <div class="stat-value" id="topPriority">0</div>
-                </div>
-                <div class="stat-card no-click">
-                    <div class="stat-label">States Covered</div>
-                    <div class="stat-value" id="statesCovered">0</div>
-                </div>
+
+            <!-- Blurb -->
+            <div class="landing-blurb">
+                <p>State legislatures across the U.S. are actively writing laws governing algorithmic content feeds: how platforms rank and recommend content, what controls users and parents can exercise, how platforms handle minors, and what data access rights exist. This tracker, a joint project of Georgetown University's Department of Computer Science and Communication, Culture &amp; Technology Program, catalogues that legislation and classifies each bill by how it would affect what users see across all 50 states. <a onclick="switchView('about')" href="#">Learn more about the methodology and research team.</a></p>
             </div>
 
-            <!-- US Map -->
+            <!-- Unified Stats Block -->
+            <div style="margin-bottom: 2rem; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow: hidden;">
+
+                <!-- Primary stat row -->
+                <div class="hero-stats" style="margin-bottom: 0; border-radius: 0; box-shadow: none;">
+                    <div class="stat-card" onclick="switchView('allBills', true)">
+                        <div class="stat-label">Total Bills</div>
+                        <div class="stat-value" id="totalBills">0</div>
+                        <div class="stat-sublabel">all tiers</div>
+                    </div>
+                    <div class="stat-card" onclick="switchToTopPriority()">
+                        <div class="stat-label">Top Priority</div>
+                        <div class="stat-value" id="topPriority">0</div>
+                        <div class="stat-sublabel">Direct + High</div>
+                    </div>
+                    <div class="stat-card no-click">
+                        <div class="stat-label">States Covered</div>
+                        <div class="stat-value" id="statesCovered">0</div>
+                        <div class="stat-sublabel">all 50 monitored</div>
+                    </div>
+                </div>
+
+                <!-- Tier breakdown row -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255,255,255,0.07);">
+                    <div class="stat-card" onclick="switchView('allBills', true); setTimeout(() => { document.getElementById('relevance-direct').checked = true; applyFilters(); }, 300);" style="padding: 1rem 2rem; border-right: 1px solid rgba(255,255,255,0.07);">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="width:8px; height:8px; border-radius:50%; background:var(--tier-direct); flex-shrink:0;"></span>
+                            <span class="stat-label" style="margin:0; font-size:0.7rem;">Direct</span>
+                        </div>
+                        <div class="stat-value" id="tierCountDirect" style="font-size:1.5rem; margin-top:0.35rem;">0</div>
+                    </div>
+                    <div class="stat-card" onclick="switchView('allBills', true); setTimeout(() => { document.getElementById('relevance-high').checked = true; applyFilters(); }, 300);" style="padding: 1rem 2rem; border-right: 1px solid rgba(255,255,255,0.07);">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="width:8px; height:8px; border-radius:50%; background:var(--tier-high); flex-shrink:0;"></span>
+                            <span class="stat-label" style="margin:0; font-size:0.7rem;">High</span>
+                        </div>
+                        <div class="stat-value" id="tierCountHigh" style="font-size:1.5rem; margin-top:0.35rem;">0</div>
+                    </div>
+                    <div class="stat-card no-click" style="padding: 1rem 2rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="width:8px; height:8px; border-radius:50%; background:var(--tier-medium); flex-shrink:0;"></span>
+                            <span class="stat-label" style="margin:0; font-size:0.7rem;">Medium</span>
+                        </div>
+                        <div class="stat-value" id="tierCountMedium" style="font-size:1.5rem; margin-top:0.35rem;">0</div>
+                    </div>
+                </div>
+
+                <!-- Meta footer -->
+                <div class="landing-meta">
+                    <div>Last complete search: <span id="lastSearchLanding">--</span></div>
+                    <div>AI-reviewed: <span id="aiReviewedCount">0</span> of <span id="aiReviewedTotal">0</span> top-priority bills</div>
+                </div>
+
+            </div>
+
+            <!-- Map -->
             <div class="map-container">
                 <h2 class="map-title">Bills by State</h2>
+                <p style="text-align:center; font-size:0.75rem; color:var(--text-dim); margin-top:-1rem; margin-bottom:1.5rem;">Direct, High, and Medium tier bills. Click a state to explore.</p>
                 <svg id="usMap" viewBox="0 0 960 600"></svg>
             </div>
 
+            <!-- Recent Activity -->
+            <div class="landing-activity">
+                <div class="landing-activity-header">
+                    <div class="landing-activity-title">Recent Activity</div>
+                    <button onclick="switchView('allBills', true)" style="background:none; border:none; color:var(--accent); font-size:0.8rem; cursor:pointer; font-family:inherit;">View All</button>
+                </div>
+                <div id="recentActivityList">
+                    <div style="color:var(--text-dim); font-size:0.85rem;">Loading...</div>
+                </div>
+            </div>
 
         </div>
 
@@ -2034,8 +2320,9 @@
                         <div class="filter-section">
                             <div class="filter-section-title">Sort By</div>
                             <div class="filter-group">
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="ssort-introduced">Last Introduced</label></div>
-                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-recent" value="recent" onchange="applyStateFilters()"><label for="ssort-recent">Most Recent</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-introduced" value="introduced" onchange="applyStateFilters()" checked><label for="ssort-introduced">Introduction Date</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-recent" value="recent" onchange="applyStateFilters()"><label for="ssort-recent">Last Action</label></div>
+                                <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-status" value="status" onchange="applyStateFilters()"><label for="ssort-status">Bill Status</label></div>
                                 <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-relevance" value="relevance" onchange="applyStateFilters()"><label for="ssort-relevance">By Relevance</label></div>
                                 <div class="filter-checkbox"><input type="radio" name="stateSortSelect" id="ssort-billnumber" value="billnumber" onchange="applyStateFilters()"><label for="ssort-billnumber">By Bill Number</label></div>
                             </div>
@@ -2087,11 +2374,13 @@
                     <div class="filter-section">
                         <div class="filter-section-title">Sort By</div>
                         <div class="filter-group">
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-introduced" value="introduced" onchange="applyFilters()" checked><label for="sort-introduced">Last Introduced</label></div>
-                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-recent" value="recent" onchange="applyFilters()"><label for="sort-recent">Most Recent</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-introduced" value="introduced" onchange="applyFilters()" checked><label for="sort-introduced">Introduction Date</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-recent" value="recent" onchange="applyFilters()"><label for="sort-recent">Last Action</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-status" value="status" onchange="applyFilters()"><label for="sort-status">Bill Status</label></div>
                             <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-relevance" value="relevance" onchange="applyFilters()"><label for="sort-relevance">By Relevance</label></div>
                             <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-state" value="state" onchange="applyFilters()"><label for="sort-state">By State</label></div>
                             <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-billnumber" value="billnumber" onchange="applyFilters()"><label for="sort-billnumber">By Bill Number</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="sortSelect" id="sort-tracker" value="tracker" onchange="applyFilters()"><label for="sort-tracker">Tracker Updated</label></div>
                         </div>
                     </div>
 
@@ -2575,11 +2864,12 @@
                     <!-- Sort -->
                     <div class="filter-section">
                         <div class="filter-section-title">Sort By</div>
-                        <select class="filter-select" id="feedbackSortSelect" onchange="applyFeedbackFilters()" style="width: 100%; padding: 0.75rem;">
-                            <option value="recent">Most Recent</option>
-                            <option value="state">By State</option>
-                            <option value="tier">By Tier</option>
-                        </select>
+                        <div class="filter-group">
+                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-reviewed" value="reviewed" onchange="applyFeedbackFilters()" checked><label for="fsort-reviewed">Last Reviewed</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-action" value="action" onchange="applyFeedbackFilters()"><label for="fsort-action">Last Action</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-tier" value="tier" onchange="applyFeedbackFilters()"><label for="fsort-tier">By Tier</label></div>
+                            <div class="filter-checkbox"><input type="radio" name="feedbackSortSelect" id="fsort-state" value="state" onchange="applyFeedbackFilters()"><label for="fsort-state">By State</label></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2601,88 +2891,126 @@
 
         <!-- ABOUT VIEW -->
         <div class="view" id="aboutView">
-            <div class="bills-header">
-                <button class="back-btn" onclick="switchView('dashboard', true)">← Back</button>
-                <h2 class="section-title">About This Tracker</h2>
+
+            <div class="about-back">
+                <button class="about-back-btn" onclick="switchView('dashboard', true)">← Back</button>
             </div>
 
-            <div style="max-width: 800px; line-height: 1.8; color: var(--text-secondary);">
+            <article class="about-article">
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">Research Question</h3>
-                    <p>This tracker monitors legislation across all 50 U.S. states and the U.S. federal government to answer a specific question: <strong style="color:var(--text-primary);">does a given bill materially affect what a user sees in their algorithmic feed?</strong></p>
-                    <p style="margin-top: 0.75rem;">That means we are not simply tracking any bill that mentions social media or artificial intelligence. We are specifically looking for legislation that would change the mechanics of how content is selected, ranked, or presented to users — through user controls, platform design requirements, transparency mandates, or restrictions on algorithmic personalization.</p>
-                </div>
+                <!-- Hero -->
+                <header class="about-hero">
+                    <div class="about-hero-label">Georgetown University &nbsp;·&nbsp; Research Documentation</div>
+                    <h1 class="about-hero-title">About This Tracker</h1>
+                    <p class="about-hero-sub">A legislative monitoring tool for studying how governments regulate algorithmic content feeds — built in support of the <em>User Controls for Algorithmic Recommendation Systems</em> project.</p>
+                    <div class="about-hero-rule"></div>
+                </header>
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Collected</h3>
-                    <p>Bills are pulled from LegiScan, a national legislative data service that aggregates bill information from all 50 state legislatures and Congress. We search using 23 keyword combinations — including terms like "algorithmic transparency," "social media recommendation," "user control algorithm," and "automated decision" — across every active legislative session.</p>
-                    <p style="margin-top: 0.75rem;">Every bill returned by those searches is run through our relevance scoring system. Bills that score above a minimum threshold are stored; the rest are discarded. We err on the side of collecting more rather than less, since the cost of missing a relevant bill is higher than the cost of reviewing an irrelevant one.</p>
-                    <p style="margin-top: 0.75rem;">The tracker re-runs these searches periodically. When a bill has not changed since the last run, we skip re-fetching its full details to avoid redundant work.</p>
-                </div>
+                <!-- The Project -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">The Project</h2>
+                    <p>This tracker is part of "User Controls for Algorithmic Recommendation Systems," a research project at Georgetown University conducted jointly by the Department of Computer Science and the Communication, Culture &amp; Technology Program. The project examines how users interact with algorithmic content feeds and what regulatory and design interventions could give them more meaningful control over what they see.</p>
+                    <p>The project has two components. The first is user research, examining how people understand and engage with algorithmic recommendations. The second is legislative and policy analysis: mapping what governments are doing, or attempting to do, to regulate algorithmic feeds. Findings from both components will inform policy recommendations. This tracker supports the legislative and policy analysis component.</p>
+                    <p>The tracker was built by Joel Piels (<a href="mailto:jp2035@georgetown.edu" style="color:var(--accent);">jp2035@georgetown.edu</a>). The broader research team includes Dr. Meg Leta Jones, Dr. Elissa Redmiles, Dr. Eric Zeng, and Avand Lakmazaheri. Questions about the tracker or the research can be directed to Joel.</p>
+                    <p>This research is supported by the Fritz Fellows Program at Georgetown University.</p>
+                </section>
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">How Bills Are Classified</h3>
-                    <p>Every bill returned by the search is run through an automated classifier that assigns one of six tiers based on the bill's title and description. No numeric score is used — tiers are assigned directly based on what language is present and how it combines.</p>
+                <!-- Research Question -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Research Question</h2>
+                    <p>The tracker is built around a single question: <strong style="color:var(--text-primary);">does a given bill materially affect what a user sees in their algorithmic feed?</strong></p>
+                    <p>The scope is deliberately narrow. Bills that mention social media or artificial intelligence in passing are not the target. The tracker looks specifically for legislation that would change how content is selected, ranked, or presented to users — through user controls, platform design requirements, transparency mandates, or restrictions on algorithmic personalization.</p>
+                </section>
 
-                    <div style="margin: 1rem 0; display: grid; gap: 0.5rem;">
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag direct" style="min-width:90px; text-align:center;">DIRECT</span>
-                            <span>Bill title contains language directly describing feed-layer legislation — for example, "algorithmic transparency," "chronological feed," or "social media recommendation."</span>
+                <!-- Coverage -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Coverage</h2>
+                    <p>The tracker currently covers all 50 U.S. state legislatures. Federal legislation (119th Congress) and comparative frameworks from the United Kingdom and Australia are tracked separately and will be integrated in a future phase.</p>
+                </section>
+
+                <!-- How Bills Are Collected -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">How Bills Are Collected</h2>
+                    <p>Bills are sourced from LegiScan, a national legislative data service that aggregates bill text and metadata from all 50 state legislatures. The tracker runs 26 keyword searches against the full text of active bills, using phrases such as "algorithmic transparency," "social media recommendation," "user control algorithm," and "automated decision," across every active session in every state.</p>
+                    <p>Every bill returned by those searches is scored by an automated classifier. Bills that score above a minimum threshold are stored; those containing no topic-relevant language are discarded. The system errs toward broader collection, since missing a relevant bill is a worse outcome than reviewing an irrelevant one.</p>
+                    <p>The tracker runs at least once a month. When a bill has not changed since the previous run, the full bill details are not re-fetched. Bills that are new or updated are retrieved in full and re-classified.</p>
+                </section>
+
+                <!-- How Bills Are Classified -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">How Bills Are Classified</h2>
+                    <p>Every stored bill is assigned one of six tiers based on whatever text LegiScan provides. Titles are always available; descriptions are present for most bills but not all. When a description is absent, classification falls back to the title alone.</p>
+
+                    <div class="about-tier-grid">
+                        <div class="about-tier-row">
+                            <span class="tag direct">DIRECT</span>
+                            <span class="about-tier-desc">The bill title contains language directly describing feed-layer legislation: "algorithmic transparency," "chronological feed," "social media recommendation."</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag high" style="min-width:90px; text-align:center;">HIGH</span>
-                            <span>Bill substantially regulates algorithmic curation — direct-match language in the description, platform/algorithm terms combined with governance language, or youth combined with platform.</span>
+                        <div class="about-tier-row">
+                            <span class="tag high">HIGH</span>
+                            <span class="about-tier-desc">The bill substantially regulates algorithmic curation. Direct-match language appears in the description, or platform and algorithm terms appear alongside governance language, or youth-focused language is combined with platform references.</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag medium" style="min-width:90px; text-align:center;">MEDIUM</span>
-                            <span>Privacy terms combined with platform or algorithm keywords — likely feed-adjacent but not primarily focused on feed mechanics.</span>
+                        <div class="about-tier-row">
+                            <span class="tag medium">MEDIUM</span>
+                            <span class="about-tier-desc">Privacy terms appear alongside platform or algorithm keywords. The bill is likely feed-adjacent but not primarily focused on feed mechanics.</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag low" style="min-width:90px; text-align:center;">LOW</span>
-                            <span>Platform or algorithm keywords present, but no governance, youth, or privacy combination. Weak signal — may be tangentially relevant.</span>
+                        <div class="about-tier-row">
+                            <span class="tag low">LOW</span>
+                            <span class="about-tier-desc">Platform or algorithm keywords are present without governance, youth, or privacy combinations. A weak signal that may be tangential.</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag minimal" style="min-width:90px; text-align:center;">MINIMAL</span>
-                            <span>Only privacy keywords; no platform or algorithm signal. Unlikely to affect feed mechanics directly.</span>
+                        <div class="about-tier-row">
+                            <span class="tag minimal">MINIMAL</span>
+                            <span class="about-tier-desc">Only privacy keywords are present, with no platform or algorithm signal. Unlikely to affect feed mechanics directly.</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <span class="tag ambiguous" style="min-width:90px; text-align:center;">AMBIGUOUS</span>
-                            <span>Bill title appears to be a backronym or acronym act name (e.g. "SAFE Act," "KIDS Act") with no descriptive keywords and no description available. Cannot be classified from available text — set aside for manual review.</span>
+                        <div class="about-tier-row">
+                            <span class="tag ambiguous">AMBIGUOUS</span>
+                            <span class="about-tier-desc">The bill title is an acronym act name (such as "SAFE Act" or "KIDS Act") with no descriptive keywords and no description available. Classification is not possible from the available text; these bills are set aside for manual review.</span>
                         </div>
                     </div>
 
-                    <p style="margin-top: 0.75rem;">Bills with no topic-relevant language at all — no platform, algorithm, or privacy keywords — are discarded and never stored. This eliminates the bulk of false positives from broad keyword searches.</p>
-                    <p style="margin-top: 0.75rem;">The classifier works on whatever text LegiScan provides. Titles are always available; descriptions are present for most bills but not all. When a description is absent, classification falls back to the title alone.</p>
-                </div>
+                    <p>Bills with no topic-relevant language at all are discarded before storage. This eliminates the bulk of false positives from broad keyword searches.</p>
+                </section>
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">Deeper Review</h3>
-                    <p>For bills classified DIRECT, HIGH, or MEDIUM, we fetch the full text of the bill from the legislative source. This text — not just the title and description — is then run through a two-part review process.</p>
-                    <p style="margin-top: 0.75rem;">The first part is a <strong style="color:var(--text-primary);">static analysis</strong>: a set of deterministic rules that scan the bill text for specific language patterns and classify the bill against our research taxonomy — what type of content control it creates, what mechanism it uses, and what platforms it covers.</p>
-                    <p style="margin-top: 0.75rem;">The second part is an <strong style="color:var(--text-primary);">AI-assisted review</strong>: the bill text is sent to a language model with a structured prompt asking it to answer the research question directly. The model assigns a tier, classifies the bill against the same taxonomy, and provides a short rationale citing specific statutory language. Results are validated against the taxonomy before being stored.</p>
-                    <p style="margin-top: 0.75rem;">Where AI review data is available, it is shown in the bill detail view alongside the automated tier. The Analytics tab shows coverage and distribution across the taxonomy.</p>
-                </div>
+                <!-- Deeper Review -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Deeper Review</h2>
+                    <p>For bills classified Direct, High, or Medium, the tracker fetches the full bill text and runs a two-part review.</p>
+                    <p>The first part is a <strong style="color:var(--text-primary);">static analysis</strong>: a set of pattern-matching rules that scan the bill text and tag it against the research taxonomy, identifying what type of content control the bill creates, what mechanism it uses, and what platforms it covers.</p>
+                    <p>The second part is an <strong style="color:var(--text-primary);">AI-assisted review</strong> using a large language model (Claude, via Anthropic's API). The bill text is submitted with a structured prompt asking the model to answer the research question directly. The model assigns a tier, classifies the bill against the taxonomy, and provides a rationale citing specific statutory language. Results are validated against the taxonomy before being stored.</p>
+                    <p>Where AI review data is available, it appears on the bill detail view alongside the automated tier. The Analytics tab shows coverage and distribution across the full taxonomy.</p>
+                </section>
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">Classification Taxonomy</h3>
-                    <p>Each reviewed bill is classified along three dimensions:</p>
+                <!-- Classification Taxonomy -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Classification Taxonomy</h2>
+                    <p>Reviewed bills are classified along three dimensions.</p>
+                    <p><strong style="color:var(--text-primary);">Content Control Type</strong> captures what kind of control or restriction the bill creates: user controls, parental controls, age-gating, default settings, ranking and recommendation control, sensitive category suppression, data privacy, opt-out rights, opt-in requirements, or content removal. A single bill can have multiple types.</p>
+                    <p><strong style="color:var(--text-primary);">Mechanism</strong> describes how the bill achieves its effect: design and defaults, verification, notice and choice, reporting, labeling, in-feed notifications, or data access.</p>
+                    <p><strong style="color:var(--text-primary);">Scope</strong> identifies what the bill covers: social media platforms specifically, general online platforms broadly, or devices.</p>
+                </section>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Content Control Type</strong> — what kind of control or restriction the bill creates: User controls, Parental controls, Age-gating, Default settings, Ranking/Recommendation control, Sensitive category suppression, Data Privacy, Opt-out, Opt-in, or Content removal. A bill can have multiple types.</p>
+                <!-- Companion Bills -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Companion Bills</h2>
+                    <p>When a bill is introduced in both chambers of a legislature, both versions are stored and linked. They appear together as a single entry in the dashboard, displayed side by side to allow status comparison across chambers.</p>
+                </section>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Mechanism</strong> — how the bill achieves its effect: Design/defaults (changing how platforms are built or configured), Verification (requiring age or identity checks), Notice &amp; choice (informing users and giving them options), Reporting (transparency reports to government or public), Labeling (warning labels or disclosures in the feed), Notifications in feed (in-app alerts), or Data access (rights to see or download personal data).</p>
+                <!-- Using This Site -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Using This Site</h2>
+                    <p>The public version of this tracker is read-only. No action taken here modifies the underlying database. To run the tracker, adjust classifications, or contribute to the database, the program must be run in a local environment. The source code is maintained in a private repository; access is available on request.</p>
+                    <p>Each bill card shows when its metadata was last fetched. Bills that have been through a recent tracker run will reflect a current date; lower-priority bills that were not re-fetched will show an older one. That difference is intentional and reflects the tracker's update logic.</p>
+                </section>
 
-                    <p style="margin-top: 0.75rem;"><strong style="color:var(--text-primary);">Scope</strong> — what the bill covers: Social media platforms specifically, General online platforms broadly, or Devices (e.g., parental control requirements on phones rather than apps).</p>
-                </div>
+                <!-- Limitations -->
+                <section class="about-section">
+                    <h2 class="about-section-heading">Limitations</h2>
+                    <p>The tracker does not take a position on any legislation. It does not assess whether a bill is sound policy, likely to pass, or constitutionally viable. It is a data collection and classification tool, not an evaluative one.</p>
+                    <p>The automated scoring system has known failure modes. Omnibus bills sometimes score highly because they contain relevant language in one narrow section among many unrelated provisions. The deeper review layer catches most of these cases, but human judgment remains necessary for rigorous analysis. Tiers and classifications should be read as research signals.</p>
+                    <p>Coverage is also bounded by LegiScan's data and the tracker's keyword set. Bills using terminology outside that vocabulary, or structured in ways the searches do not capture, will not appear here.</p>
+                </section>
 
-                <div class="chart-card" style="margin-bottom: 1.5rem;">
-                    <h3 class="chart-title" style="margin-bottom: 1rem;">What This Tracker Does Not Do</h3>
-                    <p>This tracker does not take a position on any legislation. It does not assess whether bills are good policy, likely to pass, or constitutionally sound. It is a research tool for mapping the legislative landscape around algorithmic feed controls.</p>
-                    <p style="margin-top: 0.75rem;">The automated scoring system is imperfect. Broad omnibus bills sometimes score highly because they contain relevant language in one small section among dozens of unrelated provisions. The deeper review layer is designed to catch these cases, but human judgment remains essential. Tiers and classifications should be read as research signals, not authoritative legal assessments.</p>
-                    <p style="margin-top: 0.75rem;">Coverage is limited to legislation that appears in LegiScan's database and is returned by our keyword searches. Bills using unusual terminology or framed outside our keyword set may be missed.</p>
-                </div>
-
-            </div>
+            </article>
         </div>
 
         <!-- ANALYTICS VIEW -->
@@ -2854,6 +3182,23 @@
         }
 
         /**
+         * Return a human-readable relative age for a last_updated timestamp.
+         * e.g. "today", "yesterday", "3d ago", "2mo ago", "Jan 2025"
+         */
+        function formatDataAge(dateStr) {
+            if (!dateStr) return null;
+            const date = new Date(dateStr);
+            if (isNaN(date)) return null;
+            const diffDays = Math.floor((Date.now() - date) / 86400000);
+            if (diffDays === 0) return 'today';
+            if (diffDays === 1) return 'yesterday';
+            if (diffDays < 7)  return `${diffDays}d ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        /**
          * Render a merged companion pair card.
          */
         function renderCompanionCard(primary, companion) {
@@ -2923,6 +3268,7 @@
                         </div>
                         <span class="companion-counted">companion bills · click title for overview · click panel to open individually</span>
                     </div>
+                    ${primary.last_updated ? `<div style="font-size:0.6rem; color:var(--text-dim); margin-top:0.3rem; opacity:0.7;">Data updated: ${formatDataAge(primary.last_updated)}</div>` : ''}
                 </div>`;
         }
 
@@ -3002,6 +3348,7 @@
                                 title="${bill.starred ? 'Unstar' : 'Star'}">&#9733;</button>
                         </span>
                     </div>
+                    ${bill.last_updated ? `<div style="font-size:0.6rem; color:var(--text-dim); margin-top:0.3rem; opacity:0.7;">Data updated: ${formatDataAge(bill.last_updated)}</div>` : ''}
                 </div>
             `;
         }
@@ -3137,25 +3484,34 @@
                     document.getElementById(`state-subject-${subject.replace(/[^a-zA-Z0-9]/g,'-')}`).checked = false; applyStateFilters(); }}));
             
             // Sort
+            const bestDateS = b => new Date(b.last_action_date || b.status_date || b.last_updated || 0);
+            const statusPriorityS = {'3':0,'4':1,'2':2,'1':3,'5':4,'6':5};
+            const tierOrderS = { 'direct':0,'high':1,'medium':2,'low':3,'minimal':4,'ambiguous':5,'none':6 };
+
             const sort = (document.querySelector('input[name="stateSortSelect"]:checked') || {value:'introduced'}).value;
             if (sort === 'introduced') {
-                // Sort by introduction date (status_date)
                 filtered.sort((a, b) => {
-                    const dateA = a.status_date ? new Date(a.status_date) : new Date(0);
-                    const dateB = b.status_date ? new Date(b.status_date) : new Date(0);
-                    return dateB - dateA; // Most recent first
+                    const dA = a.status_date ? new Date(a.status_date) : new Date(0);
+                    const dB = b.status_date ? new Date(b.status_date) : new Date(0);
+                    return dB - dA;
                 });
             } else if (sort === 'recent') {
-                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+                filtered.sort((a, b) => bestDateS(b) - bestDateS(a));
+            } else if (sort === 'status') {
+                filtered.sort((a, b) => {
+                    const pA = statusPriorityS[String(a.status)] ?? 6;
+                    const pB = statusPriorityS[String(b.status)] ?? 6;
+                    if (pA !== pB) return pA - pB;
+                    return bestDateS(b) - bestDateS(a);
+                });
             } else if (sort === 'relevance') {
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
-                    const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
-                    const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
-                    if (orderA !== orderB) return orderA - orderB;
-                    return new Date(b.last_updated) - new Date(a.last_updated);
+                    const oA = tierOrderS[tierA] ?? 999;
+                    const oB = tierOrderS[tierB] ?? 999;
+                    if (oA !== oB) return oA - oB;
+                    return bestDateS(b) - bestDateS(a);
                 });
             } else if (sort === 'billnumber') {
                 filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
@@ -3691,51 +4047,91 @@
 
         function updateDashboard(stats) {
             document.getElementById('totalBills').textContent = stats.total || 0;
-            
+
             // Top Priority = DIRECT + HIGH using effective tier (user > llm > auto)
-            // LLM tier is authoritative when present — auto tier is ignored if LLM reviewed
             const topPriorityBills = allBills.filter(b => {
                 const t = b.user_tier || b.llm_tier || b.relevance;
                 return t === 'direct' || t === 'high';
             });
-            // Count companion pairs as 1
             const topPriority = groupCompanions(topPriorityBills).length;
             document.getElementById('topPriority').textContent = topPriority;
-            
-            document.getElementById('statesCovered').textContent = new Set(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) !== 'none').map(b => b.state)).size;
-            
-            // Display last complete search info
-            const lastSearchEl = document.getElementById('lastSearchInfo');
+
+            document.getElementById('statesCovered').textContent = new Set(
+                allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) !== 'none').map(b => b.state)
+            ).size;
+
+            // Tier breakdown counts (companion-deduplicated)
+            document.getElementById('tierCountDirect').textContent = groupCompanions(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'direct')).length;
+            document.getElementById('tierCountHigh').textContent   = groupCompanions(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'high')).length;
+            document.getElementById('tierCountMedium').textContent = groupCompanions(allBills.filter(b => (b.user_tier || b.llm_tier || b.relevance) === 'medium')).length;
+
+            // AI review coverage (top-priority bills only)
+            const topPriorityAll = allBills.filter(b => {
+                const t = b.user_tier || b.llm_tier || b.relevance;
+                return t === 'direct' || t === 'high';
+            });
+            const aiReviewed = topPriorityAll.filter(b => !!b.llm_tier).length;
+            document.getElementById('aiReviewedCount').textContent = aiReviewed;
+            document.getElementById('aiReviewedTotal').textContent = topPriorityAll.length;
+
+            // Last complete search — populate both sidebar and landing elements
+            const lastSearchEl      = document.getElementById('lastSearchInfo');
+            const lastSearchLanding = document.getElementById('lastSearchLanding');
             if (stats.last_complete_search) {
                 lastCompleteSearch = stats.last_complete_search;
                 const lastSearch = new Date(stats.last_complete_search);
                 const now = new Date();
                 const diffDays = Math.floor((now - lastSearch) / (1000 * 60 * 60 * 24));
-                
                 let timeAgoText;
-                if (diffDays === 0) {
-                    timeAgoText = 'today';
-                } else if (diffDays === 1) {
-                    timeAgoText = 'yesterday';
-                } else if (diffDays < 7) {
-                    timeAgoText = `${diffDays} days ago`;
-                } else if (diffDays < 30) {
-                    const weeks = Math.floor(diffDays / 7);
-                    timeAgoText = `${weeks} week${weeks > 1 ? 's' : ''} ago`;
-                } else {
-                    const months = Math.floor(diffDays / 30);
-                    timeAgoText = `${months} month${months > 1 ? 's' : ''} ago`;
-                }
-                
-                lastSearchEl.innerHTML = `
-                    <div style="font-weight: 600; color: var(--text-secondary);">Last Complete Search</div>
-                    <div>${timeAgoText}</div>
-                `;
+                if (diffDays === 0)       timeAgoText = 'today';
+                else if (diffDays === 1)  timeAgoText = 'yesterday';
+                else if (diffDays < 7)    timeAgoText = `${diffDays} days ago`;
+                else if (diffDays < 30) { const w = Math.floor(diffDays / 7);  timeAgoText = `${w} week${w > 1 ? 's' : ''} ago`; }
+                else                    { const m = Math.floor(diffDays / 30); timeAgoText = `${m} month${m > 1 ? 's' : ''} ago`; }
+
+                if (lastSearchEl)      lastSearchEl.innerHTML = `<div style="font-weight:600;color:var(--text-secondary);">Last Complete Search</div><div>${timeAgoText}</div>`;
+                if (lastSearchLanding) lastSearchLanding.textContent = timeAgoText;
             } else {
-                lastSearchEl.innerHTML = `
-                    <div style="font-weight: 600; color: var(--text-secondary);">Last Complete Search</div>
-                    <div>Never</div>
-                `;
+                if (lastSearchEl)      lastSearchEl.innerHTML = `<div style="font-weight:600;color:var(--text-secondary);">Last Complete Search</div><div>Never</div>`;
+                if (lastSearchLanding) lastSearchLanding.textContent = 'never';
+            }
+
+            // Recent activity strip — 5 most recently active Direct/High/Medium bills
+            const recentEl = document.getElementById('recentActivityList');
+            if (recentEl) {
+                const recentBills = allBills
+                    .filter(b => {
+                        const t = b.user_tier || b.llm_tier || b.relevance;
+                        return t === 'direct' || t === 'high' || t === 'medium';
+                    })
+                    .filter(b => b.last_action_date || b.status_date || b.last_updated)
+                    .sort((a, b) => {
+                        const da = new Date(a.last_action_date || a.status_date || a.last_updated || 0);
+                        const db = new Date(b.last_action_date || b.status_date || b.last_updated || 0);
+                        return db - da;
+                    })
+                    .slice(0, 5);
+
+                if (recentBills.length === 0) {
+                    recentEl.innerHTML = '<div style="color:var(--text-dim); font-size:0.85rem;">No recent activity.</div>';
+                } else {
+                    const tierColors = {
+                        direct: 'var(--tier-direct)', high: 'var(--tier-high)', medium: 'var(--tier-medium)',
+                        low: 'var(--tier-low)', minimal: 'var(--tier-minimal)', ambiguous: 'var(--tier-ambiguous)'
+                    };
+                    recentEl.innerHTML = recentBills.map(b => {
+                        const t = b.user_tier || b.llm_tier || b.relevance;
+                        const color = tierColors[t] || 'var(--text-dim)';
+                        const dateStr = b.last_action_date || b.status_date || b.last_updated || '';
+                        const displayDate = dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                        return `<div class="landing-activity-row" onclick="showBillDetail(${b.bill_id});">
+                                    <span style="font-size:0.65rem; font-weight:700; color:${color}; text-transform:uppercase; min-width:52px;">${t}</span>
+                                    <span style="font-size:0.75rem; color:var(--text-dim); min-width:60px; font-family:'IBM Plex Mono',monospace;">${b.state} ${b.bill_number || ''}</span>
+                                    <span style="font-size:0.82rem; color:var(--text-secondary); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.title || ''}</span>
+                                    <span style="font-size:0.72rem; color:var(--text-dim); white-space:nowrap; flex-shrink:0;">${displayDate}</span>
+                                </div>`;
+                    }).join('');
+                }
             }
         }
 
@@ -4912,36 +5308,49 @@
                     applyFilters(); }});
             }
 
-            // Sort - default to most recent
+            // Shared helper: best available legislative activity date
+            const bestDate = b => new Date(b.last_action_date || b.status_date || b.last_updated || 0);
+            // Status priority for "Bill Status" sort: most advanced/active first, terminated last
+            const statusPriority = {'3':0,'4':1,'2':2,'1':3,'5':4,'6':5};
+            const tierOrder = { 'direct':0,'high':1,'medium':2,'low':3,'minimal':4,'ambiguous':5,'none':6 };
+
             const sort = (document.querySelector('input[name="sortSelect"]:checked') || {value:'introduced'}).value;
             if (sort === 'introduced') {
-                // Sort by introduction date (status_date for status 1)
                 filtered.sort((a, b) => {
-                    const dateA = a.status_date ? new Date(a.status_date) : new Date(0);
-                    const dateB = b.status_date ? new Date(b.status_date) : new Date(0);
-                    return dateB - dateA; // Most recent first
+                    const dA = a.status_date ? new Date(a.status_date) : new Date(0);
+                    const dB = b.status_date ? new Date(b.status_date) : new Date(0);
+                    return dB - dA;
                 });
             } else if (sort === 'recent') {
-                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+                // Sort by last legislative action date (last_action_date → status_date → last_updated)
+                filtered.sort((a, b) => bestDate(b) - bestDate(a));
+            } else if (sort === 'status') {
+                // Most advanced/active first; tiebreak by last action date
+                filtered.sort((a, b) => {
+                    const pA = statusPriority[String(a.status)] ?? 6;
+                    const pB = statusPriority[String(b.status)] ?? 6;
+                    if (pA !== pB) return pA - pB;
+                    return bestDate(b) - bestDate(a);
+                });
             } else if (sort === 'relevance') {
-                // Sort by tier: direct > high > medium > low > minimal > ambiguous
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
-                    const orderA = tierOrder[tierA] !== undefined ? tierOrder[tierA] : 999;
-                    const orderB = tierOrder[tierB] !== undefined ? tierOrder[tierB] : 999;
-                    if (orderA !== orderB) return orderA - orderB;
-                    return new Date(b.last_updated) - new Date(a.last_updated);
+                    const oA = tierOrder[tierA] ?? 999;
+                    const oB = tierOrder[tierB] ?? 999;
+                    if (oA !== oB) return oA - oB;
+                    return bestDate(b) - bestDate(a);
                 });
             } else if (sort === 'state') {
                 filtered.sort((a, b) => {
-                    const stateCompare = a.state.localeCompare(b.state);
-                    if (stateCompare !== 0) return stateCompare;
-                    return new Date(b.last_updated) - new Date(a.last_updated);
+                    const sc = a.state.localeCompare(b.state);
+                    if (sc !== 0) return sc;
+                    return bestDate(b) - bestDate(a);
                 });
             } else if (sort === 'billnumber') {
                 filtered.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+            } else if (sort === 'tracker') {
+                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
             }
             
             // Update state filter count
@@ -5053,6 +5462,7 @@
                                 title="${bill.starred ? 'Unstar' : 'Star'}">&#9733;</button>
                         </span>
                     </div>
+                    ${bill.last_updated ? `<div style="font-size:0.6rem; color:var(--text-dim); margin-top:0.3rem; opacity:0.7;">Data updated: ${formatDataAge(bill.last_updated)}</div>` : ''}
                 </div>
             `;}
 
@@ -5682,17 +6092,21 @@
             let filtered = allBills.filter(b => !!b.user_tier);
 
             // Sort
-            const sort = document.getElementById('feedbackSortSelect')?.value || 'recent';
-            if (sort === 'recent') {
-                filtered.sort((a, b) => new Date(b.last_updated) - new Date(a.last_updated));
+            const sort = (document.querySelector('input[name="feedbackSortSelect"]:checked') || {value:'reviewed'}).value;
+            const bestDateF = b => new Date(b.last_action_date || b.status_date || b.last_updated || 0);
+            const tierOrderF = { 'direct':0,'high':1,'medium':2,'low':3,'minimal':4,'ambiguous':5,'none':6 };
+            if (sort === 'reviewed') {
+                // Sort by when the user last gave feedback on this bill
+                filtered.sort((a, b) => new Date(b.reviewed_at || b.last_updated) - new Date(a.reviewed_at || a.last_updated));
+            } else if (sort === 'action') {
+                filtered.sort((a, b) => bestDateF(b) - bestDateF(a));
             } else if (sort === 'state') {
                 filtered.sort((a, b) => a.state.localeCompare(b.state));
             } else if (sort === 'tier') {
-                const tierOrder = { 'direct': 0, 'high': 1, 'medium': 2, 'low': 3, 'minimal': 4, 'ambiguous': 5, 'none': 6 };
                 filtered.sort((a, b) => {
                     const tierA = a.user_tier || a.llm_tier || a.relevance || 'none';
                     const tierB = b.user_tier || b.llm_tier || b.relevance || 'none';
-                    return (tierOrder[tierA] || 999) - (tierOrder[tierB] || 999);
+                    return (tierOrderF[tierA] ?? 999) - (tierOrderF[tierB] ?? 999);
                 });
             }
 
